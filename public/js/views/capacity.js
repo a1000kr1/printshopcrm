@@ -11,7 +11,7 @@ const dnum = (d) => new Fecha(`${d}T12:00:00`).getFecha()
 export async function capacityView() {
   const request = ++viewRequest
   clearTimeout(promiseTimer)
-  setPage('Capacity', '', '<span class="dim">Shop</span>')
+  setPage('Capacidad', '', '<span class="dim">Shop</span>')
   $('#view').innerHTML = '<div id="capacity-loading" class="dim" role="status">Reading the press schedule…</div>'
   const loading = $('#capacity-loading')
   try {
@@ -55,7 +55,7 @@ function render(d, draft = {}) {
         <div class="sub">${complete ? 'next five working days · presswork only' : 'partial queue · capacity not confirmed'}</div></div>
       <div class="kpi"><div class="lbl">Modeled presswork</div><div class="val">${d.bookedHours}h</div>
         <div class="sub">${modeled} modeled job${modeled === 1 ? '' : 's'}</div></div>
-      <div class="kpi ${d.atRiskCount ? 'bad' : ''}"><div class="lbl">Past their production date</div><div class="val">${d.atRiskCount}</div>
+      <div class="kpi ${d.atRiskCount ? 'bad' : ''}"><div class="lbl">Pasados de su fecha de producción</div><div class="val">${d.atRiskCount}</div>
         <div class="sub">${d.atRiskCount ? 'modeled jobs only — review dates below' : complete ? 'no modeled date overruns' : 'unresolved work is not included'}</div></div>
     </div>
 
@@ -105,13 +105,13 @@ function render(d, draft = {}) {
                 <label>Working hours / day<input type="number" id="mh" min="1" max="24" step="0.5" value="${cap.hours}"></label>
                 <label>Real print time %<input type="number" id="mu" min="5" max="100" value="${cap.utilizationPct}"></label>
               </div>
-              <button class="btn sm" id="model-save" style="margin-top:10px">Save & recompute</button>
+              <button class="btn sm" id="model-save" style="margin-top:10px">Guardar y recalcular</button>
               <div id="model-error" role="alert"></div>
             </div>` : '<p class="dim">An owner or manager can adjust these assumptions.</p>'}
           </div>
         </div>
 
-        ${unresolved.length ? `<div class="card"><div class="card-h"><h3>Needs a manual review</h3></div><div class="card-b"><ul>${unresolved.map(job => `<li><a href="#/jobs/${encodeURIComponent(job.id)}">${esc(job.job_number || job.title || 'Job')}</a>: ${esc(job.reason)}</li>`).join('')}</ul></div></div>` : ''}
+        ${unresolved.length ? `<div class="card"><div class="card-h"><h3>Needs a manual review</h3></div><div class="card-b"><ul>${unresolved.map(job => `<li><a href="#/jobs/${encodeURIComponent(job.id)}">${esc(job.job_number || job.title || 'Trabajo')}</a>: ${esc(job.reason)}</li>`).join('')}</ul></div></div>` : ''}
       </div>
     </div>
 
@@ -119,11 +119,11 @@ function render(d, draft = {}) {
       <div class="card-h"><h3>Active jobs and model coverage</h3><div class="spacer"></div>
         <a class="btn ghost sm" href="#/board">Open board</a></div>
       ${d.jobs.length ? `<table class="tbl stack">
-        <thead><tr><th>Job</th><th class="num">Press time</th><th>Producción due</th><th>Cotizaciónd print finish</th><th class="num">Estado</th></tr></thead>
+        <thead><tr><th>Trabajo</th><th class="num">Tiempo de prensa</th><th>Producción due</th><th>Cotizaciónd print finish</th><th class="num">Estado</th></tr></thead>
         <tbody>${[...d.jobs].sort(byDue).map(jobRow).join('')}</tbody></table>
         <div class="card-b" style="border-top:1px solid var(--line);font-size:11.5px">
           <span class="dim">Sooner-due modeled jobs claim the press first. Finishing or skipping production removes its load; QC and shipping do not reserve the press again. Custom workflows with unresolved production steps require manual review. The calendar remains your independent plan.</span></div>`
-        : empty('▦', 'No active jobs', 'Jobs with known screenprinting work appear in this model.')}
+        : empty('▦', 'No active jobs', 'Trabajos with known screenprinting work appear in this model.')}
     </div></div>`
 
   wire(d)
@@ -139,12 +139,12 @@ function jobRow(j) {
     : finished ? '<span class="pill gray">presswork finished</span>'
       : late ? `<span class="pill red">${j.daysLate}d past due</span>` : '<span class="pill gray">modeled</span>'
   return `<tr class="click" data-job="${j.id}">
-    <td data-label="Job"><div style="font-weight:600">${esc(j.title || 'Untitled')}</div>
+    <td data-label="Trabajo"><div style="font-weight:600">${esc(j.title || 'Untitled')}</div>
       <div class="mono">${esc(j.job_number || '')}${j.rush ? ' · <span style="color:var(--red)">RUSH</span>' : ''}${j.contact_name ? ' · ' + esc(j.contact_name) : ''}</div></td>
-    <td data-label="Press time" class="num">${unresolved || finished ? '<span class="dim">—</span>' : hrs(j.minutes)}</td>
+    <td data-label="Tiempo de prensa" class="num">${unresolved || finished ? '<span class="dim">—</span>' : hrs(j.minutes)}</td>
     <td data-label="Producción due">${j.due ? fmtFecha(j.due) : '<span class="dim">—</span>'}</td>
     <td data-label="Cotizaciónd print finish">${j.projectedFinish ? `<strong style="color:${late ? 'var(--amber)' : 'var(--txt)'}">${fmtFecha(j.projectedFinish)}</strong>` : '<span class="dim">—</span>'}</td>
-    <td data-label="Model status" class="num">${status}${j.reason ? `<div class="dim" style="font-size:11.5px;margin-top:4px">${esc(j.reason)}</div>` : ''}</td>
+    <td data-label="Estado del modelo" class="num">${status}${j.reason ? `<div class="dim" style="font-size:11.5px;margin-top:4px">${esc(j.reason)}</div>` : ''}</td>
   </tr>`
 }
 
@@ -166,8 +166,8 @@ function wire(d) {
     api.post('/api/capacity/promise', { pieces, colors, due_date: due, decoration: 'Screen Print' }).then((r) => {
       if (!active() || current !== request) return
       if (!r.earliestFinish) {
-        const why = r.reason || 'The scheduler could not place this run.'
-        const head = r.beyondHorizon ? 'Not schedulable' : 'Cannot check yet'
+        const why = r.reason || 'El programador no pudo ubicar esta producción.'
+        const head = r.beyondHorizon ? 'No programable' : 'Aún no se puede verificar'
         out.innerHTML = `<div class="promise-verdict no"><div class="pv-main">${esc(head)}</div><div class="pv-note">${esc(why)}</div></div>`
         announce(`${head}. ${why}`)
         return
@@ -209,10 +209,10 @@ function wire(d) {
     try {
       const result = await api.put('/api/capacity/settings', body)
       if (!active()) return
-      render(result, { pieces: quantity.value, colors: colorCount.value, due: wanted.value }); toast('Capacity updated')
+      render(result, { pieces: quantity.value, colors: colorCount.value, due: wanted.value }); toast('Capacidad actualizada')
       $('#model-toggle')?.focus()
     } catch (e) { if (active()) error.textContent = e.message }
-    finally { saving = false; if (active()) { save.disabled = false; save.textContent = 'Save & recompute'; inputs.forEach(input => { input.disabled = false }) } }
+    finally { saving = false; if (active()) { save.disabled = false; save.textContent = 'Guardar y recalcular'; inputs.forEach(input => { input.disabled = false }) } }
   }
 }
 
