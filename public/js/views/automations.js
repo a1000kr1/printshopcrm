@@ -10,7 +10,7 @@ let cfg = null
 
 export async function automationsView() {
   setPage('Automations', `<button class="btn ghost" id="run-tick">Run timed rules now</button><button class="btn" id="new-auto">+ New Automation</button>`)
-  $('#view').innerHTML = '<div class="dim">Loading…</div>'
+  $('#view').innerHTML = '<div class="dim">Cargando…</div>'
   const d = await api.get('/api/automations')
   cfg = d
 
@@ -36,7 +36,7 @@ export async function automationsView() {
       <div class="card-h"><h3>In a sequence</h3><div class="spacer"></div>
         <span class="dim" style="font-size:12px">who is mid-drip, and what is holding them up</span></div>
       <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Customer</th><th>Rule</th><th>Next step</th><th>Status</th><th class="num"></th></tr></thead>
+        <thead><tr><th>Cliente</th><th>Rule</th><th>Next step</th><th>Estado</th><th class="num"></th></tr></thead>
         <tbody>${d.pending.map((p) => {
           const rule = d.automations.find((a) => a.id === p.automation_id)
           const stopped = !!p.status
@@ -51,7 +51,7 @@ export async function automationsView() {
             <td>${stopped || why
               ? `<span class="pill ${stopped ? 'red' : 'gray'}" title="${esc(why)}">${esc(p.status || 'paused')}</span>`
               : '<span class="pill gray">waiting</span>'}${why ? `<div class="dim" style="font-size:11px;margin-top:2px">${esc(why)}</div>` : ''}</td>
-            <td class="num">${p.status==='recipient_review' && recipientDocument?`<a class="btn ghost sm" href="#${recipientDocument}">Review document</a> `:''}${stopped && p.status!=='recipient_review' ? `<button class="btn ghost sm" data-resume="${p.id}">Resume</button> ` : ''}<button class="btn ghost sm" data-cancel-seq="${p.id}">Cancel</button></td>
+            <td class="num">${p.status==='recipient_review' && recipientDocument?`<a class="btn ghost sm" href="#${recipientDocument}">Review document</a> `:''}${stopped && p.status!=='recipient_review' ? `<button class="btn ghost sm" data-resume="${p.id}">Resume</button> ` : ''}<button class="btn ghost sm" data-cancel-seq="${p.id}">Cancelar</button></td>
           </tr>`
         }).join('')}</tbody></table></div>
     </div>` : ''}
@@ -94,7 +94,7 @@ export async function automationsView() {
                 ${r.status === 'ran' ? '' : `<span class="pill ${r.status === 'error' ? 'red' : 'gray'}">${esc(r.status)}</span>`}
               </div>
               <div class="dim" style="font-size:11.5px;margin-top:2px">${esc(r.entity_label || '')} — ${esc(r.detail || '')}</div>
-              <div class="dt">${relTime(r.created_at)}${r.status === 'error' || /: skipped/.test(r.detail || '') ? ` · <button class="btn ghost sm" data-retry-run="${r.id}">Try again</button>` : ''}</div>
+              <div class="dt">${relTime(r.created_at)}${r.status === 'error' || /: skipped/.test(r.detail || '') ? ` · <button class="btn ghost sm" data-retry-run="${r.id}">Intentar de nuevo</button>` : ''}</div>
             </div>`).join('')}</div>`
             : '<div class="dim">Nothing has fired yet. Hit “Run timed rules now” to see them work.</div>'}
         </div>
@@ -185,7 +185,7 @@ function autoForm(a) {
   const bg = modal({
     title: isNew ? 'New Automation' : 'Edit Automation',
     wide: true,
-    body: `<div class="field"><label>Name</label>
+    body: `<div class="field"><label>Nombre</label>
         <input class="input" id="a-name" value="${esc(state.name)}" placeholder="Chase a quote after 3 quiet days"></div>
       <div class="autobuild">
         <div class="ab-step"><div class="ab-badge when">WHEN</div><div id="ab-trigger" style="flex:1"></div></div>
@@ -193,7 +193,7 @@ function autoForm(a) {
         <div class="ab-step"><div class="ab-badge then">THEN</div><div id="ab-actions" style="flex:1"></div></div>
       </div>
       <div class="dim" style="font-size:11.5px;margin-top:12px">Tokens: <code>{{first_name}} {{contact_name}} {{shop_name}} {{estimate_number}} {{invoice_number}} {{job_number}} {{job_title}} {{total}} {{due_date}} {{version}} {{days}} {{stage}}</code></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="a-save">${isNew ? 'Create Automation' : 'Save'}</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="a-save">${isNew ? 'Create Automation' : 'Save'}</button>`,
     onMount: (root) => {
       const drawTrigger = () => {
         const t = cfg.triggers.find((x) => x.key === state.trigger)
@@ -265,7 +265,7 @@ function autoForm(a) {
             ${def.fields.map((f) => (f.options
               /* A field whose value must be one of a fixed set is a select, never a text box.
                  "Move the job to a stage" was a blank input labelled Stage, so an owner typed
-                 what the board shows them — `Production` — and wrote a stage no column matches. */
+                 what the board shows them — `Producción` — and wrote a stage no column matches. */
               ? `<label class="sr-only" for="af-${i}-${f.key}">${esc(f.label)}</label>
                  <select class="input" id="af-${i}-${f.key}" data-af="${i}:${f.key}" style="margin-top:6px;max-width:210px">${f.options
                    .map((o) => `<option value="${o}" ${act.config?.[f.key] === o ? 'selected' : ''}>${esc(String(o).replace('_', ' '))}</option>`).join('')}</select>`
