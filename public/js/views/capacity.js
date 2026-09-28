@@ -1,12 +1,12 @@
-import { api, $, $$, esc, setPage, empty, on, go, fmtFecha, today, toast, onOnce, localDay, announce, shopLocale } from '../core.js'
+import { api, $, $$, esc, setPage, empty, on, go, fmtDate, today, toast, onOnce, localDay, announce, shopLocale } from '../core.js'
 
 // This page estimates screenprinting presswork. It does not commit a production or shipping date.
 let viewRequest = 0
 let promiseTimer
 
 const hrs = (m) => `${Math.round((m / 60) * 10) / 10}h`
-const dow = (d) => new Fecha(`${d}T12:00:00`).toLocaleFechaString(shopLocale(), { weekday: 'short' })
-const dnum = (d) => new Fecha(`${d}T12:00:00`).getFecha()
+const dow = (d) => new Date(`${d}T12:00:00`).toLocaleDateString(shopLocale(), { weekday: 'short' })
+const dnum = (d) => new Date(`${d}T12:00:00`).getDate()
 
 export async function capacityView() {
   const request = ++viewRequest
@@ -36,7 +36,7 @@ function render(d, draft = {}) {
     const h = Math.round((t.load / maxLoad) * 100)
     const full = t.pct >= 100
     const cls = full ? 'full' : t.pct >= 70 ? 'busy' : t.load > 0 ? 'open' : 'free'
-    return `<div class="cap-day" title="${fmtFecha(t.date)} — ${hrs(t.load)} of ${hrs(t.capacity)} booked (${t.pct}%)">
+    return `<div class="cap-day" title="${fmtDate(t.date)} — ${hrs(t.load)} of ${hrs(t.capacity)} booked (${t.pct}%)">
       <div class="cap-track"><div class="cap-fill ${cls}" style="height:${Math.max(t.load > 0 ? 6 : 0, h)}%"></div>
         <div class="cap-cap" style="bottom:${Math.round((cap.minutes / maxLoad) * 100)}%"></div></div>
       <div class="cap-d">${dow(t.date)}</div><div class="cap-n">${dnum(t.date)}</div>
@@ -49,7 +49,7 @@ function render(d, draft = {}) {
     ${!complete ? `<div class="card card-b" role="status"><strong>${unresolved.length || d.unresolved_count || 'Some'} active job${unresolved.length === 1 ? '' : 's'} need review</strong><p>The load below is partial. Review excluded methods, quantities or workflow steps before using a print-date estimate.</p></div>` : ''}
     <div class="kpis">
       <div class="kpi ${d.backlogDays >= 5 ? 'warn' : ''}"><div class="lbl">Modeled work through</div>
-        <div class="val" style="font-size:20px">${d.bookedThrough ? fmtFecha(d.bookedThrough) : '—'}</div>
+        <div class="val" style="font-size:20px">${d.bookedThrough ? fmtDate(d.bookedThrough) : '—'}</div>
         <div class="sub">${d.backlogDays} working day${d.backlogDays === 1 ? '' : 's'} queued</div></div>
       <div class="kpi info"><div class="lbl">Unallocated model hours</div><div class="val">${d.freeHoursThisWeek}h</div>
         <div class="sub">${complete ? 'next five working days · presswork only' : 'partial queue · capacity not confirmed'}</div></div>
@@ -142,8 +142,8 @@ function jobRow(j) {
     <td data-label="Trabajo"><div style="font-weight:600">${esc(j.title || 'Untitled')}</div>
       <div class="mono">${esc(j.job_number || '')}${j.rush ? ' · <span style="color:var(--red)">RUSH</span>' : ''}${j.contact_name ? ' · ' + esc(j.contact_name) : ''}</div></td>
     <td data-label="Tiempo de prensa" class="num">${unresolved || finished ? '<span class="dim">—</span>' : hrs(j.minutes)}</td>
-    <td data-label="Entrega de producción">${j.due ? fmtFecha(j.due) : '<span class="dim">—</span>'}</td>
-    <td data-label="Fin de impresión estimado">${j.projectedFinish ? `<strong style="color:${late ? 'var(--amber)' : 'var(--txt)'}">${fmtFecha(j.projectedFinish)}</strong>` : '<span class="dim">—</span>'}</td>
+    <td data-label="Entrega de producción">${j.due ? fmtDate(j.due) : '<span class="dim">—</span>'}</td>
+    <td data-label="Fin de impresión estimado">${j.projectedFinish ? `<strong style="color:${late ? 'var(--amber)' : 'var(--txt)'}">${fmtDate(j.projectedFinish)}</strong>` : '<span class="dim">—</span>'}</td>
     <td data-label="Estado del modelo" class="num">${status}${j.reason ? `<div class="dim" style="font-size:11.5px;margin-top:4px">${esc(j.reason)}</div>` : ''}</td>
   </tr>`
 }
@@ -176,12 +176,12 @@ function wire(d) {
         out.innerHTML = '<div class="dim">Capacity coverage is incomplete. Refresh and review the active jobs before estimating a print date.</div>'
         return
       }
-      const finishStr = fmtFecha(r.earliestFinish)
+      const finishStr = fmtDate(r.earliestFinish)
       const cushion = Number(r.slackDays) || 0
       let verdict, cls, note
       if (!due) { verdict = `Fin de impresión estimado: ${finishStr}`; cls = 'ok'; note = `${r.hours}h of press time · ${r.workingDaysOut} working day${r.workingDaysOut === 1 ? '' : 's'} out` }
-      else if (r.feasible) { verdict = `Print model fits by ${finishStr}`; cls = 'ok'; note = cushion > 0 ? `${cushion} working day${cushion === 1 ? '' : 's'} before ${fmtFecha(due)}` : `lands on ${fmtFecha(due)} — no model slack` }
-      else { verdict = `Print model exceeds ${fmtFecha(due)}`; cls = 'no'; note = `estimated print finish is ${finishStr} — ${Math.abs(cushion)} working day${Math.abs(cushion) === 1 ? '' : 's'} after the requested date. Review the production plan.` }
+      else if (r.feasible) { verdict = `Print model fits by ${finishStr}`; cls = 'ok'; note = cushion > 0 ? `${cushion} working day${cushion === 1 ? '' : 's'} before ${fmtDate(due)}` : `lands on ${fmtDate(due)} — no model slack` }
+      else { verdict = `Print model exceeds ${fmtDate(due)}`; cls = 'no'; note = `estimated print finish is ${finishStr} — ${Math.abs(cushion)} working day${Math.abs(cushion) === 1 ? '' : 's'} after the requested date. Review the production plan.` }
       note += ' Allow separate time for prerequisites, QC and delivery.'
       out.innerHTML = `<div class="promise-verdict ${cls}"><div class="pv-main">${esc(verdict)}</div><div class="pv-note">${esc(note)}</div></div>`
       announce(`${verdict}. ${note}`)
@@ -218,7 +218,7 @@ function wire(d) {
 
 /** A sensible default target for the promise tool — the coming Friday. */
 function nextFriday() {
-  const d = new Fecha(`${today()}T12:00:00`)
-  d.setFecha(d.getFecha() + ((5 - d.getDay() + 7) % 7 || 7))
+  const d = new Date(`${today()}T12:00:00`)
+  d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7 || 7))
   return localDay(d)
 }
