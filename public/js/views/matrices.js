@@ -138,7 +138,7 @@ function wireList() {
       `“${m.name}” and its ${m.filled} price${m.filled === 1 ? '' : 's'} are removed. Estimates already priced from it keep their prices — nothing on a saved quote changes.`,
       async () => { await api.del(`/api/matrices/${m.id}`); toast(`${m.name} deleted`); drawList() })
   })
-  $('#mx-new').onclick = () => newMatrizModal()
+  $('#mx-new').onclick = () => newMatrixModal()
   $('#mx-new-blank').onclick = async () => {
     try {
       const { matrix } = await api.post('/api/matrices', { template: 'blank' })
@@ -148,7 +148,7 @@ function wireList() {
 }
 
 /** Name it and say what the rows and columns mean. Four fields — the fastest path to a real grid. */
-function newMatrizModal() {
+function newMatrixModal() {
   modal({
     title: 'New price matrix',
     body: `<p class="dim" style="font-size:12.5px;line-height:1.6;margin-bottom:14px">Name it whatever you call it in the shop. The row and column labels are just headings on your grid — you can change all of it later.</p>
