@@ -4,7 +4,7 @@ import { api, esc, modal, closeModal } from '../core.js'
 let owner, states = new Map(), sequence = 0
 const providerName = p => p === 'authorize_net' ? 'Authorize.net' : p === 'stripe_connect' ? 'Stripe Connect' : 'Stripe'
 const amount = row => `${esc(row.currency || '')} ${Number.isSafeInteger(row.amount_cents) ? (row.amount_cents / 100).toFixed(2) : 'Amount needs review'}`
-const invoiceLink = row => Number.isSafeInteger(row.invoice_id) && row.invoice_id > 0 ? `<a href="#/invoices/${row.invoice_id}">Invoice #${row.invoice_id}</a>` : 'Online order'
+const invoiceLink = row => Number.isSafeInteger(row.invoice_id) && row.invoice_id > 0 ? `<a href="#/invoices/${row.invoice_id}">Invoice #${row.invoice_id}</a>` : 'Pedido en línea'
 export function safeCollectionUrl(value) {
   if (typeof value !== 'string' || !value.trim() || value.length > 4096 || /[\x00-\x20\x7f]/.test(value)) return ''
   try {
@@ -16,15 +16,15 @@ export function safeCollectionUrl(value) {
 export function collectionRows(data, state = {}) {
   const busy = !!state.busy
   return `${data.collections.length ? data.collections.map(c => `<article class="collection-row">
-    <div class="collection-heading"><strong>${providerName(c.provider)} · ${amount(c)}</strong><span class="tag">${esc(String(c.state || 'Review').replaceAll('_', ' '))}${c.is_test ? ' · Test' : ''}</span></div>
+    <div class="collection-heading"><strong>${providerName(c.provider)} · ${amount(c)}</strong><span class="tag">${esc(String(c.state || 'Revisar').replaceAll('_', ' '))}${c.is_test ? ' · Test' : ''}</span></div>
     <p>${invoiceLink(c)} · ${esc(c.kind || 'payment')}<br><small>${esc(c.created_at || '')} · ${esc(c.reference)}</small></p>
     ${c.message ? `<p class="setup-status">${esc(c.message)}</p>` : ''}
     ${c.requires_transaction_id && c.actions?.recheck ? `<label class="field">Authorize.net transaction ID<input class="input" data-collection-transaction="${esc(c.reference)}" inputmode="numeric" autocomplete="off" maxlength="40" value="${esc(state.drafts?.get(c.reference) || '')}" placeholder="From your merchant account" ${busy ? 'disabled' : ''}></label>` : ''}
     ${c.requires_session_id && c.actions?.recheck ? `<label class="field">Stripe checkout session ID<input class="input" data-collection-session="${esc(c.reference)}" autocomplete="off" maxlength="220" value="${esc(state.sessions?.get(c.reference) || '')}" placeholder="cs_… from your Stripe account" ${busy ? 'disabled' : ''}></label>` : ''}
-    <div class="collection-actions">${[['resume','Resume saved checkout'],['recheck','Check provider'],['expire','Close unpaid checkout']].filter(([action]) => c.actions?.[action] === true).map(([action,label]) => `<button class="btn ghost" type="button" data-collection-action="${action}" data-collection-reference="${esc(c.reference)}" ${busy ? 'disabled' : ''}>${label}</button>`).join('')}</div>
+    <div class="collection-actions">${[['resume','Reanudar pago guardado'],['recheck','Verificar proveedor'],['expire','Cerrar pago no realizado']].filter(([action]) => c.actions?.[action] === true).map(([action,label]) => `<button class="btn ghost" type="button" data-collection-action="${action}" data-collection-reference="${esc(c.reference)}" ${busy ? 'disabled' : ''}>${label}</button>`).join('')}</div>
     ${state.links?.get(c.reference) ? `<p><a class="btn ghost" href="${esc(state.links.get(c.reference))}" target="_blank" rel="noopener noreferrer">Open saved checkout</a></p>` : ''}
   </article>`).join('') : '<p class="dim">No online checkout records yet.</p>'}
-  ${data.receipts.length ? `<h3>Payments needing review</h3><p>Review this provider activity before requesting more money. Recorded evidence stays available even when it cannot yet be applied to an invoice.</p>${data.receipts.map(r => `<article class="collection-row"><strong>${providerName(r.provider)} · ${amount(r)}${r.is_test ? ' · Test' : ''}</strong><p>${invoiceLink(r)}<br><small>${esc(r.transaction_id || r.reference || '')} · ${esc(r.created_at || '')}</small></p><p class="setup-status">${esc(r.reason || r.message || r.state || 'Needs a manager review')}</p></article>`).join('')}` : ''}`
+  ${data.receipts.length ? `<h3>Payments needing review</h3><p>Revisar this provider activity before requesting more money. Recorded evidence stays available even when it cannot yet be applied to an invoice.</p>${data.receipts.map(r => `<article class="collection-row"><strong>${providerName(r.provider)} · ${amount(r)}${r.is_test ? ' · Test' : ''}</strong><p>${invoiceLink(r)}<br><small>${esc(r.transaction_id || r.reference || '')} · ${esc(r.created_at || '')}</small></p><p class="setup-status">${esc(r.reason || r.message || r.state || 'Requiere revisión de un administrador')}</p></article>`).join('')}` : ''}`
 }
 
 // A provider recheck never replaces the adjacent settings form or its unsaved credentials.
@@ -80,7 +80,7 @@ export async function mountCollections(element, options = {}) {
       const row = state.data.collections.find(c => c.reference === ref)
       if (!row || row.actions?.[action] !== true) return
       if (action !== 'expire') return act(row,action)
-      modal({title:'Close this unpaid checkout?',body:`<p>${providerName(row.provider)} · <strong>${amount(row)}</strong></p><p>The provider will be checked first. A completed payment is recorded. An unpaid open checkout is closed so the old link can no longer be used. No charge or refund is issued.</p>`,footer:'<button class="btn ghost" data-close>Back</button><button class="btn" data-close-checkout>Check and close checkout</button>',onMount:root=>{
+      modal({title:'¿Cerrar este pago no realizado?',body:`<p>${providerName(row.provider)} · <strong>${amount(row)}</strong></p><p>The provider will be checked first. A completed payment is recorded. An unpaid open checkout is closed so the old link can no longer be used. No charge or refund is issued.</p>`,footer:'<button class="btn ghost" data-close>Back</button><button class="btn" data-close-checkout>Check and close checkout</button>',onMount:root=>{
         const go = root.querySelector('[data-close-checkout]')
         go.onclick = () => { if(!root.isConnected || !current() || state.busy)return; closeModal(); return act(row,action) }
       }})
@@ -97,7 +97,7 @@ export async function mountCollections(element, options = {}) {
       body.session_id = state.sessions.get(row.reference) || ''
       if (!/^cs_[A-Za-z0-9_]+$/.test(body.session_id) || body.session_id.length > 220) { state.error=true;state.message='Enter the checkout session ID from your Stripe account, beginning cs_.';render();return }
     }
-    state.busy=true;state.error=false;state.message=action==='expire'?'Checking the provider before closing…':action==='resume'?'Checking the saved checkout…':'Checking the provider…';render()
+    state.busy=true;state.error=false;state.message=action==='expire'?'Verificando el proveedor antes de cerrar…':action==='resume'?'Verificando el pago guardado…':'Verificando el proveedor…';render()
     try {
       const ref = encodeURIComponent(row.reference)
       const result = await api.post(action === 'recheck' ? `/api/payments/reconcile/${ref}` : `/api/payments/collections/${ref}/${action}`,body)
@@ -106,7 +106,7 @@ export async function mountCollections(element, options = {}) {
       if (result.url && !link) { state.error=true;state.message='The checkout address could not be verified. Refresh status before continuing.' }
       else {
         if(link) state.links.set(row.reference,link)
-        state.message=link?'The existing checkout is ready. Open it below.':result.pending?'Payment is not confirmed yet. The checkout remains on hold.':'Provider checked. Review the current status below.'
+        state.message=link?'The existing checkout is ready. Open it below.':result.pending?'El pago aún no está confirmado. El proceso de pago permanece en espera.':'Provider checked. Revisar the current status below.'
       }
       await state.notify?.(true)
     } catch(e) {
