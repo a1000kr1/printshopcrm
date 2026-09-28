@@ -400,7 +400,7 @@ export async function settingsView() {
           <select class="input" id="fs-currency" name="currency">${[...new Set([cur, ...CURRENCY_CHOICES])].map((c) => `<option value="${esc(c)}" ${c === cur ? 'selected' : ''}>${esc(c)} — ${esc(moneyFormatter({ currency: c, locale: loc }).money(1234.5))}</option>`).join('')}</select>
           <div class="dim" style="font-size:11px;margin-top:4px">Every screen, PDF, email and customer page writes money this way.</div></div>
         <div class="field"><label for="fs-locale">Number &amp; date format</label>
-          <select class="input" id="fs-locale" name="locale">${[...(LOCALE_CHOICES.some(([t]) => t === loc) ? [] : [[loc, loc]]), ...LOCALE_CHOICES].map(([t, label]) => `<option value="${esc(t)}" ${t === loc ? 'selected' : ''}>${esc(label)} — ${esc(moneyFormatter({ currency: cur, locale: t }).number(1234.5))} · ${esc(new Date(2026, 7, 28, 12).toConfiguración regionalDateString(t, { month: 'short', day: 'numeric' }))}</option>`).join('')}</select>
+          <select class="input" id="fs-locale" name="locale">${[...(LOCALE_CHOICES.some(([t]) => t === loc) ? [] : [[loc, loc]]), ...LOCALE_CHOICES].map(([t, label]) => `<option value="${esc(t)}" ${t === loc ? 'selected' : ''}>${esc(label)} — ${esc(moneyFormatter({ currency: cur, locale: t }).number(1234.5))} · ${esc(new Date(2026, 7, 28, 12).toLocaleDateString(t, { month: 'short', day: 'numeric' }))}</option>`).join('')}</select>
           <div class="dim" style="font-size:11px;margin-top:4px">How thousands, decimals and dates are written. Tax stays the rate above.</div></div>
       </div>
     </div></div>
