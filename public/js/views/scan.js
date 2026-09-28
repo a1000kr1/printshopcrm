@@ -17,7 +17,7 @@ let lastCodeAt = 0
 
 // The camera has to go off when the page does.
 //
-// stopCámara() was only ever called at the TOP of scanView() — on re-entry. Walk away from Floor
+// stopCamera() was only ever called at the TOP of scanView() — on re-entry. Walk away from Floor
 // Mode and the phone kept the camera live: the indicator light stays on, the battery drains, and
 // on iOS and Android the camera is held away from every other app until the tab is closed. The
 // 350ms detect loop kept running too, and its lookup() would render into a #scan-job that no
@@ -25,17 +25,17 @@ let lastCodeAt = 0
 //
 // hashchange is this app's navigation (see public/js/app.js), and pagehide covers tab close,
 // bfcache and a real navigation away. Registered once, not per view render.
-if (typeof window !== 'undefined' && !window.__pscEscanearTeardown) {
-  window.__pscEscanearTeardown = true
-  const leaving = () => { if (!location.hash.startsWith('#/scan')) stopCámara() }
+if (typeof window !== 'undefined' && !window.__pscScanTeardown) {
+  window.__pscScanTeardown = true
+  const leaving = () => { if (!location.hash.startsWith('#/scan')) stopCamera() }
   window.addEventListener('hashchange', leaving)
-  window.addEventListener('pagehide', () => stopCámara())
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') stopCámara() })
+  window.addEventListener('pagehide', () => stopCamera())
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') stopCamera() })
 }
 
 export async function scanView() {
   setPage('Floor Mode', '', '<span class="dim">Production</span>')
-  stopCámara()
+  stopCamera()
   const hasDetector = 'BarcodeDetector' in window
   $('#view').innerHTML = `
     <div class="scan-wrap">
@@ -78,14 +78,14 @@ export async function scanView() {
         } catch { /* a failed frame is not an error state */ }
       }, 350)
     } catch (e) {
-      stopCámara()
+      stopCamera()
       toast(`Cámara unavailable: ${e.message}`, true)
     }
   })
 
   // Without this the only way to switch the camera off while still on the page was to reload it.
   onOnce($('#view'), '#scan-stop', () => {
-    stopCámara()
+    stopCamera()
     const hint = $('#scan-cam-hint')
     if (hint) hint.textContent = '📷 Point the camera at a work-ticket barcode.'
   })
@@ -169,7 +169,7 @@ function renderJob(d, note) {
   ;($('.scan-advance', host) || $('button.scan-stage', host))?.focus?.()
 }
 
-function stopCámara() {
+function stopCamera() {
   if (scanTimer) { clearInterval(scanTimer); scanTimer = 0 }
   if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null }
   lastCode = ''; lastCodeAt = 0
