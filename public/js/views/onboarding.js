@@ -19,7 +19,7 @@ const FLOW = ['welcome', 'basics', 'import', 'quote', 'pricing', 'email', 'sms',
 const state = { i: 0, data: null, ai: null }
 
 export async function onboardingView() {
-  setPage('Welcome')
+  setPage('Bienvenido')
   // The lite edition sells "sign in and invoice" — no distributor/AI/Stripe steps to wade through.
   // One screen, two numbers (already sensible), then straight into the app. Pricing is pre-built.
   if (window.__EDITION === 'lite') return liteOnboarding()
@@ -28,14 +28,14 @@ export async function onboardingView() {
    * httpMessage()'s "The server is restarting — try that again in a moment" never reached it and
    * the router's own catch never ran either. What was left was the grey words "Could not load
    * setup." with an empty header, no reason, no retry and no link. Two escapes, because the two
-   * failures are different: a 502 during a deploy wants Try again, and a persistent 500 wants a
+   * failures are different: a 502 during a deploy wants Intentar de nuevo, and a persistent 500 wants a
    * way into the product regardless — the app works fine without the wizard. */
   let bootErr = null
   state.data = await api.get('/api/onboarding').catch((e) => { bootErr = e; return null })
   if (!state.data) {
-    setPage('Welcome', '<button class="btn" id="ob-retry" type="button">Try again</button>')
+    setPage('Bienvenido', '<button class="btn" id="ob-retry" type="button">Intentar de nuevo</button>')
     $('#view').innerHTML = empty('⚠', 'Setup could not load', bootErr?.message || 'The server did not answer.',
-      '<a class="btn ghost" href="#/">Skip setup and go to the dashboard</a>')
+      '<a class="btn ghost" href="#/">Omitir setup and go to the dashboard</a>')
     const again = $('#ob-retry')
     if (again) again.onclick = () => { again.disabled = true; again.textContent = 'Trying…'; onboardingView() }
     return
@@ -61,8 +61,8 @@ async function liteOnboarding() {
   const brand = document.getElementById('brand-name')?.textContent || 'InkVoice'
   $('#view').innerHTML = `<div class="card" style="max-width:520px;margin:40px auto">
     <div class="card-b">
-      <h2 style="margin:0 0 6px">Welcome to ${esc(brand)}</h2>
-      <p class="dim" style="margin:0 0 20px;line-height:1.5">Let's put your shop on your invoices. Add your logo and a couple of numbers so your quotes price themselves — or skip and do it anytime under Settings. Your pricing is already built in.</p>
+      <h2 style="margin:0 0 6px">Bienvenido to ${esc(brand)}</h2>
+      <p class="dim" style="margin:0 0 20px;line-height:1.5">Let's put your shop on your invoices. Add your logo and a couple of numbers so your quotes price themselves — or skip and do it anytime under Configuración. Your pricing is already built in.</p>
       <div class="field">
         <label>Your logo <span class="dim" style="font-weight:400">— appears on everything you send</span></label>
         <div class="logo-row">
@@ -80,7 +80,7 @@ async function liteOnboarding() {
         <div class="field"><label>Sales tax (%)</label><input class="input" id="lo-tax" type="number" step="0.001" min="0" value="${esc(s.tax_rate ?? 0)}"></div>
       </div>
       <div class="wrap-row" style="margin-top:22px;justify-content:flex-end;gap:10px">
-        <button class="btn ghost" id="lo-skip">Skip for now</button>
+        <button class="btn ghost" id="lo-skip">Omitir for now</button>
         <button class="btn" id="lo-go">Start invoicing →</button>
       </div>
     </div></div>`
@@ -140,7 +140,7 @@ function render() {
         <div class="ob-progress-t">${d.onboarding.done} of ${d.onboarding.total} done</div>
       </div>
       <div class="ob-rail-list" aria-label="Setup steps">${rail}</div>
-      <button class="ob-skip-all" id="ob-later">Finish later — take me in →</button>
+      <button class="ob-skip-all" id="ob-later">Finalizar later — take me in →</button>
     </aside>
     <section class="ob-panel" id="ob-panel">${panel(key)}</section>
   </div>`
@@ -155,21 +155,21 @@ function render() {
   // double the live listeners on every rail click and freeze the wizard after a dozen of them.
   on($('.ob-rail-list'), '[data-goto]', (_e, t) => { const idx = FLOW.indexOf(t.dataset.goto); if (idx >= 0) leaveStep(() => { state.i = idx; render() }) })
   $('#ob-later').onclick = () => leaveStep(finishLater)
-  // And the paths this screen does not own: the sidebar, the tabbar, the `g` shortcuts, Back.
+  // And the paths this screen does not own: the sidebar, the tabbar, the `g` shortcuts, Atrás.
   guardLeave((to) => { if (!stepDirty) return true; leaveStep(() => go(to)); return false })
 }
 
 /* -------------------------------------------------------------------------------------------------
- * A step's form exists only in the browser until "Save & continue" — saveSettings() is wired to
- * that button and to nothing else. The nine-item rail beside the form, "Back", and
- * "Finish later — take me in →" all repainted straight over it. A shop copying a Twilio SID, auth
+ * A step's form exists only in the browser until "Save & continue" — saveConfiguración() is wired to
+ * that button and to nothing else. The nine-item rail beside the form, "Atrás", and
+ * "Finalizar later — take me in →" all repainted straight over it. A shop copying a Twilio SID, auth
  * token and number across from another tab, who then clicks a rail item — which is what a rail is
  * for — lost all three, and Twilio only shows an auth token once, so that is a real second trip.
  * The newest possible user, on the first screen of the product, being taught that this app loses
  * work.
  *
  * The offer is to SAVE rather than to discard, because that is this wizard's own promise: every
- * step is optional and saves as you go. saveSettings() here is the exact write the Next button
+ * step is optional and saves as you go. saveConfiguración() here is the exact write the Siguiente button
  * performs.
  * ---------------------------------------------------------------------------------------------- */
 let stepDirty = false
@@ -182,7 +182,7 @@ async function leaveStep(then) {
   confirmModal('Save this step first?',
     'What you typed on this screen has not been saved yet.',
     async () => {
-      try { await saveSettings(form); await markStep(FLOW[state.i], 'done') } catch (e) { toast(e.message, true) }
+      try { await saveConfiguración(form); await markStep(FLOW[state.i], 'done') } catch (e) { toast(e.message, true) }
       stepDirty = false
       then()
     }, 'Save and continue')
@@ -198,9 +198,9 @@ const sf = (name, label, isSet, { hint = '', ph = '' } = {}) => `<div class="fie
 function panel(key) {
   const s = state.data.settings
   const foot = (next = 'Save & continue', skip = true) => `<div class="ob-foot">
-    ${state.i > 1 ? '<button class="btn ghost" id="ob-back">Back</button>' : '<span></span>'}
+    ${state.i > 1 ? '<button class="btn ghost" id="ob-back">Atrás</button>' : '<span></span>'}
     <div class="row" style="gap:8px">
-      ${skip ? '<button class="btn ghost" id="ob-skip">Skip for now</button>' : ''}
+      ${skip ? '<button class="btn ghost" id="ob-skip">Omitir for now</button>' : ''}
       <button class="btn" id="ob-next">${esc(next)}</button>
     </div></div>`
 
@@ -224,7 +224,7 @@ function panel(key) {
         <span class="dim" id="ob-price-note" style="font-size:12px">No setup needed. Nothing is sent to anyone.</span>
       </div>
       <div id="ob-quote-out" class="ob-describe-out" hidden></div>
-    </div>${foot('Skip for now', true)}`
+    </div>${foot('Omitir for now', true)}`
 
   if (key === 'basics') return `<div class="ob-head"><h2>◱ Shop & costing basics</h2>
       <p>Just the things you know off the top of your head. Everything else already has a working default.</p></div>
@@ -292,7 +292,7 @@ function panel(key) {
   if (key === 'email') {
     const connected = !!s.smtp_host
     return `<div class="ob-head"><h2>✉ Connect email so you can send</h2>
-        <p>Estimates, proofs, and replies are emailed from <strong>your own address</strong>. Connect it, or your messages only save to the Outbox and <strong>never reach the customer</strong>. If a platform relay is enabled you can skip this, but connecting your own is best.</p></div>
+        <p>Cotizacións, proofs, and replies are emailed from <strong>your own address</strong>. Connect it, or your messages only save to the Outbox and <strong>never reach the customer</strong>. If a platform relay is enabled you can skip this, but connecting your own is best.</p></div>
       <div id="ob-form" class="ob-form">
         <div class="field"><label for="ob-mail-provider">Who hosts your email?</label><select class="input" id="ob-mail-provider"><option value="">Choose a provider or enter details below</option><option value="google">Google Workspace / Gmail</option><option value="custom">Other mailbox / custom SMTP</option></select><p class="ob-hint">Use your provider’s app password or supported SMTP credentials. Your ordinary account password may not work.</p></div>
         ${f('smtp_user', 'Mailbox address / username', s.smtp_user, { ph: 'quotes@yourshop.com' })}
@@ -348,7 +348,7 @@ function panel(key) {
       <div class="grid2">${f('ss_account', 'Account #', s.ss_account)}${sf('ss_api_key', 'API key', s.ss_api_key_set)}</div>
       <div class="ob-svc-h" style="margin-top:14px">SanMar</div>
       <div class="grid2">${f('sanmar_user', 'Username', s.sanmar_user)}${sf('sanmar_pass', 'Password', s.sanmar_pass_set)}</div>
-      ${f('sanmar_cust', 'Customer #', s.sanmar_cust, { hint: 'For customer-specific pricing.' })}
+      ${f('sanmar_cust', 'Cliente #', s.sanmar_cust, { hint: 'For customer-specific pricing.' })}
       <div class="row" style="gap:10px;align-items:center"><button class="btn ghost sm" id="dist-check" type="button">Check connection</button><span class="ob-hint" id="dist-note" role="status" aria-live="polite" aria-atomic="true"></span></div>
     </div>${foot()}`
 
@@ -366,7 +366,7 @@ function panel(key) {
     ['AI', !!s.ai_api_key_set, 'Receptionist and quoting supercharged'],
     ['Email', !!s.smtp_host, 'Messages actually send to customers'],
     ['SMS', !!s.twilio_sid, 'Two-way texting with customers'],
-    ['Payments', s.payment_provider==='authorize_net' ? !!(s.anet_transaction_key_set && s.anet_signature_key_set) : s.payment_provider!=='off' && !!s.stripe_secret_set, 'Deposits and balances into your account'],
+    ['Pagos', s.payment_provider==='authorize_net' ? !!(s.anet_transaction_key_set && s.anet_signature_key_set) : s.payment_provider!=='off' && !!s.stripe_secret_set, 'Deposits and balances into your account'],
   ]
   const essRows = ess.map(([name, ok, why]) => `<div class="ob-ess-row" style="display:flex;align-items:center;gap:10px;padding:7px 0">
     <span style="font-weight:600;color:${ok ? 'var(--accent)' : 'var(--muted, #999)'}">${ok ? '✓' : '○'}</span>
@@ -377,7 +377,7 @@ function panel(key) {
     <h1>${p.pct === 100 ? "You're fully set up" : "You're ready to go"}</h1>
     <p>${p.done} of ${p.total} setup steps done. Here's what's connected:</p>
     <div class="ob-ess" style="text-align:left;max-width:420px;margin:12px auto 20px">${essRows}</div>
-    <p class="dim" style="font-size:12.5px">Finish the rest anytime from the <a href="#/settings">setup checklist in Settings</a> — nothing is locked in.</p>
+    <p class="dim" style="font-size:12.5px">Finalizar the rest anytime from the <a href="#/settings">setup checklist in Configuración</a> — nothing is locked in.</p>
     <button class="btn" id="ob-finish">Go to my dashboard →</button>
   </div>`
 }
@@ -390,7 +390,7 @@ function markStep(key, status) {
   return api.post('/api/onboarding/step', { key, status })
     .catch((e) => { console.warn('setup step not recorded', e); toast('Saved — but the setup checklist could not be updated', true) })
 }
-function saveSettings(root) {
+function saveConfiguración(root) {
   const out = {}
   for (const el of $$('[name]', root)) out[el.name] = el.type === 'number' && el.value === '' ? '' : el.value
   return api.put('/api/settings', out)
@@ -439,12 +439,12 @@ function wire(key) {
           <ul>
             <li><strong>${esc(e.estimate_number || '')}</strong> — ${money(e.total)} for ${r.pieces || o.total_pieces || ''} × ${esc(o.garment || 'garments')}</li>
             <li>Read by ${o.source === 'model' ? 'your AI model' : 'the built-in reader'}: ${esc(o.decoration || '')}${o.garment_color ? ` · ${esc(o.garment_color)}` : ''}${o.due_hint ? ` · due <strong>${esc(o.due_hint)}</strong>` : ''}</li>
-            <li>Customer ${r.isNew ? 'created' : 'matched'}: ${esc((r.contact || {}).name || '')}</li>
+            <li>Cliente ${r.isNew ? 'created' : 'matched'}: ${esc((r.contact || {}).name || '')}</li>
             <li>A production job was queued, and your automation rules are live on it.</li>
           </ul>
           <div class="row" style="gap:10px;margin-top:8px">
             <a class="btn sm" href="#/estimates/${e.id}">Open the estimate</a>
-            <button class="btn ghost sm" id="ob-quote-next" type="button">Finish setting up →</button>
+            <button class="btn ghost sm" id="ob-quote-next" type="button">Finalizar setting up →</button>
           </div>`
         $('#ob-quote-next').onclick = async () => { await markStep(key, 'done'); advance() }
         await markStep(key, 'done')
@@ -474,10 +474,10 @@ function wire(key) {
       btn.disabled = true; const old = btn.textContent; btn.textContent = 'Opening Google…'
       try {
         const r = await api.get('/api/gdrive/connect')
-        if (r && r.url) { window.open(r.url, '_blank', 'noopener'); note.innerHTML = 'Finish signing in on the Google tab, then come back — we\'ll mark it connected.' }
+        if (r && r.url) { window.open(r.url, '_blank', 'noopener'); note.innerHTML = 'Finalizar signing in on the Google tab, then come back — we\'ll mark it connected.' }
         else throw new Error('No connect URL returned')
       } catch (e) {
-        toast('Google Drive isn\'t available yet — you can connect it later from Settings', true)
+        toast('Google Drive isn\'t available yet — you can connect it later from Configuración', true)
         note.innerHTML = '<span style="color:var(--amber)">Couldn\'t start Google sign-in. Art uses local storage until you connect.</span>'
       }
       btn.disabled = false; btn.textContent = old
@@ -498,7 +498,7 @@ function wire(key) {
       // shop's own address/number, so ask where it should land (prefilled with a sensible guess).
       try {
         const form = $('#ob-form')
-        if (form && $$('[name]', form).length) await saveSettings(form)
+        if (form && $$('[name]', form).length) await saveConfiguración(form)
       } catch (e) { note.textContent = `Could not save: ${e.message}`; return }
       const guess = channel === 'email'
         ? (($('[name=smtp_from]') || {}).value || ($('[name=smtp_user]') || {}).value || '').trim()
@@ -514,7 +514,7 @@ function wire(key) {
         note.innerHTML = !r || r.error
           ? `<span style="color:var(--red)">✕ ${esc((r && r.error) || 'Send failed')}</span>`
           : r.delivered === false
-            ? `<span style="color:var(--amber)">Saved, but not delivered yet (${esc(r.via || 'no mail transport')}). Finish your ${channel === 'email' ? 'SMTP' : 'Twilio'} details to actually send.</span>`
+            ? `<span style="color:var(--amber)">Saved, but not delivered yet (${esc(r.via || 'no mail transport')}). Finalizar your ${channel === 'email' ? 'SMTP' : 'Twilio'} details to actually send.</span>`
             : `<span style="color:var(--accent)">✓ Test ${channel === 'email' ? 'email' : 'text'} sent — check it arrived</span>`
         // This is the first screen a new shop ever sees, and this span is the only answer it gives
         // to "will my customers actually receive anything". Say it, and interrupt on a refusal.
@@ -550,7 +550,7 @@ function wire(key) {
   if (key === 'distributors') {
     $('#dist-check').onclick = async () => {
       const note = $('#dist-note'); note.textContent = 'Saving & checking…'
-      try { await saveSettings($('#ob-form')); const st = await api.get('/api/suppliers/status')
+      try { await saveConfiguración($('#ob-form')); const st = await api.get('/api/suppliers/status')
         note.innerHTML = st.connected ? `<span style="color:var(--accent)">✓ Connected: ${[st.ss && 'S&S', st.sanmar && 'SanMar', st.alpha && 'AlphaBroder'].filter(Boolean).join(', ')}</span>` : '<span style="color:var(--amber)">No distributor connected yet — check the credentials.</span>'
         announce(st.connected
           ? `Distributor connected: ${[st.ss && 'S&S', st.sanmar && 'SanMar', st.alpha && 'AlphaBroder'].filter(Boolean).join(', ')}`
@@ -560,7 +560,7 @@ function wire(key) {
   }
 
   if (key === 'import') $('#ob-import-orders').onclick = () => importOrders(() => toast('Order history imported'))
-  if (key === 'import') $('#ob-import').onclick = () => importContacts(async () => { await markStep('import', 'done'); state.data = await api.get('/api/onboarding').catch(() => state.data); toast('Customers imported') })
+  if (key === 'import') $('#ob-import').onclick = () => importContacts(async () => { await markStep('import', 'done'); state.data = await api.get('/api/onboarding').catch(() => state.data); toast('Clientes imported') })
 
   if (key === 'done') $('#ob-finish').onclick = finishLater
 
@@ -570,7 +570,7 @@ function wire(key) {
     next.disabled = true; next.textContent = 'Saving…'
     try {
       const form = $('#ob-form')
-      if (form && $$('[name]', form).length) await saveSettings(form)
+      if (form && $$('[name]', form).length) await saveConfiguración(form)
       if (key === 'pricing') {
         const svc = {}; $$('[data-svc]').forEach((el) => { svc[el.dataset.svc] = el.value })
         // No .catch here. This is the shop's per-service pricing — the numbers every quote it
