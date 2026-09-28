@@ -58,7 +58,7 @@ export async function artView() {
 /* ---------- activity ---------- */
 
 export async function activityView() {
-  setPage('Activity')
+  setPage('Actividad')
   const rows = await api.get('/api/activities')
   // Kept byte-identical to the canonical map in views/dashboard.js — the two render the same
   // activity feed, so a glyph that drifts here shows up as two different icons for one event type.
@@ -74,7 +74,7 @@ export async function activityView() {
 /* ---------- outbox ---------- */
 
 export async function outboxView(showNeeds = false) {
-  setPage('Outbox')
+  setPage('Bandeja de salida')
   /* The list is a newest-50 window, and the only Send button in the product is drawn per row on
    * this screen — so every unsent message past the 50th had no Send control anywhere, while the
    * card below promises "nothing vanishes". The ones that fall off the bottom are the OLDEST,
@@ -115,8 +115,8 @@ export async function outboxView(showNeeds = false) {
           ? `Mail is going out from <strong>${esc(notif.shop_email_from || 'your address')}</strong> and logged here. Each row shows whether it actually left the building.`
           : `Messages are being delivered over your ${[notif.shop_email && 'SMTP', notif.sms && 'Twilio'].filter(Boolean).join(' + ')} connection and logged here. Each row shows whether it actually left the building.`)
         : (lite
-          ? 'Your email isn\'t connected yet, so what you send is saved here with a shareable link instead of reaching the customer — nothing vanishes. Connect it under <strong>Settings → Sending Email</strong> and it goes out from your own address.'
-          : 'No delivery is wired yet, so "sent" mail is recorded here instead of reaching customers — nothing vanishes. Add SMTP / Twilio in Settings → Message Delivery and the same calls go out for real.')}</p>
+          ? 'Your email isn\'t connected yet, so what you send is saved here with a shareable link instead of reaching the customer — nothing vanishes. Connect it under <strong>Configuración → Sending Email</strong> and it goes out from your own address.'
+          : 'No delivery is wired yet, so "sent" mail is recorded here instead of reaching customers — nothing vanishes. Add SMTP / Twilio in Configuración → Message Delivery and the same calls go out for real.')}</p>
     </div></div>
     <div class="row" style="gap:8px;align-items:center;margin-bottom:10px">
       <button class="btn ${showNeeds ? 'ghost' : ''} sm" type="button" id="ob-all" aria-pressed="${!showNeeds}">Recent</button>
@@ -133,7 +133,7 @@ export async function outboxView(showNeeds = false) {
         <td>${status(m)}</td>
         <td class="num dim" style="font-size:12px">${relTime(m.created_at)}</td>
       </tr>`).join('')}</tbody></table></div>`
-      : empty('✉', showNeeds ? 'Nothing waiting' : 'Outbox empty', showNeeds ? 'Every message has gone out or been sent by hand.' : 'Send an estimate or a proof to see it here.')}</div>`
+      : empty('✉', showNeeds ? 'Nothing waiting' : 'Bandeja de salida empty', showNeeds ? 'Every message has gone out or been sent by hand.' : 'Send an estimate or a proof to see it here.')}</div>`
 
   $('#ob-all').onclick = () => outboxView(false)
   $('#ob-needs').onclick = () => outboxView(true)
@@ -148,7 +148,7 @@ export async function outboxView(showNeeds = false) {
       ${m.via === 'draft' ? '<div class="dim" style="font-size:12px;margin-bottom:12px;color:var(--amber)">Follow-ups are on “Ask me first”, so this was drafted and is waiting for you.</div>' : ''}
       ${m.via === 'error' && m.delivery_error ? `<div class="dim" style="font-size:12px;margin-bottom:12px;color:var(--red)">It did not go out: ${esc(m.delivery_error)}</div>` : ''}
       <div style="white-space:pre-wrap;font-size:13.5px;line-height:1.65;background:var(--bg);padding:15px;border-radius:8px;border:1px solid var(--line)">${esc(m.body)}</div>`,
-      footer: `<button class="btn ghost" data-close>Close</button>${sendable(m) ? '<button class="btn" id="ob-send">Send it</button>' : ''}`,
+      footer: `<button class="btn ghost" data-close>Cerrar</button>${sendable(m) ? '<button class="btn" id="ob-send">Send it</button>' : ''}`,
       // onMount, not a delegated #view binding: bin/gate.mjs forbids the latter, and this modal is
       // re-created on every row click.
       onMount: (bg) => {
@@ -168,7 +168,7 @@ export async function outboxView(showNeeds = false) {
 /* ---------- settings ---------- */
 
 const ROLE_PILL = { owner: 'green', manager: 'blue', staff: 'gray' }
-const ROLE_DESC = { owner: 'Billing, keys, staff, everything', manager: 'Settings, keys, staff — not billing', staff: 'Day-to-day shop work' }
+const ROLE_DESC = { owner: 'Billing, keys, staff, everything', manager: 'Configuración, keys, staff — not billing', staff: 'Day-to-day shop work' }
 
 /** Staff card — real logins with Owner / Manager / Staff roles. Management gated to owners/managers. */
 function staffCard(d, me, esc) {
@@ -186,7 +186,7 @@ function staffCard(d, me, esc) {
     return `<select class="input role-sel" data-mid="${m.id}" aria-label="Role for ${esc(m.name || m.email)}" style="width:120px;padding:5px 8px;font-size:12px">
       ${['owner', 'manager', 'staff'].map((r) => `<option value="${r}" ${m.role === r ? 'selected' : ''} ${r === 'owner' && !isOwner ? 'disabled' : ''}>${r}</option>`).join('')}</select>`
   }
-  // The roster lives behind a disclosure: a shop sets its crew up once and then comes to Settings
+  // The roster lives behind a disclosure: a shop sets its crew up once and then comes to Configuración
   // for a phone number or a price. The summary carries the headcount and the role split, so the
   // answer to "who can get in?" is on screen without opening anything.
   const byRole = (r) => members.filter((m) => m.role === r).length
@@ -336,7 +336,7 @@ function slackCard(esc) {
 }
 
 export async function settingsView() {
-  setPage('Settings')
+  setPage('Configuración')
   const d = await api.get('/api/settings')
   const s = d.settings
   const me = await api.get('/api/auth/me').catch(() => ({}))
@@ -376,7 +376,7 @@ export async function settingsView() {
     catch { return DEFAULT_UPCHARGES }
   })()
 
-  $('#view').innerHTML = `<div class="settings-workspace stack"><nav class="settings-jumps" aria-label="Settings sections">
+  $('#view').innerHTML = `<div class="settings-workspace stack"><nav class="settings-jumps" aria-label="Configuración sections">
       <a href="#/setup">Setup guide</a><a href="#/branding">Logo & colors</a><button type="button" data-settings-jump="shop">Shop</button><button type="button" data-settings-jump="costing">Costing</button><button type="button" data-settings-jump="delivery">Email &amp; SMS</button><button type="button" data-settings-jump="ai">AI</button><button type="button" data-settings-jump="slack">Slack</button><button type="button" data-settings-jump="modes">Advanced controls</button></nav>
     <div class="card"><div class="card-h"><h3>Shop</h3></div><div class="card-b" id="shop">
       <div class="field">
@@ -396,11 +396,11 @@ export async function settingsView() {
       ${f('shop_address', 'Address', 'Appears on estimate and invoice PDFs')}
       <div class="grid2">${f('tax_rate', 'Default tax rate (%)', '', 'number')}${window.__EDITION === 'lite' ? '' : f('brand_name', 'Product name', 'What the sidebar says')}</div>
       <div class="grid2">
-        <div class="field"><label for="fs-currency">Currency</label>
+        <div class="field"><label for="fs-currency">Moneda</label>
           <select class="input" id="fs-currency" name="currency">${[...new Set([cur, ...CURRENCY_CHOICES])].map((c) => `<option value="${esc(c)}" ${c === cur ? 'selected' : ''}>${esc(c)} — ${esc(moneyFormatter({ currency: c, locale: loc }).money(1234.5))}</option>`).join('')}</select>
           <div class="dim" style="font-size:11px;margin-top:4px">Every screen, PDF, email and customer page writes money this way.</div></div>
         <div class="field"><label for="fs-locale">Number &amp; date format</label>
-          <select class="input" id="fs-locale" name="locale">${[...(LOCALE_CHOICES.some(([t]) => t === loc) ? [] : [[loc, loc]]), ...LOCALE_CHOICES].map(([t, label]) => `<option value="${esc(t)}" ${t === loc ? 'selected' : ''}>${esc(label)} — ${esc(moneyFormatter({ currency: cur, locale: t }).number(1234.5))} · ${esc(new Date(2026, 7, 28, 12).toLocaleDateString(t, { month: 'short', day: 'numeric' }))}</option>`).join('')}</select>
+          <select class="input" id="fs-locale" name="locale">${[...(LOCALE_CHOICES.some(([t]) => t === loc) ? [] : [[loc, loc]]), ...LOCALE_CHOICES].map(([t, label]) => `<option value="${esc(t)}" ${t === loc ? 'selected' : ''}>${esc(label)} — ${esc(moneyFormatter({ currency: cur, locale: t }).number(1234.5))} · ${esc(new Date(2026, 7, 28, 12).toConfiguración regionalDateString(t, { month: 'short', day: 'numeric' }))}</option>`).join('')}</select>
           <div class="dim" style="font-size:11px;margin-top:4px">How thousands, decimals and dates are written. Tax stays the rate above.</div></div>
       </div>
     </div></div>
@@ -459,17 +459,17 @@ export async function settingsView() {
         <div class="spacer"></div><span class="dim" style="font-size:11px">sensible defaults already set</span></div>
       <div class="card-b">
         <p class="dim" style="font-size:12.5px;line-height:1.6;margin-bottom:2px">The terms printed on your estimates and invoices, and the wording of the emails that send them. Everything here already works — open a section only if you want to change the words.</p>
-        <details class="disc"><summary>Estimate &amp; invoice terms</summary>
+        <details class="disc"><summary>Cotización &amp; invoice terms</summary>
           <div class="disc-b" id="terms">
-            ${ta('estimate_terms', 'Estimate terms', 'Printed at the bottom of every estimate')}
-            ${ta('invoice_terms', 'Invoice terms')}
+            ${ta('estimate_terms', 'Cotización terms', 'Printed at the bottom of every estimate')}
+            ${ta('invoice_terms', 'Factura terms')}
           </div></details>
         <details class="disc"><summary>Email wording — 3 templates</summary>
           <div class="disc-b" id="tpl">
             <p class="dim" style="font-size:12px">Variables: <code>{{first_name}} {{contact_name}} {{shop_name}} {{estimate_number}} {{invoice_number}} {{total}} {{due_date}} {{job_title}} {{version}}</code></p>
-            ${ta('email_template_estimate', 'Estimate email')}
+            ${ta('email_template_estimate', 'Cotización email')}
             ${ta('email_template_art', 'Art proof email')}
-            ${ta('email_template_invoice', 'Invoice email')}
+            ${ta('email_template_invoice', 'Factura email')}
           </div></details>
       </div></div>
 
@@ -481,7 +481,7 @@ export async function settingsView() {
              "Art & proofs" were read nowhere in the codebase: intake already hands you a draft to
              confirm, and no proof has ever auto-advanced, so both switches promised a choice the
              app does not have. Their defaults stay in SETTING_DEFAULTS so no saved row breaks. -->
-        ${mode('mode_estimates', 'Estimate drafting', 'Let the assistant and receptionist draft estimates')}
+        ${mode('mode_estimates', 'Cotización drafting', 'Let the assistant and receptionist draft estimates')}
         ${mode('mode_followups', 'Follow-ups', 'Send nudges on quiet quotes / overdue invoices automatically')}
         ${mode('mode_agent', 'Website receptionist', 'The chatbot replies on its own vs. assist-only')}
       </div>
@@ -493,7 +493,7 @@ export async function settingsView() {
         <span class="deliv ${notif.shop_email ? 'ok' : ''}" title="Email to customers"><span class="dot"></span>Email ${notif.shop_email ? 'on' : 'off'}</span>
         <span class="deliv ${notif.sms ? 'ok' : ''}" title="Text messages" style="margin-left:10px"><span class="dot"></span>SMS ${notif.sms ? 'on' : 'off'}</span></div>
       <div class="card-b" id="delivery">
-        <p class="dim" style="font-size:12.5px;margin-bottom:2px;line-height:1.6">Wire your own email + text and estimates, proofs, and reminders actually go out. Left blank, messages still record to the Outbox (nothing vanishes) — they just aren't delivered. Your credentials stay on your server.</p>
+        <p class="dim" style="font-size:12.5px;margin-bottom:2px;line-height:1.6">Wire your own email + text and estimates, proofs, and reminders actually go out. Left blank, messages still record to the Bandeja de salida (nothing vanishes) — they just aren't delivered. Your credentials stay on your server.</p>
 
         <details class="disc"><summary>Email settings — ${notif.shop_email ? `sending as ${esc(notif.shop_email_from || 'your address')}` : 'not connected, add your SMTP details'}</summary>
           <div class="disc-b">
@@ -514,12 +514,12 @@ export async function settingsView() {
 
     ${window.__EDITION === 'lite' ? `
     <div class="card">
-      <div class="card-h"><h3>Take Payments</h3><span class="pill ${s.stripe_charges_enabled ? 'green' : ''}" id="pay-pill">${s.stripe_charges_enabled ? 'Stripe connected' : (s.stripe_account_id ? 'finish setup' : 'not connected')}</span></div>
+      <div class="card-h"><h3>Take Pagos</h3><span class="pill ${s.stripe_charges_enabled ? 'green' : ''}" id="pay-pill">${s.stripe_charges_enabled ? 'Stripe connected' : (s.stripe_account_id ? 'finish setup' : 'not connected')}</span></div>
       <div class="card-b" id="online">
         <p class="dim" style="font-size:12.5px;margin-bottom:14px;line-height:1.6">Connect Stripe to accept card payments on your invoices — customers pay online and payouts go straight to your bank. A flat <strong style="color:var(--txt-2)">4% fee</strong> on collected payments covers card processing and the platform, so there's nothing else to set up or pay.</p>
         <div class="row" style="gap:8px">
           <button class="btn" id="connect-stripe">${s.stripe_charges_enabled ? 'Manage Stripe' : (s.stripe_account_id ? 'Finish Stripe setup' : 'Connect Stripe')}</button>
-          ${disconnectBtn('stripe', 'Stripe', 'This shop stops being linked to that Stripe account: no new payment can be collected into it, and the Take Payments card goes back to &quot;not connected&quot;. Nothing already collected is touched, no invoice or payment record is deleted, and a card payment a customer is part-way through still lands on the right invoice. To take payments again, press Connect Stripe and go through Stripe&#39;s setup once more.')}
+          ${disconnectBtn('stripe', 'Stripe', 'This shop stops being linked to that Stripe account: no new payment can be collected into it, and the Take Pagos card goes back to &quot;not connected&quot;. Nothing already collected is touched, no invoice or payment record is deleted, and a card payment a customer is part-way through still lands on the right invoice. To take payments again, press Connect Stripe and go through Stripe&#39;s setup once more.')}
         </div>
       </div>
     </div>` : `
@@ -533,7 +533,7 @@ export async function settingsView() {
         </div>
         ${f('dtf_sheet_width', 'Roll width (in)', 'Your DTF printer roll width — usually 22"', 'number')}
 
-        <p><a class="btn ghost" href="#/payments">Payment connections — Stripe or Authorize.net</a></p><details class="disc"><summary>Stripe keys — ${s.stripe_secret_set ? 'connected, replace the key' : 'take card payment on the builder'}</summary>
+        <p><a class="btn ghost" href="#/payments">Pago connections — Stripe or Authorize.net</a></p><details class="disc"><summary>Stripe keys — ${s.stripe_secret_set ? 'connected, replace the key' : 'take card payment on the builder'}</summary>
           <div class="disc-b">
             <div class="grid2">
               ${sf('stripe_secret', 'Your Stripe secret key', 'In Stripe: Developers → API keys → Secret key → Reveal. Starts <code>sk_live_</code> or <code>sk_test_</code> — not the publishable <code>pk_</code> one. Stays on your server.')}
@@ -578,7 +578,7 @@ export async function settingsView() {
     </div>
 
     <div class="card">
-      <div class="card-h"><h3>Wholesale Suppliers</h3><span class="pill ${(s.ss_account && s.ss_api_key_set) || (s.sanmar_user && s.sanmar_pass_set) || (s.alpha_account && s.alpha_pass_set) ? 'green' : ''}">${(s.ss_account && s.ss_api_key_set) || (s.sanmar_user && s.sanmar_pass_set) || (s.alpha_account && s.alpha_pass_set) ? 'connected' : 'optional'}</span></div>
+      <div class="card-h"><h3>Wholesale Proveedores</h3><span class="pill ${(s.ss_account && s.ss_api_key_set) || (s.sanmar_user && s.sanmar_pass_set) || (s.alpha_account && s.alpha_pass_set) ? 'green' : ''}">${(s.ss_account && s.ss_api_key_set) || (s.sanmar_user && s.sanmar_pass_set) || (s.alpha_account && s.alpha_pass_set) ? 'connected' : 'optional'}</span></div>
       <div class="card-b" id="suppliers">
         <p class="dim" style="font-size:12.5px;margin-bottom:2px;line-height:1.6">Connect a distributor to pull <strong style="color:var(--txt-2)">live blank costs + inventory</strong> into job ROI, the Products lookup, and consolidated purchase orders. Left blank, the built-in catalog answers instantly — nothing breaks.</p>
         <details class="disc"><summary>Distributor logins — S&amp;S Activewear, SanMar</summary>
@@ -628,10 +628,10 @@ export async function settingsView() {
 
     ${me.can_manage === false
       ? '<div class="card"><div class="card-b dim" style="font-size:12.5px">You have <strong>staff</strong> access — settings are read-only. Ask an owner or manager to change shop settings, keys, or integrations.</div></div>'
-      : '<div class="row" style="justify-content:flex-end"><button class="btn" id="save">Save Settings</button></div>'}
+      : '<div class="row" style="justify-content:flex-end"><button class="btn" id="save">Save Configuración</button></div>'}
   </div>`
 
-  /* Settings is ONE long form — eleven cards and a single Save Settings button at the bottom — and
+  /* Configuración is ONE long form — eleven cards and a single Save Configuración button at the bottom — and
    * five controls on that same page used to throw the whole thing away without asking: a logo
    * upload, a logo removal, returning from Stripe Connect, and both Disconnect buttons, two of
    * which called location.reload(). Each re-rendered from the STORED values, so an owner who
@@ -641,8 +641,8 @@ export async function settingsView() {
    *
    * location.reload() was worse than a repaint: it also drops the hash route. */
   // Module-level (declared at the foot of this file), NOT here. The beforeunload listener below is
-  // bound once per page load behind window.__pscSettingsGuard, so a flag declared in this function
-  // would be captured from the FIRST render only — and every later visit to Settings, after a Save,
+  // bound once per page load behind window.__pscConfiguraciónGuard, so a flag declared in this function
+  // would be captured from the FIRST render only — and every later visit to Configuración, after a Save,
   // a logo upload, a disconnect, an invite, or simply coming back, made a new one the listener
   // could not see. The reload/tab-close guard worked once per session and then silently never
   // again, on the screen holding the SMTP password and the Stripe keys. Every other screen with
@@ -689,8 +689,8 @@ export async function settingsView() {
   // The paths the app does not control: tab close, reload, navigating off the origin entirely. NOT
   // the browser's Back button — that is a hash change and fires no beforeunload; the guardLeave
   // above catches it. Bound once, and it only speaks while the settings form is on screen.
-  if (!window.__pscSettingsGuard) {
-    window.__pscSettingsGuard = true
+  if (!window.__pscConfiguraciónGuard) {
+    window.__pscConfiguraciónGuard = true
     window.addEventListener('beforeunload', (e) => {
       if (!settingsDirty || !document.getElementById('save')) return
       e.preventDefault(); e.returnValue = ''
@@ -777,7 +777,7 @@ export async function settingsView() {
       if (!host) { toast('Add your mail server', true); return }
       const btn = $('#mail-save'); btn.disabled = true; btn.textContent = 'Saving…'
       try {
-        // An empty smtp_pass means "keep the stored one" (applySettingsPatch preserves secrets),
+        // An empty smtp_pass means "keep the stored one" (applyConfiguraciónPatch preserves secrets),
         // so sending it blank on a details-only edit is safe.
         await api.put('/api/settings', {
           smtp_host: host, smtp_port: String(port), smtp_secure: prov === 'other' ? '' : (preset.secure || ''),
@@ -832,13 +832,13 @@ export async function settingsView() {
     // Every settings card that holds a [name] field. #gdrive was missing from this list, and the
     // only other writer of its two keys is the Connect Drive button — which is rendered disabled
     // until they are already saved. A shop pasted its Google Client ID and secret, was told
-    // "Settings saved", and came back to two blank fields and a greyed-out button, with no error
+    // "Configuración saved", and came back to two blank fields and a greyed-out button, with no error
     // anywhere and no second path in the product. Some cards only exist in one edition, so a
     // missing container is skipped rather than throwing.
     const CARDS = ['#shop', '#costing', '#ai', '#slack', '#online', '#suppliers', '#gdrive', '#modes', '#delivery', '#terms', '#tpl']
     const payload = Object.assign({}, ...CARDS.map((sel) => ($(sel) ? formData($(sel)) : {})))
     // The upcharge inputs deliberately carry no `name`, so formData ignores them: they are one
-    // setting, not four. applySettingsPatch serialises a JSON-shaped setting given as an object.
+    // setting, not four. applyConfiguraciónPatch serialises a JSON-shaped setting given as an object.
     const upBoxes = $$('[data-up]')
     if (upBoxes.length) {
       // MERGE over what is stored, never replace it. This was a whole-map replace built from
@@ -869,7 +869,7 @@ export async function settingsView() {
       // The server answers with what it stored (normalised — 'eur' came back 'EUR'). Apply it here
       // so the re-render below, and every screen after it, already writes money the new way.
       setShopFormat(saved)
-      toast('Settings saved'); settingsDirty = false; settingsView(); window.dispatchEvent(new Event('psc:settings'))
+      toast('Configuración saved'); settingsDirty = false; settingsView(); window.dispatchEvent(new Event('psc:settings'))
     }
     catch (e) { toast(e.message, true) }
   }
@@ -970,7 +970,7 @@ export async function settingsView() {
 
   // Delivery: verify + test buttons. These save first so the just-typed credentials are used.
   // Only present in pro — the lite edition swaps this card for the guided "Sending Email" one above,
-  // so every binding here has to be optional or the whole Settings view dies on a null element.
+  // so every binding here has to be optional or the whole Configuración view dies on a null element.
   const saveDelivery = () => api.put('/api/settings', { ...formData($('#delivery')) })
   if ($('#verify-email')) $('#verify-email').onclick = async () => {
     $('#email-test-note').textContent = 'Checking…'; await saveDelivery()
@@ -1014,7 +1014,7 @@ export async function settingsView() {
       <div class="field"><label for="cp-again">New password again</label>
         <input class="input" id="cp-again" name="confirm" type="password" autocomplete="new-password"></div>
       <p class="dim" style="font-size:11.5px;margin-top:6px">You stay signed in on this device. Every other session — including one you are worried about — is signed out immediately.</p>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="cpgo">Change password</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="cpgo">Change password</button>`,
     onMount: (bg) => {
       $('#cpgo', bg).onclick = async () => {
         const body = formData(bg)
@@ -1046,7 +1046,7 @@ export async function settingsView() {
         <div class="field"><label>Temporary password</label><input class="input" name="password" minlength="8" placeholder="at least 8 characters"></div>
       </div>
       <p class="dim" style="font-size:11.5px;margin-top:6px">They sign in at your login page with this email and temporary password.</p>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="go">Send invite</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="go">Send invite</button>`,
     onMount: (bg) => $('#go', bg).onclick = async () => {
       const body = formData(bg)
       if (!body.email || !body.password) { toast('Email and a temporary password are required', true); return }
@@ -1105,7 +1105,7 @@ export const MAIL_PRESETS = {
   other: { label: 'Something else (enter manually)', host: '', port: '587', secure: '', appPw: '' },
 }
 
-/** Guess which preset a shop is already on, so revisiting Settings shows the right provider. */
+/** Guess which preset a shop is already on, so revisiting Configuración shows the right provider. */
 export function presetFor(host) {
   const h = String(host || '').toLowerCase()
   if (!h) return ''
@@ -1127,7 +1127,7 @@ function emailCard(s, notif, esc) {
       <span class="pill ${live ? 'green' : ''}">${live ? 'sending as ' + esc(from) : 'not set up'}</span></div>
     <div class="card-b" id="delivery">
       <p class="dim" style="font-size:12.5px;margin-bottom:15px;line-height:1.6">Connect your shop's email and estimates, invoices and reminders go out <strong style="color:var(--txt-2)">from your own address</strong> — your customers see ${esc(from || 'you@yourshop.com')}, reply straight to you, and it lands in their inbox like any other email from you.
-        ${live ? '' : '<br><span style="color:var(--txt-3)">Until this is connected, what you send is saved to your Outbox with a shareable link, but not emailed.</span>'}</p>
+        ${live ? '' : '<br><span style="color:var(--txt-3)">Until this is connected, what you send is saved to your Bandeja de salida with a shareable link, but not emailed.</span>'}</p>
 
       <div class="field"><label>Who hosts your email?</label>
         <select class="input" id="mail-prov">
