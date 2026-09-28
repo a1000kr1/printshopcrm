@@ -1,6 +1,6 @@
 import { api, $, $$, esc, money, setPage, toast, on, go, modal, closeModal, onOnce, announce, confirmModal, guardLeave } from '../core.js'
 
-/* Pricing Matrix + margin-floor guard — the shop's whole price grid, generated from its own
+/* Precios Matrix + margin-floor guard — the shop's whole price grid, generated from its own
    costing inputs, with the real margin of every cell and a hard flag on anything that loses money. */
 
 const DECOS = ['Screen Print', 'DTF Transfer', 'Embroidery', 'UV DTF', 'Vinyl', 'Patch']
@@ -11,7 +11,7 @@ let state = { deco: 'Screen Print' }
 let chart = 'screen'
 
 export async function pricingView() {
-  setPage('Pricing')
+  setPage('Precios')
   await loadChart(chart)
 }
 
@@ -32,7 +32,7 @@ async function loadChart(which) {
   keepTab()
 }
 
-const chartTabs = () => `<div class="tabs" id="pm-tabs" style="margin-bottom:14px" role="tablist" aria-label="Price book views">
+const chartTabs = () => `<div class="tabs" id="pm-tabs" style="margin-bottom:14px" role="tablist" aria-label="Precio book views">
   ${[['screen', 'Screen Print'], ['embroidery', 'Embroidery'], ['dtf', 'DTF'], ['book', 'Your prices'], ['matrices', 'Your matrices']]
     .map(([k, l]) => `<button type="button" role="tab" data-c="${k}" class="${chart === k ? 'on' : ''}" aria-selected="${chart === k}" tabindex="${chart === k ? 0 : -1}">${l}</button>`).join('')}
 </div>`
@@ -48,9 +48,9 @@ async function loadBook() {
 }
 
 const AXIS_HELP = {
-  colors: 'Price rises per ink colour.',
-  stitches: 'Price rises per 1,000 stitches.',
-  area: 'Price rises per square inch printed.',
+  colors: 'Precio rises per ink colour.',
+  stitches: 'Precio rises per 1,000 stitches.',
+  area: 'Precio rises per square inch printed.',
   flat: 'One rate per piece, per placement.',
 }
 
@@ -63,7 +63,7 @@ function serviceCard(s) {
       <div class="spacer"></div>
       <span class="dim" style="font-size:11px">${esc(s.axisLabel)}</span></div>
     <div class="card-b">
-      <p class="dim" style="font-size:12px;margin-bottom:12px">${esc(AXIS_HELP[s.axis] || '')} Prices below are per piece at 48 pieces; bigger runs get the quantity break automatically.</p>
+      <p class="dim" style="font-size:12px;margin-bottom:12px">${esc(AXIS_HELP[s.axis] || '')} Precios below are per piece at 48 pieces; bigger runs get the quantity break automatically.</p>
       <div class="grid2">
         <div class="field"><label>Base rate ($/piece)</label>
           <input class="input" data-f="base" type="number" step="0.01" value="${n(s.base)}"></div>
@@ -112,7 +112,7 @@ function renderBook(b) {
         <p class="dim" style="font-size:12.5px;margin-bottom:12px">Puff embroidery, sublimation, foil, rhinestones — anything you sell.</p>
         <div class="grid2">
           <div class="field"><label>Name</label><input class="input" id="pb-new-name" placeholder="e.g. Puff Embroidery"></div>
-          <div class="field"><label>Prices on</label><select class="input" id="pb-new-axis">
+          <div class="field"><label>Precios on</label><select class="input" id="pb-new-axis">
             ${b.axes.map((a) => `<option value="${a.key}">${esc(a.label)}</option>`).join('')}
           </select></div>
         </div>
@@ -204,7 +204,7 @@ function wireBook(b) {
     confirmModal(
       custom ? `Delete "${name}"?` : `Reset ${name} to stock rates?`,
       custom
-        ? `"${name}" and every price in its matrix are removed. Estimates and invoices already priced from it keep their prices — nothing already quoted changes. This cannot be undone.`
+        ? `"${name}" and every price in its matrix are removed. Cotizacións and invoices already priced from it keep their prices — nothing already quoted changes. This cannot be undone.`
         : `Every rate you have changed on ${name} goes back to the stock rate. Your custom services are not affected. This cannot be undone.`,
       async () => {
         try {
@@ -297,7 +297,7 @@ async function loadMatrix(service, colors) {
     const qs = new URLSearchParams({ colors: String(mxState.colors) })
     if (mxState.service) qs.set('service', mxState.service)
     r = await api.get(`/api/pricebook/matrix?${qs}`)
-  } catch { card.innerHTML = '<div class="card-b dim">Price matrix unavailable.</div>'; return }
+  } catch { card.innerHTML = '<div class="card-b dim">Precio matrix unavailable.</div>'; return }
   mxState.service = r.matrix.service
   renderMatrix(card, r)
 }
@@ -402,12 +402,12 @@ function renderChart(m) {
   const emb = m.kind === 'embroidery'
   const cols = emb ? m.stitchCounts.map((s) => `${(s / 1000).toLocaleString()}k`) : m.sizes.map((z) => z.label)
   const controls = emb
-    ? [num('garment', 'Blank cost $', 'per piece'), num('markup', 'Markup ×', 'on the blank'),
+    ? [num('garment', 'Blank cost $', 'per piece'), num('markup', 'Margen sobre costo ×', 'on the blank'),
        num('rate_1k', 'Per 1,000 stitches $', 'your stitch rate', '0.05'),
        num('min_charge', 'Minimum $', 'per piece floor', '0.5'),
        num('digitizing', 'Digitizing $', 'one-time setup', '1')]
-    : [num('garment', 'Blank cost $', 'per piece'), num('markup', 'Markup ×', 'on the blank'),
-       num('per_sq_in', 'Price / sq inch $', 'printed film', '0.005'),
+    : [num('garment', 'Blank cost $', 'per piece'), num('markup', 'Margen sobre costo ×', 'on the blank'),
+       num('per_sq_in', 'Precio / sq inch $', 'printed film', '0.005'),
        num('press_fee', 'Pressing $', 'per piece labor', '0.25'),
        num('min_charge', 'Minimum $', 'per piece floor', '0.5')]
 
@@ -442,7 +442,7 @@ function renderChart(m) {
         <p class="dim" style="font-size:11.5px;margin-top:12px;line-height:1.6">${emb
           ? `Add <strong style="color:var(--txt-2)">${money(m.inputs.digitizingFee)}</strong> digitizing once per new design. Re-orders of the same file skip it.`
           : `Every price includes <strong style="color:var(--txt-2)">${money(m.inputs.pressFee)}</strong> pressing per piece.`}
-          Change any number above and the card re-prices instantly. These are sell prices — nothing here is saved until you edit your defaults in Settings.</p>
+          Change any number above and the card re-prices instantly. These are sell prices — nothing here is saved until you edit your defaults in Configuración.</p>
       </div>
     </div>
   </div>`
@@ -471,7 +471,7 @@ function render(matrix, defaults) {
   $('#view').innerHTML = `<div class="stack" style="max-width:1040px">
     ${chartTabs()}
     <div class="card">
-      <div class="card-h"><h3>Pricing matrix</h3><span class="pill green">margin floor ${matrix.targetMargin}%</span><div class="spacer"></div><button class="btn ghost sm" id="rate-wizard">◱ True shop rate</button></div>
+      <div class="card-h"><h3>Precios matrix</h3><span class="pill green">margin floor ${matrix.targetMargen}%</span><div class="spacer"></div><button class="btn ghost sm" id="rate-wizard">◱ True shop rate</button></div>
       <div class="card-b">
         <p class="dim" style="font-size:12.5px;line-height:1.6;margin-bottom:14px">Your whole price grid, generated from <strong style="color:var(--txt-2)">your</strong> costing — garment, markup, real press time, and the load-bearing <strong style="color:var(--txt-2)">press-utilization %</strong>. Every cell shows the true margin, and anything under your floor is flagged <span style="color:var(--red);font-weight:600">before</span> a customer ever asks. Change an assumption and the whole grid re-prices live — no spreadsheet.</p>
         <div class="pm-controls">
@@ -479,11 +479,11 @@ function render(matrix, defaults) {
             <select class="input" name="deco">${DECOS.map((d) => `<option ${state.deco === d ? 'selected' : ''}>${d}</option>`).join('')}</select>
             <div class="pm-hint">changes cost basis</div></div>
           ${num('garment', 'Blank cost $', 'per piece')}
-          ${num('markup', 'Markup ×', 'on the blank')}
+          ${num('markup', 'Margen sobre costo ×', 'on the blank')}
           ${num('rate', 'Shop rate $/hr', 'loaded')}
           ${num('util', 'Utilization %', 'press-on time', '1')}
           ${num('screen_fee', 'Screen fee $', 'per color', '1')}
-          ${num('target', 'Margin floor %', 'flag below', '1')}
+          ${num('target', 'Margen floor %', 'flag below', '1')}
         </div>
       </div>
     </div>
@@ -497,13 +497,13 @@ function render(matrix, defaults) {
           <thead><tr><th>Qty ↓ / Colors →</th>${matrix.colorCounts.map((c) => `<th>${c} color${c === 1 ? '' : 's'}</th>`).join('')}</tr></thead>
           <tbody>${matrix.rows.map((r) => `<tr>
             <th class="pm-qty">${r.qty}</th>
-            ${r.cells.map((c) => `<td class="${cellClass(c)}" title="${c.belowFloor ? 'Below your ' + matrix.targetMargin + '% floor — ' + c.label : c.label}">
+            ${r.cells.map((c) => `<td class="${cellClass(c)}" title="${c.belowFloor ? 'Below your ' + matrix.targetMargen + '% floor — ' + c.label : c.label}">
               <div class="pm-price">${money(c.perPiece)}</div>
               <div class="pm-margin">${c.margin}%${c.belowFloor ? ' ⚠' : ''}</div>
             </td>`).join('')}
           </tr>`).join('')}</tbody>
         </table></div>
-        <p class="dim" style="font-size:11.5px;margin-top:12px;line-height:1.6">Margin is figured against real job cost — blanks + <strong style="color:var(--txt-2)">press time costed at your rate ÷ utilization</strong> + screens + spoilage. That utilization divide is why a 12-piece, 6-color run shows red: the setup eats the run. Most shops price these at a loss and never know.</p>
+        <p class="dim" style="font-size:11.5px;margin-top:12px;line-height:1.6">Margen is figured against real job cost — blanks + <strong style="color:var(--txt-2)">press time costed at your rate ÷ utilization</strong> + screens + spoilage. That utilization divide is why a 12-piece, 6-color run shows red: the setup eats the run. Most shops price these at a loss and never know.</p>
       </div>
     </div>
   </div>`
@@ -546,11 +546,11 @@ function openRateWizard() {
         ${f('owner', 'Owner pay / mo', 4000, 'Pay yourself — it belongs in the rate')}
       </div>
       <div class="grid2">
-        ${f('staff', 'Production people', 3, 'Bodies on the floor')}
+        ${f('staff', 'Producción people', 3, 'Bodies on the floor')}
         ${f('hours', 'Hours each / week', 40, 'Actual worked hours')}
       </div>
       <div id="rate-out" class="rate-out"></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="apply-rate">Use this rate</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="apply-rate">Use this rate</button>`,
     onMount: (bg) => {
       const calc = () => {
         const v = (n) => Number($(`[name=${n}]`, bg).value) || 0
