@@ -35,11 +35,11 @@ const COMMANDS = [
   // Navigation — same targets as `g <key>`.
   { icon: '◧', title: 'Go to Dashboard', kw: 'dashboard home', run: () => go('/'), hint: 'g d' },
   { icon: '▦', title: 'Go to Job Board', kw: 'board jobs production kanban', run: () => go('/board'), hint: 'g b' },
-  { icon: '▤', title: 'Go to Estimates', kw: 'estimates quotes', run: () => go('/estimates'), hint: 'g e' },
-  { icon: '▣', title: 'Go to Invoices', kw: 'invoices money billing', run: () => go('/invoices'), hint: 'g v' },
+  { icon: '▤', title: 'Go to Cotizaciones', kw: 'estimates quotes', run: () => go('/estimates'), hint: 'g e' },
+  { icon: '▣', title: 'Go to Facturas', kw: 'invoices money billing', run: () => go('/invoices'), hint: 'g v' },
   { icon: '◱', title: 'Go to Pipeline', kw: 'pipeline deals sales opportunities', run: () => go('/pipeline'), hint: 'g p' },
   { icon: '▭', title: 'Go to Conversations', kw: 'inbox messages conversations chat', run: () => go('/conversations'), hint: 'g i' },
-  { icon: '◉', title: 'Go to Customers', kw: 'customers contacts crm', run: () => go('/contacts'), hint: 'g c' },
+  { icon: '◉', title: 'Go to Clientes', kw: 'customers contacts crm', run: () => go('/contacts'), hint: 'g c' },
   { icon: '◎', title: 'Go to Follow-ups', kw: 'followups chase money quotes', run: () => go('/followups'), hint: 'g f' },
   { icon: '⟳', title: 'Go to Automations', kw: 'automations rules workflows', run: () => go('/automations'), hint: 'g u' },
   { icon: '⚙', title: 'Go to Settings', kw: 'settings config shop preferences', run: () => go('/settings'), hint: 'g ,' },
@@ -68,19 +68,19 @@ function fuzzy(query, text) {
  * spoke nothing at all; and Tab walked invisibly out into the sidebar behind a dimmed backdrop
  * where Enter fired whatever it landed on.
  */
-export function openSearch() {
+export function openBuscar() {
   if (box) return
   boxReturnFocus = focusKeeper()
   box = el(`<div class="cmd-bg">
-    <div class="cmd" role="dialog" aria-modal="true" aria-label="Search and run commands">
+    <div class="cmd" role="dialog" aria-modal="true" aria-label="Buscar and run commands">
       <div class="cmd-in"><span class="cmd-ico" aria-hidden="true">⌕</span>
-        <input id="cmd-q" placeholder="Search or run a command…" autocomplete="off" spellcheck="false"
-          role="combobox" aria-expanded="true" aria-controls="cmd-list" aria-autocomplete="list" aria-label="Search or run a command">
+        <input id="cmd-q" placeholder="Buscar or run a command…" autocomplete="off" spellcheck="false"
+          role="combobox" aria-expanded="true" aria-controls="cmd-list" aria-autocomplete="list" aria-label="Buscar or run a command">
         <kbd>esc</kbd></div>
       <div class="cmd-list" id="cmd-list" role="listbox" aria-label="Results"></div>
     </div></div>`)
   document.body.appendChild(box)
-  box.addEventListener('mousedown', (e) => { if (e.target === box) closeSearch() })
+  box.addEventListener('mousedown', (e) => { if (e.target === box) closeBuscar() })
   const input = $('#cmd-q', box)
   // The palette is Arrow-driven and its only focusable control is the input, so trapTab's
   // first/last wrap collapses to "stay here" — which is exactly right, and is the same rule
@@ -111,7 +111,7 @@ export function openSearch() {
 
   const pick = (i) => {
     const r = items[i]; if (!r) return
-    closeSearch()
+    closeBuscar()
     if (r.isCmd) r.run(); else go(r.href)
   }
 
@@ -135,7 +135,7 @@ export function openSearch() {
   }
 
   input.onkeydown = (e) => {
-    if (e.key === 'Escape') return closeSearch()
+    if (e.key === 'Escape') return closeBuscar()
     if (e.key === 'ArrowDown') { e.preventDefault(); cursor = Math.min(cursor + 1, items.length - 1); draw(); scrollTo() }
     if (e.key === 'ArrowUp') { e.preventDefault(); cursor = Math.max(cursor - 1, 0); draw(); scrollTo() }
     if (e.key === 'Enter') { e.preventDefault(); pick(cursor) }
@@ -146,7 +146,7 @@ export function openSearch() {
   input.focus()
 }
 
-export function closeSearch() {
+export function closeBuscar() {
   const back = boxReturnFocus
   boxReturnFocus = null
   box?.remove(); box = null; items = []; cursor = 0
@@ -154,8 +154,8 @@ export function closeSearch() {
 }
 
 /** ⌘K / Ctrl-K anywhere. (`/` and other keys are handled by the keyboard system.) */
-export function wireSearchHotkey() {
+export function wireBuscarHotkey() {
   window.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); box ? closeSearch() : openSearch() }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); box ? closeBuscar() : openBuscar() }
   })
 }
