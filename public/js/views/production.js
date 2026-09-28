@@ -23,13 +23,13 @@ const input = (name, value = '', type = 'text') =>
   `<input class="input" name="${name}" type="${type}" value="${esc(value)}">`
 const collect = (el) => Object.fromEntries(new FormData(el))
 function buttons() {
-  return `<a class="btn ghost" href="#/calendar">Calendar</a><button class="btn ghost" id="prod-focus">${document.body.classList.contains('production-focus') ? 'Exit focus' : 'Focus mode'}</button><a class="btn ghost" href="#/scan">Scan / find</a>`
+  return `<a class="btn ghost" href="#/calendar">Calendario</a><button class="btn ghost" id="prod-focus">${document.body.classList.contains('production-focus') ? 'Exit focus' : 'Modo enfoque'}</button><a class="btn ghost" href="#/scan">Escanear / buscar</a>`
 }
 function focus() {
   document.body.classList.toggle('production-focus')
   $('#prod-focus').textContent = document.body.classList.contains('production-focus')
     ? 'Exit focus'
-    : 'Focus mode'
+    : 'Modo enfoque'
 }
 window.addEventListener('hashchange', () => {
   if (!location.hash.startsWith('#/production')) document.body.classList.remove('production-focus')
@@ -39,15 +39,15 @@ export async function productionView() {
     d = await api.get(`/api/production?${query}`)
   setPage(
     'Producción',
-    buttons() + (d.manager ? '<a class="btn" href="#/production/workflows">Edit workflows</a>' : ''),
+    buttons() + (d.manager ? '<a class="btn" href="#/production/workflows">Editar flujos</a>' : ''),
     'Cola por departamento'
   )
   $('#view').innerHTML =
-    `<div class="stack production-page"><form id="prod-filter" class="prod-toolbar">${field('Department', `<select class="input" name="department"><option value="">All departments</option>${options(d.departments, d.department)}</select>`)}<label><input type="checkbox" name="mine" ${new URLSearchParams(query).get('mine') === '1' ? 'checked' : ''}> Assigned to me</label><button class="btn">Show queue</button><button class="btn ghost" type="button" id="prod-default">Make my start page</button></form>
-    <p class="dim">${d.ready} ready · ${d.waiting} waiting. Open a job to see counts, artwork, instructions and its next task.</p>
+    `<div class="stack production-page"><form id="prod-filter" class="prod-toolbar">${field('Departamento', `<select class="input" name="department"><option value="">Todos los departamentos</option>${options(d.departments, d.department)}</select>`)}<label><input type="checkbox" name="mine" ${new URLSearchParams(query).get('mine') === '1' ? 'checked' : ''}> Asignado a mí</label><button class="btn">Mostrar cola</button><button class="btn ghost" type="button" id="prod-default">Usar como página inicial</button></form>
+    <p class="dim">${d.ready} listos · ${d.waiting} en espera. Abre un trabajo para ver cantidades, arte, instrucciones y su siguiente tarea.</p>
     <div class="prod-queue">${d.rows.length ? d.rows.map((r) => `<a class="prod-queue-row" href="#/production/jobs/${r.job_id}"><div><span class="mono">${esc(r.job_number)}</span>${r.rush ? ' · RUSH' : ''}<h3>${esc(r.task.title)}</h3><span>${esc(r.title)}</span></div><div><strong>${esc(r.task.department)}</strong><div class="dim">${esc(d.members.find((m) => m.id === r.task.assigned_id)?.name || 'Unassigned')}${r.task.planned_due_date ? ` · task due ${esc(fmtDate(r.task.planned_due_date))}` : r.due_date ? ` · job due ${esc(fmtDate(r.due_date))}` : ''}</div><div class="${r.blocked ? 'dim' : 'prod-ready'}">${esc(r.blocked || 'Ready to work')}</div></div></a>`).join('') : '<div class="card card-b">No open tasks in this queue. Add a workflow from a job’s Producción tasks screen.</div>'}</div>
     ${queuePages(d, query)}
-    ${d.manager ? `<details class="card card-b"><summary>Automatic tasks for new jobs</summary><p>Match a workflow by decoration text. Existing jobs keep their current process. For recurring combinations, save a combined template once. For one-off combinations, select multiple workflows on the job.</p><label><input id="prod-auto" type="checkbox" ${d.auto ? 'checked' : ''}> Apply matching workflows automatically</label></details>` : ''}</div>`
+    ${d.manager ? `<details class="card card-b"><summary>Tareas automáticas para trabajos nuevos</summary><p>Match a workflow by decoration text. Existing jobs keep their current process. For recurring combinations, save a combined template once. For one-off combinations, select multiple workflows on the job.</p><label><input id="prod-auto" type="checkbox" ${d.auto ? 'checked' : ''}> Apply matching workflows automatically</label></details>` : ''}</div>`
   $('#prod-focus').onclick = focus
   $('#prod-filter').onsubmit = (e) => {
     e.preventDefault()
@@ -56,7 +56,7 @@ export async function productionView() {
   }
   $('#prod-default').onclick = async () => {
     await api.put('/api/production/preference', { department: $('#prod-filter select').value })
-    toast('Department start page saved')
+    toast('Departamento start page saved')
   }
   if ($('#prod-auto'))
     $('#prod-auto').onchange = async (e) => {
@@ -244,7 +244,7 @@ export async function productionJobView(id) {
   )
 }
 function taskFields(t, members) {
-  return `${field('Task', input('title', t.title || ''))}${field('Days from production (− before, + after; blank = untimed)', input('due_offset', t.due_offset ?? '', 'number'))}${field('Department', input('department', t.department || 'Producción'))}${field('Board stage', `<select class="input" name="stage">${options(stages, t.stage || 'production')}</select>`)}${field('Assigned employee', `<select class="input" name="assigned_id">${staff(members, t.assigned_id)}</select>`)}${field('Requirement', `<select class="input" name="gate"><option value="">None</option><option value="receiving" ${t.gate === 'receiving' ? 'selected' : ''}>Garments received / counted</option><option value="approval" ${t.gate === 'approval' ? 'selected' : ''}>Artwork approval</option><option value="preflight" ${t.gate === 'preflight' ? 'selected' : ''}>Technical production release</option></select>`)}`
+  return `${field('Task', input('title', t.title || ''))}${field('Days from production (− before, + after; blank = untimed)', input('due_offset', t.due_offset ?? '', 'number'))}${field('Departamento', input('department', t.department || 'Producción'))}${field('Board stage', `<select class="input" name="stage">${options(stages, t.stage || 'production')}</select>`)}${field('Assigned employee', `<select class="input" name="assigned_id">${staff(members, t.assigned_id)}</select>`)}${field('Requirement', `<select class="input" name="gate"><option value="">None</option><option value="receiving" ${t.gate === 'receiving' ? 'selected' : ''}>Garments received / counted</option><option value="approval" ${t.gate === 'approval' ? 'selected' : ''}>Artwork approval</option><option value="preflight" ${t.gate === 'preflight' ? 'selected' : ''}>Technical production release</option></select>`)}`
 }
 function editJobTask(id, d, t) {
   modal({
@@ -379,7 +379,7 @@ function queuePages(d, query) {
 }
 
 function timingFields(t, job = false) {
-  return `<fieldset><legend>Optional timeline</legend><label><input type="checkbox" name="timing_enabled" ${t.enabled ? 'checked' : ''}> Use timing for this ${job ? 'job' : 'workflow'}</label><p class="dim">Task order and completion work with timing off. Working days skip Saturday and Sunday; holidays are not excluded.</p><div class="prod-fields">${field('Normal days from start to production', input('turnaround_days', t.turnaround_days ?? 5, 'number'))}${field('Count days as', `<select class="input" name="day_basis"><option value="business" ${t.day_basis !== 'calendar' ? 'selected' : ''}>Working days (Mon–Fri)</option><option value="calendar" ${t.day_basis === 'calendar' ? 'selected' : ''}>Calendar days</option></select>`)}${job ? field('Planning start', input('start_date', t.start_date || '', 'date')) + field('Override production date', input('production_date', t.production_date || '', 'date')) : ''}</div></fieldset>`
+  return `<fieldset><legend>Optional timeline</legend><label><input type="checkbox" name="timing_enabled" ${t.enabled ? 'checked' : ''}> Use timing for this ${job ? 'job' : 'workflow'}</label><p class="dim">Task order and completion work with timing off. Working days skip Saturday and Sunday; holidays are not excluded.</p><div class="prod-fields">${field('Normal days from start to production', input('turnaround_days', t.turnaround_days ?? 5, 'number'))}${field('Count days as', `<select class="input" name="day_basis"><option value="business" ${t.day_basis !== 'calendar' ? 'selected' : ''}>Working days (Mon–Fri)</option><option value="calendar" ${t.day_basis === 'calendar' ? 'selected' : ''}>Calendario days</option></select>`)}${job ? field('Planning start', input('start_date', t.start_date || '', 'date')) + field('Override production date', input('production_date', t.production_date || '', 'date')) : ''}</div></fieldset>`
 }
 function readTiming(form, job = false) {
   return { enabled: form.elements.timing_enabled.checked, turnaround_days: Number(form.elements.turnaround_days.value), day_basis: form.elements.day_basis.value,
