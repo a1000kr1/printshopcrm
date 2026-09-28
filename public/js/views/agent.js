@@ -54,7 +54,7 @@ export async function agentView() {
         <div class="card-b">
           <div class="capgrid">
             ${cap('faq', 'Answer FAQs', 'From the list below')}
-            ${cap('quote', 'Give ballpark quotes', 'Priced from your rules')}
+            ${cap('quote', 'Give ballpark quotes', 'Preciod from your rules')}
             ${cap('qualify', 'Qualify + capture leads', 'Contact, opp & draft estimate')}
             ${cap('handoff', 'Hand off to a human', 'When they ask for a person')}
           </div>
@@ -81,7 +81,7 @@ export async function agentView() {
       <div class="card preview-card">
         <div class="card-h"><h3>Live preview</h3><div class="spacer"></div><button class="btn ghost sm" id="reset-preview">Reset</button></div>
         <div class="chatprev" id="chatprev"></div>
-        <div class="chatinput"><input class="input" id="prev-in" placeholder="Message the bot as a customer…"><button class="btn sm" id="prev-send">Send</button></div>
+        <div class="chatinput"><input class="input" id="prev-in" placeholder="Message the bot as a customer…"><button class="btn sm" id="prev-send">Enviar</button></div>
         <div class="card-b dim" style="font-size:11.5px;padding-top:0">A rehearsal — it runs the real bot, but saves no customer, deal or estimate and sends no email.</div>
       </div>
 
@@ -173,7 +173,7 @@ function renderAiBanner(data) {
   return wrap(`<div class="card-b" style="display:flex;align-items:center;gap:14px">
     <div style="width:34px;height:34px;flex:0 0 auto;border-radius:var(--r-md);display:grid;place-items:center;font-size:18px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--txt-2)">✦</div>
     <div style="flex:1;min-width:0">
-      <div style="font-weight:650;font-size:13.5px">Add your AI key in Settings to supercharge the receptionist</div>
+      <div style="font-weight:650;font-size:13.5px">Add your AI key in Configuración to supercharge the receptionist</div>
       <div class="dim" style="font-size:12px;line-height:1.5;margin-top:2px">With a key connected, the bot answers freeform questions from your knowledge base instead of dead-ending, and can draft inbox replies for you.</div>
     </div>
     <a class="btn sm" href="#/settings" style="flex:0 0 auto">Add AI key</a></div>`)
@@ -239,7 +239,7 @@ function renderFaqs(faqs) { $('#faqs').innerHTML = ''; (faqs.length ? faqs : [])
 
 function addFaqRow(q, a) {
   const row = document.createElement('div')
-  row.className = 'faqrow'
+  row.classNombre = 'faqrow'
   row.innerHTML = `<input class="input faq-q" placeholder="Question a customer asks…" value="${esc(q)}">
     <textarea class="input faq-a" placeholder="How the bot answers">${esc(a)}</textarea>
     <button class="btn danger sm faq-x" title="Remove" aria-label="Remove this question and answer">&times;</button>`
@@ -256,7 +256,7 @@ function updateEmbed() {
 
 function addPrev(text, who) {
   const d = document.createElement('div')
-  d.className = `prevmsg ${who}`
+  d.classNombre = `prevmsg ${who}`
   d.textContent = text
   $('#chatprev').appendChild(d)
   $('#chatprev').scrollTop = $('#chatprev').scrollHeight
@@ -269,7 +269,7 @@ async function resetPreview() {
   box.innerHTML = ''
   addPrev(($('#greeting')?.value || cfg.greeting || 'Hi!'), 'bot')
   const chips = ['Get a quote', 'What is your minimum?', 'Talk to a person']
-  const c = document.createElement('div'); c.className = 'prevchips'
+  const c = document.createElement('div'); c.classNombre = 'prevchips'
   c.innerHTML = chips.map((x) => `<button class="chip">${esc(x)}</button>`).join('')
   on(c, '.chip', (_e, t) => sendPrev(t.textContent))
   box.appendChild(c)
@@ -296,7 +296,7 @@ async function sendPrev(text) {
     typing.remove()
     addPrev(r.reply || '…', 'bot')
     if (r.quick && r.quick.length) {
-      const c = document.createElement('div'); c.className = 'prevchips'
+      const c = document.createElement('div'); c.classNombre = 'prevchips'
       c.innerHTML = r.quick.map((x) => `<button class="chip">${esc(x)}</button>`).join('')
       on(c, '.chip', (_e, t) => sendPrev(t.textContent))
       $('#chatprev').appendChild(c)
@@ -317,7 +317,7 @@ function openSession(pid) {
     modal({
       title: `Chat · ${session.contact_name || session.visitor_email || 'Website visitor'}`,
       wide: true, body,
-      footer: `<button class="btn ghost" data-close>Close</button><button class="btn ghost" id="ai-draft">✦ Draft with AI</button><button class="btn" id="send-take">Send reply</button>`,
+      footer: `<button class="btn ghost" data-close>Cerrar</button><button class="btn ghost" id="ai-draft">✦ Draft with AI</button><button class="btn" id="send-take">Send reply</button>`,
       onMount: (bg) => {
         $('#send-take', bg).onclick = async () => {
           const text = $('#takeover', bg).value.trim(); if (!text) return
@@ -341,7 +341,7 @@ function openSession(pid) {
             const r = await api.post('/api/agent/draft', { session_pid: pid })
             if (r && r.ok && r.text) { ta.value = r.text; ta.focus(); toast('Draft ready — review before sending') }
             else { toast('AI could not draft a reply right now') }
-          } catch (e) { toast('AI draft unavailable — add your AI key in Settings') }
+          } catch (e) { toast('AI draft unavailable — add your AI key in Configuración') }
           draftBtn.disabled = false; draftBtn.textContent = label
         }
       },
