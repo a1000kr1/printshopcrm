@@ -38,7 +38,7 @@ export function quoteModal(settings, onUse) {
   const LOCS = ['Front', 'Back', 'Left Chest', 'Right Chest', 'Sleeve', 'Hood', 'Yoke']
 
   modal({
-    title: 'Price Calculator',
+    title: 'Calculadora de precios',
     wide: true,
     body: `<div class="quote">
       <div class="quote-in">
@@ -58,7 +58,7 @@ export function quoteModal(settings, onUse) {
         </div>
 
         <div id="q-sp">
-          <div class="field"><label>Print locations</label><div id="q-locs"></div>
+          <div class="field"><label>Ubicación de impresións</label><div id="q-locs"></div>
             <button class="btn ghost sm" id="q-addloc" style="margin-top:7px">+ Add location</button>
           </div>
           <div class="grid2">
@@ -97,7 +97,7 @@ export function quoteModal(settings, onUse) {
           <div class="qtile"><div class="qtile-l">Gross margin</div><div class="qtile-v" id="q-marginv">0%</div></div>
           <div class="qtile" id="q-conf-tile"><div class="qtile-l">Cost basis</div><div class="qtile-v" id="q-conf">Est.</div></div>
         </div>
-        <button class="qshow" id="q-showcalc" type="button">Show the calculation ▾</button>
+        <button class="qshow" id="q-showcalc" type="button">Mostrar cálculo ▾</button>
         <div id="q-calc" hidden>
           <div class="qbreak" id="q-break"></div>
           <div class="qtable"><h4>Price at other quantities</h4><div id="q-breaks"></div></div>
@@ -108,7 +108,7 @@ export function quoteModal(settings, onUse) {
     onMount: (bg) => {
       const drawLocs = () => {
         $('#q-locs', bg).innerHTML = state.locations.map((l, i) => `<div class="qloc" data-i="${i}">
-          <select class="input" data-lf="name" aria-label="Print location ${i + 1}">${LOCS.map((n) => `<option ${n === l.name ? 'selected' : ''}>${n}</option>`).join('')}</select>
+          <select class="input" data-lf="name" aria-label="Ubicación de impresión ${i + 1}">${LOCS.map((n) => `<option ${n === l.name ? 'selected' : ''}>${n}</option>`).join('')}</select>
           <input class="input num" data-lf="colors" type="number" min="1" max="12" aria-label="Colours on print location ${i + 1}" value="${l.colors}">
           <span class="dim" style="font-size:11px">colors${state.darkGarment ? ' +UB' : ''}</span>
           ${state.locations.length > 1 ? `<button class="del" data-rmloc="${i}" aria-label="Remove print location ${i + 1}">&times;</button>` : '<span></span>'}
@@ -133,22 +133,22 @@ export function quoteModal(settings, onUse) {
         const q = serviceQuote(state.qty)
         const v = marginVerdict(q.m.margin)
         $('#q-pp', bg).textContent = money(q.perPiece)
-        $('#q-total', bg).textContent = `${money(q.subtotal)} order total · ${state.qty} pcs${q.fee ? ` (incl. ${money(q.fee)} ${q.svc.feeLabel || 'setup'})` : ''}`
+        $('#q-total', bg).textContent = `${money(q.subtotal)} total del pedido · ${state.qty} pcs${q.fee ? ` (incl. ${money(q.fee)} ${q.svc.feeLabel || 'setup'})` : ''}`
         $('#q-profit', bg).textContent = money(q.m.profit)
         const me = $('#q-marginv', bg); me.textContent = `${q.m.margin}%`
         me.style.color = v.level === 'good' ? 'var(--accent)' : v.level === 'warn' ? 'var(--amber)' : 'var(--red)'
-        $('#q-conf', bg).textContent = q.svc.cost != null ? 'Cost model' : 'Estimated'
+        $('#q-conf', bg).textContent = q.svc.cost != null ? 'Modelo de costos' : 'Estimado'
         $('#q-conf-tile', bg).title = `${state.decoration} priced from real cost data — ${q.svc.basis}.`
         $('#q-verdict', bg).innerHTML = `<div class="qverdict ${v.level}"><span class="qv-label">${v.label}</span>
           <span class="qv-vph">${esc(state.decoration)} · ${esc(q.svc.basis)}</span>
-          ${q.m.margin < 25 ? `<div class="qv-warn">${q.m.margin < 0 ? 'This job loses money. Raise the price.' : 'Under 25% is thin. Raise the price or the quantity.'}</div>` : ''}</div>`
+          ${q.m.margin < 25 ? `<div class="qv-warn">${q.m.margin < 0 ? 'Este trabajo genera pérdida. Aumenta el precio.' : 'Under 25% is thin. Raise the price or the quantity.'}</div>` : ''}</div>`
         $('#q-break', bg).innerHTML = `
           <div><span>Garment (${money(state.garmentCost)} × ${state.markup})</span><span>${money(q.garment)}</span></div>
           <div><span>${esc(state.decoration)} — ${esc(q.svc.basis)}</span><span>${money(q.svc.sell)}</span></div>
           ${state.rushMult > 1 ? `<div style="color:var(--amber)"><span>Rush +${Math.round((state.rushMult - 1) * 100)}%</span><span>included</span></div>` : ''}
           <div class="qline"><span>Per piece</span><span>${money(q.perPiece)}</span></div>
           <div><span>${state.qty} pieces</span><span>${money(q.perPiece * state.qty)}</span></div>
-          ${q.fee ? `<div><span>${esc(q.svc.feeLabel || 'Setup')}</span><span>${money(q.fee)}</span></div>` : ''}
+          ${q.fee ? `<div><span>${esc(q.svc.feeLabel || 'Preparación')}</span><span>${money(q.fee)}</span></div>` : ''}
           <div class="qline strong"><span>Order total</span><span>${money(q.subtotal)}</span></div>`
         // qty price breaks (methods with real qty tiers move; area-priced ones are flat)
         $('#q-breaks', bg).innerHTML = [24, 48, 72, 144, 288, 500].map((qq) => {
@@ -181,15 +181,15 @@ export function quoteModal(settings, onUse) {
         const vph = valuePerHour(q.subtotal, cost.minutes)
 
         // One clear answer up top: recommended price, what you keep, the margin, and how solid the
-        // cost is. The full math lives behind "Show the calculation".
+        // cost is. The full math lives behind "Mostrar cálculo".
         $('#q-pp', bg).textContent = money(q.perPiece)
-        $('#q-total', bg).textContent = `${money(q.subtotal)} order total · ${state.qty} pcs`
+        $('#q-total', bg).textContent = `${money(q.subtotal)} total del pedido · ${state.qty} pcs`
         $('#q-profit', bg).textContent = money(m.profit)
         const marginEl = $('#q-marginv', bg)
         marginEl.textContent = `${m.margin}%`
         marginEl.style.color = v.level === 'good' ? 'var(--accent)' : v.level === 'warn' ? 'var(--amber)' : 'var(--red)'
         // Confidence: the garment cost here is typed, so it's an estimate until a distributor is connected.
-        $('#q-conf', bg).textContent = 'Estimated'
+        $('#q-conf', bg).textContent = 'Estimado'
         $('#q-conf-tile', bg).title = 'Based on the garment cost you typed. Connect a distributor in Settings for live blank costs.'
 
         $('#q-verdict', bg).innerHTML = `<div class="qverdict ${v.level}">
@@ -246,7 +246,7 @@ export function quoteModal(settings, onUse) {
       $('#q-showcalc', bg).onclick = () => {
         const c = $('#q-calc', bg); const open = c.hidden
         c.hidden = !open
-        $('#q-showcalc', bg).textContent = open ? 'Hide the calculation ▴' : 'Show the calculation ▾'
+        $('#q-showcalc', bg).textContent = open ? 'Ocultar cálculo ▴' : 'Mostrar cálculo ▾'
       }
 
       on($('#q-locs', bg), '[data-lf]', (_e, t) => {
@@ -276,7 +276,7 @@ export function quoteModal(settings, onUse) {
             rush_days: state.rushMult > 1 ? state.rushDays : 0,
             taxable: true,
           })
-          if (q.fee > 0) onUse({ description: q.svc.feeLabel || 'Setup', detail: 'One-time charge', qty: 1, unit_price: q.fee, taxable: false })
+          if (q.fee > 0) onUse({ description: q.svc.feeLabel || 'Preparación', detail: 'Cargo único', qty: 1, unit_price: q.fee, taxable: false })
           closeModal()
           toast(`Added at ${money(q.perPiece)}/pc — now spread the ${state.qty} pieces across sizes`)
           return
@@ -284,7 +284,7 @@ export function quoteModal(settings, onUse) {
         const q = quoteScreenPrint(state)
         const desc = state.locations.map((l) => `${l.colors}/0 ${l.name}`).join(' + ')
         onUse({
-          description: `Garment — ${desc}`,
+          description: `Prenda — ${desc}`,
           detail: `${state.locations.length} location${state.locations.length > 1 ? 's' : ''}, ${q.totalColors} color${q.totalColors === 1 ? '' : 's'}${q.underbase ? ' incl. underbase' : ''}${q.rushApplied ? `, RUSH +${Math.round((q.rushMult - 1) * 100)}%` : ''}`,
           decoration: 'Screen Print',
           sizes: { S: 0, M: state.qty, L: 0, XL: 0 },
@@ -295,7 +295,7 @@ export function quoteModal(settings, onUse) {
         })
         if (q.screens > 0) {
           onUse({ description: `Screen setup — ${q.totalColors} screen${q.totalColors === 1 ? '' : 's'}`,
-            detail: 'One-time charge, screens held 12 months', qty: q.totalColors, unit_price: state.screenFee, taxable: false })
+            detail: 'Cargo único, screens held 12 months', qty: q.totalColors, unit_price: state.screenFee, taxable: false })
         }
         closeModal()
         toast(`Added at ${money(q.perPiece)}/pc — now spread the ${state.qty} pieces across sizes`)
