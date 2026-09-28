@@ -90,7 +90,7 @@
           <input id="f-email" name="email" type="email" placeholder="you@yourshop.com" autocomplete="email" required>
         </div>
         <div id="password-field">
-          <label id="password-label" for="f-password">Password</label>
+          <label id="password-label" for="f-password">Contraseña</label>
           <input id="f-password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required minlength="8">
         </div>
 
@@ -99,7 +99,7 @@
         <button class="btn" id="submit" type="submit">Sign in</button>
       </form>
       <div class="foot" id="forgot-foot"><a href="#" onclick="mode('forgot');return false">Forgot your password?</a></div>
-      <div class="foot" id="foot"><span id="foot-q">New here?</span> <a href="#" onclick="mode('signup');return false" id="foot-a">Create your shop →</a></div>
+      <div class="foot" id="foot"><span id="foot-q">¿Eres nuevo aquí?</span> <a href="#" onclick="mode('signup');return false" id="foot-a">Crear tu negocio →</a></div>
     </div>
     <!-- AGPL §13: users interacting over a network must be offered the Corresponding Source. -->
     <div class="foot" style="opacity:.7">__SOURCE_LINK__</div>
@@ -128,12 +128,12 @@
       $('password-field').classList.toggle('hide', isForgot)
       document.querySelector('[name=email]').required = !isReset
       document.querySelector('[name=password]').required = !isForgot
-      $('password-label').textContent = isReset ? 'New password' : 'Password'
+      $('password-label').textContent = isReset ? 'Nueva contraseña' : 'Contraseña'
       $('submit').textContent = TITLES[m]
       $('forgot-foot').classList.toggle('hide', m !== 'login')
       $('foot').classList.toggle('hide', isForgot || isReset)
-      $('foot-q').textContent = isSignup ? 'Already have a shop?' : 'New here?'
-      $('foot-a').textContent = isSignup ? 'Sign in →' : 'Create your shop →'
+      $('foot-q').textContent = isSignup ? '¿Ya tienes un negocio?' : '¿Eres nuevo aquí?'
+      $('foot-a').textContent = isSignup ? 'Iniciar sesión →' : 'Crear tu negocio →'
       $('foot-a').setAttribute('onclick', `mode('${isSignup ? 'login' : 'signup'}');return false`)
       // mode() owns the visibility of every control on this card. The expired-reset-link handler
       // below hides the submit button, and it used to be the only code that ever touched it — so
@@ -153,10 +153,10 @@
      * page and the shop's public checkout are the two surfaces that never load core.js.
      */
     function httpMsg(status) {
-      if (status === 502 || status === 503 || status === 504) return 'The server is restarting — try that again in a moment.'
-      if (status === 429) return 'Too many attempts just now — wait a moment and try again.'
-      if (!status) return 'No connection to the server.'
-      return `Something went wrong (${status}).`
+      if (status === 502 || status === 503 || status === 504) return 'El servidor se está reiniciando — inténtalo de nuevo en un momento.'
+      if (status === 429) return 'Demasiados intentos en este momento — espera un momento e inténtalo de nuevo.'
+      if (!status) return 'Sin conexión con el servidor.'
+      return `Algo salió mal (${status}).`
     }
     async function readJson(r) {
       const text = await r.text()
