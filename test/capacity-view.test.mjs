@@ -67,7 +67,7 @@ test('date checker displays print-only language and guards incomplete or horizon
   assert.match(f.node('promise-out').innerHTML, /coverage is incomplete/); assert.doesNotMatch(f.node('promise-out').innerHTML, /Print model fits/)
   f.api.postOverride = () => answer({ earliestFinish: null, feasible: false, beyondHorizon: true, reason: 'Split it into smaller runs.' })
   f.input('pq', '300'); f.flush(); await tick()
-  assert.match(f.node('promise-out').innerHTML, /Not schedulable/); assert.match(f.notices.at(-1), /Split it into smaller runs/)
+  assert.match(f.node('promise-out').innerHTML, /No programable/); assert.match(f.notices.at(-1), /Split it into smaller runs/)
 })
 
 test('older requests cannot overwrite changed inputs, including the debounce gap', async () => {
