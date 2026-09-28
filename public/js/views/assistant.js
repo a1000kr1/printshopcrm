@@ -16,7 +16,7 @@ const history = [] // { role: 'user'|'bot', ...payload } — kept for the sessio
 const GREETING = {
   role: 'bot',
   reply: "Hey — I'm your front desk. Tell me what you need and I'll handle it (or point you to it). Everything I do, you can edit or undo.",
-  followups: ["What's due today?", 'Who owes me money?', 'Quote 48 navy hoodies, 2 color front, for Northgate', "How's the board?"],
+  followups: ["What's due today?", '¿Quién me debe dinero?', 'Quote 48 navy hoodies, 2 color front, for Northgate', "How's the board?"],
 }
 
 /** ** bold ** and newlines → safe HTML. */
@@ -37,12 +37,12 @@ export function openAssistant(seed) {
     <div class="asst-head">
       <div class="asst-badge">◍</div>
       <div style="flex:1"><div class="asst-title">Assistant</div><div class="asst-sub">Message your problem</div></div>
-      <button class="asst-x" data-close aria-label="Close the assistant">&times;</button>
+      <button class="asst-x" data-close aria-label="Cerrar el asistente">&times;</button>
     </div>
     <div class="asst-log" id="asst-log" role="log" aria-live="polite" aria-atomic="false"></div>
     <div class="asst-compose">
       <textarea id="asst-input" rows="1" placeholder="Ask or tell me anything…"></textarea>
-      <button class="asst-send" id="asst-send" title="Send" aria-label="Send this message">↑</button>
+      <button class="asst-send" id="asst-send" title="Send" aria-label="Enviar este mensaje">↑</button>
     </div>
   </div>`)
   document.body.appendChild(panel)
@@ -68,7 +68,7 @@ export function openAssistant(seed) {
   on(log, '[data-chip]', (_e, t) => send(t.dataset.chip))
   on(log, '[data-undo]', async (_e, t) => {
     const m = history[+t.dataset.undo]; const u = m?.action?.undo
-    if (u?.type === 'job_stage') { await api.patch(`/api/jobs/${u.id}/stage`, { stage: u.stage }); delete m.action; toast('Undone'); pushBot({ reply: 'Reverted — put it back where it was.' }) }
+    if (u?.type === 'job_stage') { await api.patch(`/api/jobs/${u.id}/stage`, { stage: u.stage }); delete m.action; toast('Deshecho'); pushBot({ reply: 'Reverted — put it back where it was.' }) }
   })
 
   const input = $('#asst-input', panel)
@@ -96,7 +96,7 @@ export function closeAssistant() {
 function render() {
   const log = $('#asst-log', panel); if (!log) return
   /**
-   * The two controls this function is fired FROM — a followup chip and "Undo that" — live inside
+   * The two controls this function is fired FROM — a followup chip and "Deshacer eso" — live inside
    * #asst-log, and this innerHTML replaces it. So pressing either dropped focus on <body>, outside
    * a NON-modal panel, with the skip link, the sidebar and the whole page to Tab back through.
    * board.js and scan.js already carry this rule and the gate asserts it for both.
@@ -113,7 +113,7 @@ function render() {
         <div class="asst-bub">${m.thinking ? '<span class="asst-dots"><i></i><i></i><i></i></span>' : fmt(m.reply)}${m.model ? ' <span class="asst-ai">AI</span>' : ''}</div>
         ${(m.cards || []).map((c) => `<a class="asst-card" href="#${esc(c.href)}" data-href="${esc(c.href)}"><span class="asst-card-ic" aria-hidden="true">${c.icon || '→'}</span>
           <span><span class="asst-card-t">${esc(c.title)}</span>${c.sub ? `<span class="asst-card-s">${esc(c.sub)}</span>` : ''}</span></a>`).join('')}
-        ${m.action?.undo ? `<button class="asst-undo" data-undo="${i}">Undo that</button>` : ''}
+        ${m.action?.undo ? `<button class="asst-undo" data-undo="${i}">Deshacer eso</button>` : ''}
         ${(m.followups || []).length ? `<div class="asst-chips">${m.followups.map((f) => `<button class="asst-chip" data-chip="${esc(f)}">${esc(f)}</button>`).join('')}</div>` : ''}
       </div>`).join('')
   log.scrollTop = log.scrollHeight
@@ -130,10 +130,10 @@ async function send(text) {
     const r = await api.post('/api/assistant', { message: text })
     Object.assign(thinking, { thinking: false, ...r })
   } catch (e) {
-    Object.assign(thinking, { thinking: false, reply: `Something went wrong: ${e.message}` })
+    Object.assign(thinking, { thinking: false, reply: `Algo salió mal: ${e.message}` })
   }
   render()
   // The log is a live region, but render() rewrites the WHOLE list on every turn, which reads as
   // a wall of text rather than the new answer. Say the settled reply, once.
-  announce(thinking.reply || 'The assistant answered.')
+  announce(thinking.reply || 'El asistente respondió.')
 }
