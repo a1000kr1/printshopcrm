@@ -3,7 +3,7 @@ import { readPngDpi, addPngDpi, canvasToPngBlob, analyzeTrim, resizeToPrint, loa
   printQuality, maxPrintSize, upscale, gangSheetLayout, gangSheetPrice, SHEET_SIZES, fitSheet } from '../shared/dtftrim.js'
 
 /**
- * DTF Resize — auto-trim a transparent PNG and resample it to exact print size with real DPI
+ * Redimensionar DTF — auto-trim a transparent PNG and resample it to exact print size with real DPI
  * metadata. The everyday prep step before art hits the gang sheet or the RIP. Entirely in the
  * browser: the art never uploads anywhere.
  */
@@ -11,10 +11,10 @@ import { readPngDpi, addPngDpi, canvasToPngBlob, analyzeTrim, resizeToPrint, loa
 let st = null
 const reset = () => { st = { img: null, file: null, url: null, srcDpi: null, crop: null, outUrl: null, outName: null, upUrl: null } }
 
-export async function dtfResizeView() {
+export async function dtfRedimensionarView() {
   reset()
   const lite = window.__EDITION === 'lite'
-  setPage(lite ? 'Art Tools' : 'DTF Resize', '', lite ? '' : '<span class="dim">Production</span>')
+  setPage(lite ? 'Art Tools' : 'Redimensionar DTF', '', lite ? '' : '<span class="dim">Production</span>')
   // The planner quotes off the shop's own roll rate, so the number it shows is the number it charges.
   const cfg = (await api.get('/api/settings').catch(() => ({ settings: {} }))).settings || {}
   const rollW = Number(cfg.dtf_sheet_width) || 22
@@ -29,15 +29,15 @@ export async function dtfResizeView() {
           <div id="dtf-drop-txt">Choose a transparent PNG — we trim the empty space automatically</div></label>
         <div class="dtf-controls" id="dtf-controls" hidden>
           <div class="grid4">
-            <div class="field"><label>Width (in)</label><input class="input" id="dtf-w" type="number" step="0.05" min="0.2"></div>
-            <div class="field"><label>Height (in)</label><input class="input" id="dtf-h" type="number" step="0.05" min="0.2"></div>
+            <div class="field"><label>Ancho (in)</label><input class="input" id="dtf-w" type="number" step="0.05" min="0.2"></div>
+            <div class="field"><label>Alto (in)</label><input class="input" id="dtf-h" type="number" step="0.05" min="0.2"></div>
             <div class="field"><label>DPI</label><input class="input" id="dtf-dpi" type="number" value="300" min="72" max="1200"></div>
             <div class="field"><label>Alpha threshold</label><input class="input" id="dtf-alpha" type="number" value="1" min="0" max="254"></div>
           </div>
           <label class="row" style="gap:7px;cursor:pointer;margin:4px 0 10px"><input type="checkbox" id="dtf-lock" checked><span style="font-size:12.5px">Lock aspect ratio</span></label>
           <div class="row" style="gap:8px">
-            <button class="btn" id="dtf-apply">Resize</button>
-            <a class="btn ghost" id="dtf-dl" hidden download>Download print-ready PNG</a>
+            <button class="btn" id="dtf-apply">Redimensionar</button>
+            <a class="btn ghost" id="dtf-dl" hidden download>Descargar print-ready PNG</a>
             <button class="btn ghost sm" id="dtf-reset">Start over</button>
           </div>
           <div class="dim" id="dtf-stats" style="font-size:12px;margin-top:10px;line-height:1.6"></div>
@@ -61,7 +61,7 @@ export async function dtfResizeView() {
           <div class="field" style="grid-column:span 3;align-self:end">
             <div class="row" style="gap:8px">
               <button class="btn ghost" id="dtf-up-go">Upscale art</button>
-              <a class="btn ghost" id="dtf-up-dl" hidden download>Download upscaled PNG</a>
+              <a class="btn ghost" id="dtf-up-dl" hidden download>Descargar upscaled PNG</a>
             </div></div>
         </div>
         <div id="dtf-quality" class="dtf-q"></div>
@@ -94,7 +94,7 @@ export async function dtfResizeView() {
   drop.ondrop = (e) => { e.preventDefault(); drop.style.borderColor = ''; if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]) }
   fileIn.onchange = () => { if (fileIn.files[0]) load(fileIn.files[0]) }
   $('#dtf-apply').onclick = apply
-  $('#dtf-reset').onclick = () => dtfResizeView()
+  $('#dtf-reset').onclick = () => dtfRedimensionarView()
   $('#dtf-lock').onchange = () => syncSize('width')
   $('#dtf-w').oninput = () => { syncSize('width'); quality() }
   $('#dtf-h').oninput = () => { syncSize('height'); quality() }
@@ -144,7 +144,7 @@ export async function dtfResizeView() {
     const out = $('#gs-out')
     const layout = gangSheetLayout({
       pieceW: +$('#gs-w').value, pieceH: +$('#gs-h').value,
-      qty: +$('#gs-q').value, sheetWidth: rollW, gap: +$('#gs-g').value,
+      qty: +$('#gs-q').value, sheetAncho: rollW, gap: +$('#gs-g').value,
     })
     if (!layout) { out.innerHTML = '<span class="dim">Enter a size and quantity.</span>'; return }
     if (layout.error) { out.innerHTML = `<div class="dtf-q-row bad"><strong>Won't fit</strong><span>${esc(layout.error)}</span></div>`; return }
@@ -237,7 +237,7 @@ export async function dtfResizeView() {
     for (let y = 0; y < cv.height; y += 8) for (let x = 0; x < cv.width; x += 8) { ctx.fillStyle = ((x + y) / 8) % 2 ? '#2a2f3a' : '#232833'; ctx.fillRect(x, y, 8, 8) }
     ctx.drawImage(source, 0, 0, cv.width, cv.height)
     if (crop && crop.sourceW) {
-      ctx.strokeStyle = '#10d39a'; ctx.lineWidth = 2; ctx.setLineDash([6, 4])
+      ctx.strokeStyle = '#10d39a'; ctx.lineAncho = 2; ctx.setLineDash([6, 4])
       ctx.strokeRect(crop.x * scale, crop.y * scale, crop.w * scale, crop.h * scale)
     }
   }
