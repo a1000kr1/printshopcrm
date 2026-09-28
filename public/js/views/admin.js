@@ -1,4 +1,4 @@
-import { api, $, esc, money, fmtDate, setPage, on, modal, closeModal, toast, go } from '../core.js'
+import { api, $, esc, money, fmtFecha, setPage, on, modal, closeModal, toast, go } from '../core.js'
 
 /**
  * Platform Control Room — the admin's cockpit over every shop on this deployment. Only reachable by
@@ -26,14 +26,14 @@ export async function adminView() {
       ${kpi(money(revenue), 'Collected across all shops')}
     </div>
     <section class="card" style="margin-bottom:16px"><div class="card-b">
-      <h2>Customer usage</h2>
+      <h2>Cliente usage</h2>
       ${usage.available ? `<p><strong>${usage.customers_active7}</strong> confirmed customer shops worked in the last 7 UTC dates; <strong>${usage.customers_active30}</strong> in the last 30. ${usage.customer_shops} confirmed customer accounts; ${usage.unreviewed} unreviewed.</p>
       <p class="dim">Measurement started ${esc(usage.started_at)}. Counts successful browser changes to customers, estimates, invoices, jobs and opportunities after a fresh member sign-in. Excludes support sign-ins, API integrations, reads and marked synthetic checks. Older sessions show uncertain activity until the next sign-in. Browser signals are not proof of a human. Review account classifications before interpreting adoption; zero does not mean no use before measurement began. Windows include today and the previous 6 or 29 UTC dates.</p>` : '<p role="alert">Usage measurement unavailable. No adoption count can be reported.</p>'}
     </div></section>
     <div class="card"><div class="card-b" style="padding:0;overflow-x:auto">
       <table class="tbl" style="width:100%;min-width:1200px;border-collapse:collapse">
         <thead><tr style="text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)">
-          <th style="padding:12px 14px">Shop</th><th>Owner</th><th>Status</th><th>Invoices</th><th>Customers</th><th>Collected</th><th>Last login</th><th>Usage / classification</th><th></th>
+          <th style="padding:12px 14px">Shop</th><th>Owner</th><th>Estado</th><th>Facturas</th><th>Clientes</th><th>Collected</th><th>Last login</th><th>Usage / classification</th><th></th>
         </tr></thead>
         <tbody id="ad-rows">
           ${shops.length ? shops.map(row).join('') : '<tr><td colspan="8" style="padding:26px;text-align:center;color:var(--dim)">No client shops yet — add your first one.</td></tr>'}
@@ -70,7 +70,7 @@ function deleteShopModal(tenantId, name) {
       <p>Recorded hosting subscriptions must have ended in Stripe before deletion can proceed. Hosting payment records are retained for reconciliation.</p>
       <p id="shop-delete-status" class="dim" role="status" aria-live="polite"></p>
       <p id="shop-delete-error" role="alert"></p>`,
-    footer: '<button class="btn ghost" data-close>Cancel</button><button class="btn danger" id="shop-delete-go">Verify and delete</button>',
+    footer: '<button class="btn ghost" data-close>Cancelar</button><button class="btn danger" id="shop-delete-go">Verify and delete</button>',
     onMount: bg => {
       const button = $('#shop-delete-go', bg)
       let pending = false
@@ -115,7 +115,7 @@ function row(s) {
     <td>${s.invoices}</td>
     <td>${s.customers}</td>
     <td>${money(s.revenue)}</td>
-    <td class="dim" style="font-size:12px">${s.last_login ? esc(fmtDate(s.last_login)) : 'never'}</td>
+    <td class="dim" style="font-size:12px">${s.last_login ? esc(fmtFecha(s.last_login)) : 'never'}</td>
     <td><div>${s.usage ? `${s.usage.days7} / ${s.usage.days30} work days (7 / 30 dates)<br>${s.usage.uncertain_actions30} uncertain actions` : 'Measurement unavailable'}</div>
       <label>Account type <select aria-label="Account type for ${esc(s.shop_name)}">${['unreviewed','customer','demo','test','internal'].map(k=>`<option value="${k}" ${s.usage?.kind===k?'selected':''}>${k==='customer'?'Confirmed customer':k}</option>`).join('')}</select></label>
       <button class="btn ghost sm" data-act="classification" data-id="${s.id}">Save classification</button></td>
@@ -123,7 +123,7 @@ function row(s) {
       <button class="btn ghost sm" data-act="hosting" data-id="${s.id}" data-name="${esc(s.shop_name)}">Hosting</button>
       <button class="btn ghost sm" data-act="signin" data-id="${s.id}" data-name="${esc(s.shop_name)}">Sign in</button>
       <button class="btn ghost sm" data-act="${suspended ? 'activate' : 'suspend'}" data-id="${s.id}" data-name="${esc(s.shop_name)}">${suspended ? 'Reactivate' : 'Suspend'}</button>
-      <button class="btn ghost sm" data-act="delete" data-id="${s.id}" data-name="${esc(s.shop_name)}" style="color:#ef4444">Delete</button>
+      <button class="btn ghost sm" data-act="delete" data-id="${s.id}" data-name="${esc(s.shop_name)}" style="color:#ef4444">Eliminar</button>
     </td>
   </tr>`
 }
@@ -144,24 +144,24 @@ async function hostingReviewModal(tenantId,name) {
       ${data.intent ? `<p>Latest checkout: <strong>${esc(data.intent.state)}</strong>${data.intent.session_id ? `<br><code class="hosting-session-id">${esc(data.intent.session_id)}</code>` : ''}</p>` : '<p>No current checkout.</p>'}
       ${verifications.length ? `<p>A received hosting payment still needs verification. Check its current state in Stripe before starting another checkout or deleting the shop.</p>
         ${verifications.map(item=>`<section class="card hosting-recovery"><div class="card-b">
-          <p><strong>Payment awaiting verification</strong></p>
+          <p><strong>Pago awaiting verification</strong></p>
           <p>Checkout<br><code>${esc(item.session_id)}</code></p>
           ${item.subscription_id ? `<p>Subscription<br><code>${esc(item.subscription_id)}</code></p>` : ''}
           <button type="button" class="btn ghost" data-hosting-check="${esc(item.id)}">Check payment</button>
         </div></section>`).join('')}` : ''}
       ${issues.length ? `<p>Review each payment in the connected Stripe account. This action verifies its current state and records your review. Refunds and subscription changes must be handled in Stripe first.</p>
         ${issues.map(issue=>`<section class="card hosting-recovery"><div class="card-b">
-          <p><strong>Payment needs review</strong><br>${esc(String(issue.code || '').replaceAll('_',' '))}</p>
+          <p><strong>Pago needs review</strong><br>${esc(String(issue.code || '').replaceAll('_',' '))}</p>
           ${issue.session_id ? `<p>Checkout<br><code>${esc(issue.session_id)}</code></p>` : ''}
           ${issue.subscription_id ? `<p>Subscription<br><code>${esc(issue.subscription_id)}</code></p>` : ''}
           <div class="field"><label for="hosting-note-${issue.id}">What did you check?</label><textarea class="input" id="hosting-note-${issue.id}" maxlength="1000" rows="3"></textarea></div>
           <button type="button" class="btn ghost" data-hosting-resolve="${esc(issue.id)}">Verify and close review</button>
         </div></section>`).join('')}` : verifications.length ? '' : '<p>No unresolved payment reviews.</p>'}
       ${data.resolved_anomalies?.length ? `<details class="hosting-recovery-details"><summary>Recent completed reviews</summary>
-        ${data.resolved_anomalies.map(review=>`<div class="hosting-recovery"><strong>${esc(Number.isSafeInteger(review.resolved_at) && review.resolved_at > 0 && review.resolved_at <= 8640000000000000 ? fmtDate(new Date(review.resolved_at).toISOString()) : 'Date unavailable')}</strong><p>${esc(review.resolution_note || '')}</p></div>`).join('')}
+        ${data.resolved_anomalies.map(review=>`<div class="hosting-recovery"><strong>${esc(Number.isSafeInteger(review.resolved_at) && review.resolved_at > 0 && review.resolved_at <= 8640000000000000 ? fmtFecha(new Fecha(review.resolved_at).toISOString()) : 'Fecha unavailable')}</strong><p>${esc(review.resolution_note || '')}</p></div>`).join('')}
       </details>` : ''}
       <p class="dim" id="hosting-review-error" role="alert"></p>`,
-    footer:'<button class="btn ghost" data-close>Close</button>',
+    footer:'<button class="btn ghost" data-close>Cerrar</button>',
     onMount:bg=>{
       let pending=false
       on(bg,'[data-hosting-resolve],[data-hosting-check]',async(_event,button)=>{
@@ -175,7 +175,7 @@ async function hostingReviewModal(tenantId,name) {
           if(verificationId) await api.post('/api/admin/hosting-verification/reconcile',{tenant_id:tenantId,verification_id:verificationId})
           else await api.post('/api/admin/hosting-checkout/resolve',{tenant_id:tenantId,anomaly_id:anomalyId,note})
           if(!bg.isConnected) return
-          closeModal();toast(verificationId ? 'Payment checked. Review the current hosting details.' : 'Payment review verified and recorded.');await hostingReviewModal(tenantId,name)
+          closeModal();toast(verificationId ? 'Pago checked. Review the current hosting details.' : 'Pago review verified and recorded.');await hostingReviewModal(tenantId,name)
         } catch(error) { if(bg.isConnected) $('#hosting-review-error',bg).textContent=error.message }
         finally { pending=false;button.disabled=false }
       })
@@ -194,7 +194,7 @@ function newShopModal() {
       </div>
       <div class="field" style="margin-top:10px"><label>Temp password (optional — auto-generated if blank)</label><input class="input" id="ns-pw" placeholder="leave blank to auto-generate"></div>
       <div class="dim" id="ns-err" role="alert" style="color:#ef4444;font-size:12px;display:none;margin-top:8px"></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="ns-go">Create shop</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="ns-go">Create shop</button>`,
     onMount: (bg) => {
       const err = (m) => { const e = $('#ns-err', bg); e.textContent = m; e.style.display = '' }
       $('#ns-go', bg).onclick = async () => {
@@ -207,7 +207,7 @@ function newShopModal() {
             title: 'Shop created ✓',
             body: `<div style="line-height:1.7"><strong>${esc(r.shop.shop_name)}</strong> is ready. Hand these to your client:<div class="card" style="margin-top:12px"><div class="card-b" style="font-size:13px">
               <div>Sign-in: <strong>${location.origin}/login</strong></div>
-              <div>Email: <strong>${esc(r.shop.owner_email)}</strong></div>
+              <div>Correo electrónico: <strong>${esc(r.shop.owner_email)}</strong></div>
               <div>Temp password: <strong>${esc(r.password)}</strong></div>
             </div></div><div class="dim" style="font-size:12px;margin-top:8px">Save the password now — it isn't shown again.</div></div>`,
             footer: `<button class="btn" data-close>Done</button>`,
