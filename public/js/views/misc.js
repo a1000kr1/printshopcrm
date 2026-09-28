@@ -514,12 +514,12 @@ export async function settingsView() {
 
     ${window.__EDITION === 'lite' ? `
     <div class="card">
-      <div class="card-h"><h3>Take Pagos</h3><span class="pill ${s.stripe_charges_enabled ? 'green' : ''}" id="pay-pill">${s.stripe_charges_enabled ? 'Stripe connected' : (s.stripe_account_id ? 'finish setup' : 'not connected')}</span></div>
+      <div class="card-h"><h3>Cobrar pagos</h3><span class="pill ${s.stripe_charges_enabled ? 'green' : ''}" id="pay-pill">${s.stripe_charges_enabled ? 'Stripe connected' : (s.stripe_account_id ? 'finish setup' : 'not connected')}</span></div>
       <div class="card-b" id="online">
         <p class="dim" style="font-size:12.5px;margin-bottom:14px;line-height:1.6">Connect Stripe to accept card payments on your invoices — customers pay online and payouts go straight to your bank. A flat <strong style="color:var(--txt-2)">4% fee</strong> on collected payments covers card processing and the platform, so there's nothing else to set up or pay.</p>
         <div class="row" style="gap:8px">
           <button class="btn" id="connect-stripe">${s.stripe_charges_enabled ? 'Manage Stripe' : (s.stripe_account_id ? 'Finish Stripe setup' : 'Connect Stripe')}</button>
-          ${disconnectBtn('stripe', 'Stripe', 'This shop stops being linked to that Stripe account: no new payment can be collected into it, and the Take Pagos card goes back to &quot;not connected&quot;. Nothing already collected is touched, no invoice or payment record is deleted, and a card payment a customer is part-way through still lands on the right invoice. To take payments again, press Connect Stripe and go through Stripe&#39;s setup once more.')}
+          ${disconnectBtn('stripe', 'Stripe', 'This shop stops being linked to that Stripe account: no new payment can be collected into it, and the Cobrar pagos card goes back to &quot;not connected&quot;. Nothing already collected is touched, no invoice or payment record is deleted, and a card payment a customer is part-way through still lands on the right invoice. To take payments again, press Connect Stripe and go through Stripe&#39;s setup once more.')}
         </div>
       </div>
     </div>` : `
