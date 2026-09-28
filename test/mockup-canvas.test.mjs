@@ -9,8 +9,8 @@ test('output fits bounded photo aspect; placement and physical notes reject inva
   assert.deepEqual(outputSize(3000, 2000), { width: 2000, height: 1333 })
   assert.deepEqual(outputSize(100, 200), { width: 100, height: 200 })
   assert.deepEqual(outputSize(1, 4096), { width: 1, height: 2000 })
-  assert.throws(() => outputSize(10000, 200), /dimensions/)
-  assert.throws(() => outputSize(NaN, 200), /dimensions/)
+  assert.throws(() => outputSize(10000, 200), /dimensiones/g)
+  assert.throws(() => outputSize(NaN, 200), /dimensiones/g)
   const recipe = makeRecipe(photoHeader, placement, { width: 12, height: 14, units: 'in' })
   assert.equal(recipe.sizing_mode, 'visual')
   assert.deepEqual(recipe.canvas, { width: 2000, height: 1333 })
@@ -84,7 +84,7 @@ test('uncertain retry retains byte-identical originals, PNG, metadata and reques
 })
 
 test('PNG export errors are actionable; unsupported or excessive buffers cannot be saved', async () => {
-  await assert.rejects(exportProof({ width: 4000, height: 4000 }), /limit/)
+  await assert.rejects(exportProof({ width: 4000, height: 4000 }), /límite/)
   await assert.rejects(exportProof({ width: 100, height: 100, toBlob(callback) { callback(null) } }), /export a PNG/)
   await assert.rejects(exportProof({ width: 100, height: 100, toBlob() { throw new Error('tainted') } }), /safely/)
   const png = new Blob(['png'], { type: 'image/png' })
