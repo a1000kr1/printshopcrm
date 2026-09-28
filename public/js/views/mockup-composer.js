@@ -15,7 +15,7 @@ function loadStyles() {
 async function jsonRequest(url, options = {}) {
   let response
   try { response = await fetch(url, { credentials: 'same-origin', ...options }) }
-  catch (error) { if (error.name === 'AbortError') throw error; throw new Error('The connection was interrupted. Your draft is still here; retry when connected.') }
+  catch (error) { if (error.name === 'AbortError') throw error; throw new Error('La conexión se interrumpió. Tu borrador sigue aquí; vuelve a intentarlo cuando tengas conexión.') }
   let data
   try { data = await response.json() } catch { /* proxy/restart response */ }
   if (!response.ok || !data) {
@@ -60,10 +60,10 @@ export async function mockupComposerView(jobId) {
   activeCleanup?.()
   loadStyles()
   const id = String(jobId)
-  if (!/^\d+$/.test(id)) throw new Error('Choose a job before creating a mockup.')
-  setPage('Create appearance mockup', `<a class="btn ghost" href="#/jobs/${id}">Back to job</a>`, '<a href="#/board">Board</a> /')
+  if (!/^\d+$/.test(id)) throw new Error('Elige un trabajo antes de crear un mockup.')
+  setPage('Crear mockup de apariencia', `<a class="btn ghost" href="#/jobs/${id}">Back to job</a>`, '<a href="#/board">Board</a> /')
   $('#view').innerHTML = `<section class="mockup-composer" aria-labelledby="mc-title">
-    <header class="mc-intro"><div><h2 id="mc-title">Place original artwork on a product photo</h2><p id="mc-job-context" class="mc-muted" role="status">Loading job…</p></div><span class="mc-local-label">Made on your device · No AI</span></header>
+    <header class="mc-intro"><div><h2 id="mc-title">Place original artwork on a product photo</h2><p id="mc-job-context" class="mc-muted" role="status">Cargando trabajo…</p></div><span class="mc-local-label">Made on your device · No AI</span></header>
     <p class="mc-explanation">Move and resize your artwork without redrawing it. Placement is visual; photo perspective and print dimensions are not calibrated. Saving uploads a draft proof and private originals for this job.</p>
     <div id="mc-job-error" class="mc-error" role="alert" hidden></div>
     <button type="button" class="btn ghost" id="mc-retry-job" hidden>Retry loading job, keep this draft</button>
@@ -89,8 +89,8 @@ export async function mockupComposerView(jobId) {
           <div id="mc-placement-error" class="mc-error" role="alert" hidden></div>
           <details class="mc-details"><summary>Requested print size (optional)</summary><p class="mc-help">Notes for human review only. These values do not calibrate this photo, resize the original or prepare a production file.</p>
             <fieldset id="mc-print-fields" class="mc-fieldset"><legend class="sr-only">Requested print size</legend><div class="mc-print-grid">
-              <label>Width<input class="input" id="mc-print-width" type="number" inputmode="decimal" min="0.001" step="any" placeholder="Optional"></label>
-              <label>Height<input class="input" id="mc-print-height" type="number" inputmode="decimal" min="0.001" step="any" placeholder="Optional"></label>
+              <label>Width<input class="input" id="mc-print-width" type="number" inputmode="decimal" min="0.001" step="any" placeholder="Opcional"></label>
+              <label>Height<input class="input" id="mc-print-height" type="number" inputmode="decimal" min="0.001" step="any" placeholder="Opcional"></label>
               <label>Units<select class="input" id="mc-units"><option value="in">Inches</option><option value="mm">Millimeters</option><option value="cm">Centimeters</option></select></label>
             </div></fieldset>
           </details>
@@ -103,7 +103,7 @@ export async function mockupComposerView(jobId) {
           <button type="button" id="mc-cancel-photo" class="btn ghost" hidden>Cancel photo loading</button>
           <button type="button" id="mc-clear-ticket" class="btn ghost" hidden>Use as unverified shop photo</button>
           <details class="mc-details"><summary>Use an S&amp;S catalog photo</summary><p class="mc-help">Requires your shop’s configured S&amp;S API credentials. Enter an exact SKU, including its color and size variant.</p>
-            <form id="mc-supplier-form"><label>Exact S&amp;S SKU<input class="input" id="mc-sku" autocomplete="off" maxlength="120" required></label><button type="submit" class="btn ghost" id="mc-lookup">Find available photos</button></form>
+            <form id="mc-supplier-form"><label>Exact S&amp;S SKU<input class="input" id="mc-sku" autocomplete="off" maxlength="120" required></label><button type="submit" class="btn ghost" id="mc-lookup">Buscar fotos disponibles</button></form>
             <p id="mc-supplier-status" class="mc-help" role="status"></p><div id="mc-supplier-error" class="mc-error" role="alert" hidden></div><div id="mc-supplier-result"></div>
           </details>
         </section>
@@ -112,7 +112,7 @@ export async function mockupComposerView(jobId) {
           <p id="mc-artwork-meta" class="mc-file-meta">No artwork selected</p><p id="mc-artwork-status" class="mc-help" role="status"></p><div id="mc-artwork-error" class="mc-error" role="alert" hidden></div><button type="button" id="mc-cancel-artwork" class="btn ghost" hidden>Cancel artwork loading</button>
         </section>
         <p class="mc-help mc-limits">Still PNG, JPEG or WebP. Up to 10 MiB per file, 4096 pixels per edge and 8 million pixels combined. Originals keep their uploaded bytes; the preview is resized to at most 2000 pixels per edge.</p>
-        <section class="mc-panel mc-save-panel" aria-labelledby="mc-save-title"><h3 id="mc-save-title">3. Save for review</h3><p class="mc-help">This saves an appearance draft. Customer approval and staff production review happen separately on the job.</p><button type="button" class="btn" id="mc-save" disabled>Save draft mockup</button>
+        <section class="mc-panel mc-save-panel" aria-labelledby="mc-save-title"><h3 id="mc-save-title">3. Save for review</h3><p class="mc-help">This saves an appearance draft. Customer approval and staff production review happen separately on the job.</p><button type="button" class="btn" id="mc-save" disabled>Guardar mockup como borrador</button>
           <p id="mc-save-status" class="mc-help" role="status">Add both images to continue.</p><div id="mc-save-error" class="mc-error" role="alert" hidden></div>
           <a id="mc-sign-in" class="btn ghost" href="/login" target="_blank" rel="noopener" hidden>Sign in in another tab</a>
           <button type="button" id="mc-refresh-revision" class="btn ghost" hidden>Refresh job version, keep this draft</button>
@@ -138,14 +138,14 @@ export async function mockupComposerView(jobId) {
   function markChanged() {
     dirty = true; receipt = null; saveFailed = false
     showError('#mc-save-error'); find('#mc-sign-in').hidden = true
-    if (!stale) find('#mc-save-status').textContent = 'Unsaved draft. Files stay in this tab until you save.'
+    if (!stale) find('#mc-save-status').textContent = 'Borrador sin guardar. Los archivos permanecerán en esta pestaña hasta que guardes.'
     updateControls()
   }
   function updateControls() {
     const processing = loading.photo || loading.artwork || inputTasks > 0
     const ready = !!(slots.photo && slots.artwork && context)
     find('#mc-save').disabled = saving || processing || !ready || revision === null || stale
-    find('#mc-save').textContent = saving ? 'Saving draft…' : saveFailed && receipt ? 'Retry same draft save' : 'Save draft mockup'
+    find('#mc-save').textContent = saving ? 'Guardando borrador…' : saveFailed && receipt ? 'Reintentar guardar el mismo borrador' : 'Guardar mockup como borrador'
     find('#mc-placement-fields').disabled = saving || !ready
     find('#mc-reset').disabled = saving || !ready
     find('#mc-print-fields').disabled = saving
@@ -156,7 +156,7 @@ export async function mockupComposerView(jobId) {
     find('#mc-artwork-input').disabled = saving || inputTasks > 0
     find('#mc-sku').disabled = saving || supplierBusy
     find('#mc-lookup').disabled = saving || supplierBusy
-    find('#mc-lookup').textContent = supplierBusy ? 'Finding photos…' : 'Find available photos'
+    find('#mc-lookup').textContent = supplierBusy ? 'Buscando fotos…' : 'Buscar fotos disponibles'
     find('#mc-refresh-revision').disabled = saving
     find('#mc-clear-ticket').disabled = saving || processing
     for (const button of root.querySelectorAll('[data-media-id]')) button.disabled = saving || loading.photo || inputTasks > 0
@@ -232,7 +232,7 @@ export async function mockupComposerView(jobId) {
     confirmModal('Remove supplier verification?', 'Keep this photo and placement, but save it as an unverified shop photo. Staff must confirm the product and color.', () => {
       if (!alive || saving || !slots.photo) return
       slots.photo.mediaTicket = ''; slots.photo.supplierLabel = ''; updateFileMeta('photo'); markChanged()
-    }, 'Use as shop photo')
+    }, 'Usar como foto del negocio')
   })
   find('#mc-supplier-form').addEventListener('submit', async event => {
     event.preventDefault()
@@ -320,7 +320,7 @@ export async function mockupComposerView(jobId) {
   find('#mc-save').addEventListener('click', async () => {
     if (saving || inputTasks > 0 || loading.photo || loading.artwork || !slots.photo || !slots.artwork || revision === null || stale) return
     saving = true; updateControls(); showError('#mc-save-error'); find('#mc-sign-in').hidden = true
-    find('#mc-save-status').textContent = receipt ? 'Retrying the same draft receipt…' : 'Preparing the PNG on your device…'
+    find('#mc-save-status').textContent = receipt ? 'Retrying the same draft receipt…' : 'Preparando el PNG en tu dispositivo…'
     try {
       if (!receipt) {
         placement = placementFromFields()
@@ -330,7 +330,7 @@ export async function mockupComposerView(jobId) {
         if (!alive) return
         receipt = makeSaveReceipt({ revision, photo: slots.photo.file, artwork: slots.artwork.file, proof, recipe, mediaTicket: slots.photo.mediaTicket || '' })
       }
-      find('#mc-save-status').textContent = 'Uploading draft proof and private originals…'
+      find('#mc-save-status').textContent = 'Subiendo prueba en borrador y originales privados…'
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 75000)
       let result
@@ -341,7 +341,7 @@ export async function mockupComposerView(jobId) {
       if (!Number.isSafeInteger(result.proof_id) || String(result.job_id) !== id) throw new Error('The server response did not confirm this job’s saved proof. Retry the same draft to check its receipt.')
       dirty = false; saveFailed = false
       find('#mc-save-status').textContent = `Draft version ${result.version} saved.`
-      toast('Appearance draft saved. Review and send it from the job.')
+      toast('Borrador de apariencia guardado. Revísalo y envíalo desde el trabajo.')
       go(`#/jobs/${id}`)
     } catch (error) {
       if (!alive) return
@@ -388,13 +388,13 @@ export async function mockupComposerView(jobId) {
   guardLeave(target => {
     if (!alive || (!dirty && !saving)) { cleanup(); return true }
     if (saving) { showError('#mc-save-error', 'Wait for this save to finish before leaving. A retry receipt must stay in this tab until the result is known.'); return false }
-    confirmModal('Discard this unsaved mockup?', 'The images and placement are held in this tab. Leaving will discard this draft.', () => { dirty = false; cleanup(); go(target) }, 'Discard draft')
+    confirmModal('¿Descartar este mockup sin guardar?', 'The images and placement are held in this tab. Leaving will discard this draft.', () => { dirty = false; cleanup(); go(target) }, 'Descartar borrador')
     return false
   })
   if (!context) showError('#mc-job-error', 'This browser cannot create a canvas preview. Use a current browser to create a mockup.')
   async function loadJob() {
     find('#mc-retry-job').disabled = true
-    find('#mc-job-context').textContent = 'Loading job…'
+    find('#mc-job-context').textContent = 'Cargando trabajo…'
     try {
       const job = await jsonRequest(`/api/jobs/${id}`)
       if (!alive) return
@@ -406,7 +406,7 @@ export async function mockupComposerView(jobId) {
       updateControls()
     } catch (error) {
       if (alive) {
-        find('#mc-job-context').textContent = 'Job could not be loaded.'; showError('#mc-job-error', error.message)
+        find('#mc-job-context').textContent = 'No se pudo cargar el trabajo.'; showError('#mc-job-error', error.message)
         find('#mc-retry-job').hidden = false
         if (error.status === 401) find('#mc-sign-in').hidden = false
       }
