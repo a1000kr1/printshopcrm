@@ -5,7 +5,7 @@ import { api, $, esc, setPage, on, toast, onOnce, fmtDate, relTime, announce } f
  * advance it. Every competitor either has no barcoding or gates it behind the top tier and a
  * USB scanner; this is a phone page. Timestamps from these scans are ROI's labor actuals.
  *
- * Camera path uses BarcodeDetector (Android Chrome, desktop Chrome). Where it doesn't exist
+ * Cámara path uses BarcodeDetector (Android Chrome, desktop Chrome). Where it doesn't exist
  * (iOS Safari), the page is still fully usable: the job number is printed under the barcode
  * and the number pad is one tap away.
  */
@@ -17,7 +17,7 @@ let lastCodeAt = 0
 
 // The camera has to go off when the page does.
 //
-// stopCamera() was only ever called at the TOP of scanView() — on re-entry. Walk away from Floor
+// stopCámara() was only ever called at the TOP of scanView() — on re-entry. Walk away from Floor
 // Mode and the phone kept the camera live: the indicator light stays on, the battery drains, and
 // on iOS and Android the camera is held away from every other app until the tab is closed. The
 // 350ms detect loop kept running too, and its lookup() would render into a #scan-job that no
@@ -25,17 +25,17 @@ let lastCodeAt = 0
 //
 // hashchange is this app's navigation (see public/js/app.js), and pagehide covers tab close,
 // bfcache and a real navigation away. Registered once, not per view render.
-if (typeof window !== 'undefined' && !window.__pscScanTeardown) {
-  window.__pscScanTeardown = true
-  const leaving = () => { if (!location.hash.startsWith('#/scan')) stopCamera() }
+if (typeof window !== 'undefined' && !window.__pscEscanearTeardown) {
+  window.__pscEscanearTeardown = true
+  const leaving = () => { if (!location.hash.startsWith('#/scan')) stopCámara() }
   window.addEventListener('hashchange', leaving)
-  window.addEventListener('pagehide', () => stopCamera())
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') stopCamera() })
+  window.addEventListener('pagehide', () => stopCámara())
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') stopCámara() })
 }
 
 export async function scanView() {
   setPage('Floor Mode', '', '<span class="dim">Production</span>')
-  stopCamera()
+  stopCámara()
   const hasDetector = 'BarcodeDetector' in window
   $('#view').innerHTML = `
     <div class="scan-wrap">
@@ -44,7 +44,7 @@ export async function scanView() {
         <div id="scan-cam-hint" class="dim" style="padding:14px">
           ${hasDetector ? '📷 Point the camera at a work-ticket barcode.' : 'Use your phone camera to open a QR label, or enter a job number here.'}
         </div>
-        ${hasDetector ? '<button class="btn" id="scan-start">Start camera</button><button class="btn ghost" id="scan-stop" hidden>Stop camera</button>' : ''}
+        ${hasDetector ? '<button class="btn" id="scan-start">Start camera</button><button class="btn ghost" id="scan-stop" hidden>Detener camera</button>' : ''}
       </div>
       <form id="scan-form" class="scan-form" autocomplete="off">
         <input id="scan-input" name="code" inputmode="text" placeholder="Job number — e.g. JOB-1042" autofocus />
@@ -59,7 +59,7 @@ export async function scanView() {
       const v = $('#scan-video')
       v.srcObject = stream
       v.style.display = 'block'
-      $('#scan-cam-hint').textContent = 'Scanning…'
+      $('#scan-cam-hint').textContent = 'Escanearning…'
       $('#scan-start').hidden = true
       $('#scan-stop').hidden = false
       await v.play()
@@ -78,14 +78,14 @@ export async function scanView() {
         } catch { /* a failed frame is not an error state */ }
       }, 350)
     } catch (e) {
-      stopCamera()
-      toast(`Camera unavailable: ${e.message}`, true)
+      stopCámara()
+      toast(`Cámara unavailable: ${e.message}`, true)
     }
   })
 
   // Without this the only way to switch the camera off while still on the page was to reload it.
   onOnce($('#view'), '#scan-stop', () => {
-    stopCamera()
+    stopCámara()
     const hint = $('#scan-cam-hint')
     if (hint) hint.textContent = '📷 Point the camera at a work-ticket barcode.'
   })
@@ -169,7 +169,7 @@ function renderJob(d, note) {
   ;($('.scan-advance', host) || $('button.scan-stage', host))?.focus?.()
 }
 
-function stopCamera() {
+function stopCámara() {
   if (scanTimer) { clearInterval(scanTimer); scanTimer = 0 }
   if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null }
   lastCode = ''; lastCodeAt = 0
