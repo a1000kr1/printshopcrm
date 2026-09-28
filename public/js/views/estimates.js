@@ -231,7 +231,7 @@ export async function estimateEditor(id) {
     const unsupported = unsupportedScreenPrintMethods(items)
     if (unsupported.length) {
       g.hidden = false; g.className = 'margin-guard'
-      g.innerHTML = `<div class="mg-sub">Usa Costeo de trabajo para ${esc(unsupported.join(', '))} labor and machine costs. This quick preview supports screen printing only.</div>`
+      g.innerHTML = `<div class="mg-sub">Usa Costeo de trabajo para los costos de mano de obra y máquina de ${esc(unsupported.join(', '))}. Esta vista previa rápida solo admite serigrafía.</div>`
       return
     }
     let cost = 0, priced = false
