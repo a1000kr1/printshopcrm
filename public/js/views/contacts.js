@@ -33,7 +33,7 @@ function mappingEditor(bg, prefix, kind) {
 
 
 export async function contactsView() {
-  setPage('Customers', `<button class="btn ghost" id="import-c">Import CSV</button><button class="btn ghost" id="import-o">Import order history</button><button class="btn" id="new-c">+ New Customer</button>`)
+  setPage('Clientes', `<button class="btn ghost" id="import-c">Import CSV</button><button class="btn ghost" id="import-o">Import order history</button><button class="btn" id="new-c">+ New Cliente</button>`)
   const included = new Set(), excluded = new Set()
   const account = window.__me, route = location.hash.split('?')[0]
   let sequence = 0, listRoot
@@ -58,12 +58,12 @@ export async function contactsView() {
     const filtered = included.size || excluded.size
 
     const body = d.contacts.length ? `<table class="tbl stack">
-      <thead><tr><th>Customer</th><th>Contact</th><th>Tags</th><th class="num">Orders</th><th class="num">Lifetime</th><th class="num">Balance</th></tr></thead>
+      <thead><tr><th>Cliente</th><th>Contacto</th><th>Tags</th><th class="num">Orders</th><th class="num">Lifetime</th><th class="num">Balance</th></tr></thead>
       <tbody>${d.contacts.map((c) => `<tr class="click" data-id="${c.id}">
-        <td data-label="Customer"><div class="row"><div class="avatar">${esc(initials(c.name))}</div><div>
+        <td data-label="Cliente"><div class="row"><div class="avatar">${esc(initials(c.name))}</div><div>
           <div style="font-weight:600">${esc(c.name)}</div>
           <div class="dim" style="font-size:12px">${esc(c.company || '—')}</div></div></div></td>
-        <td data-label="Contact"><div style="font-size:12.5px">${esc(c.email || '—')}</div><div class="dim" style="font-size:12px">${esc(c.phone || '')}</div></td>
+        <td data-label="Contacto"><div style="font-size:12.5px">${esc(c.email || '—')}</div><div class="dim" style="font-size:12px">${esc(c.phone || '')}</div></td>
         <td data-label="Tags">${c.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join(' ') || '<span class="dim">—</span>'}</td>
         <td class="num" data-label="Orders">${c.job_count}</td>
         <td class="num" data-label="Lifetime"><strong>${money0(c.lifetime_value)}</strong></td>
@@ -124,14 +124,14 @@ export async function contactsView() {
   let t
   $('#q').oninput = (e) => { ++sequence; disableExport(); clearTimeout(t); t = setTimeout(() => render(e.target.value), 180) }
   $('#new-c').onclick = () => contactForm(null, () => render($('#q').value))
-  $('#import-c').onclick = () => importContacts(() => render($('#q').value))
+  $('#import-c').onclick = () => importContactos(() => render($('#q').value))
   $('#import-o').onclick = () => importOrders(() => render($('#q').value))
   if (new URLSearchParams(location.hash.split('?')[1] || '').get('new')) { history.replaceState(null, '', location.hash.split('?')[0]); contactForm(null, () => render($('#q').value)) }
   await render()
 }
 
 /** Import a customer list from a CSV export of the shop's old tool — preview first, then import. */
-export function importContacts(after) {
+export function importContactos(after) {
   modal({
     title: 'Import customers from CSV',
     wide: true,
@@ -141,7 +141,7 @@ export function importContacts(after) {
       <div class="field" style="margin-top:10px"><label>…or paste CSV rows</label>
         <textarea class="input" id="csv-text" style="min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:12px" placeholder="name,email,phone,company&#10;Jamie Rivera,jamie@example.edu,(714) 555-0142,Lakeside High School"></textarea></div>
       <div id="csv-out" style="margin-top:12px"></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn ghost" id="csv-preview">Preview</button><button class="btn" id="csv-go" disabled>Import</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn ghost" id="csv-preview">Preview</button><button class="btn" id="csv-go" disabled>Import</button>`,
     onMount: (bg) => {
       const fileInput = $('#csv-file', bg)
       const mapper = mappingEditor(bg, 'csv', 'contacts')
@@ -189,7 +189,7 @@ export function importContacts(after) {
 }
 
 /**
- * Import full ORDER HISTORY (Printavo "Quotes/Invoices" export, YoPrint, InkSoft, Deco order
+ * Import full ORDER HISTORY (Printavo "Quotes/Facturas" export, YoPrint, InkSoft, Deco order
  * summaries). Writes real history — estimates, paid invoices, completed jobs, all backdated —
  * so Reorder Radar, lifetime value, A/R aging and "same as last time" work on day one.
  * This is the switching-cost inverter: their old tool held the history hostage; we ingest it.
@@ -198,13 +198,13 @@ export function importOrders(after) {
   modal({
     title: 'Import order history from CSV',
     wide: true,
-    body: `<p class="dim" style="font-size:12.5px;line-height:1.6;margin-bottom:12px">Drop your old system's <strong>orders / invoices export</strong> (Printavo: Reports → Export → Quotes/Invoices; also works with YoPrint, InkSoft and DecoNetwork order summaries). Review explicit payment states before importing: paid, unpaid, or quote. Unknown, completed-only, and partial-payment statuses pause the import for review. Historical jobs are treated as completed; migrate active production separately. Reorder Radar and "same as last time" light up immediately. Re-running the same export is safe — orders already on file are skipped, whether or not your export has an order-number column.</p>
+    body: `<p class="dim" style="font-size:12.5px;line-height:1.6;margin-bottom:12px">Drop your old system's <strong>orders / invoices export</strong> (Printavo: Reports → Export → Quotes/Facturas; also works with YoPrint, InkSoft and DecoNetwork order summaries). Review explicit payment states before importing: paid, unpaid, or quote. Unknown, completed-only, and partial-payment statuses pause the import for review. Historical jobs are treated as completed; migrate active production separately. Reorder Radar and "same as last time" light up immediately. Re-running the same export is safe — orders already on file are skipped, whether or not your export has an order-number column.</p>
       <label class="csv-drop" id="ocsv-drop"><input type="file" id="ocsv-file" accept=".csv,text/csv,text/plain" hidden>
         <div id="ocsv-drop-txt">Choose the orders CSV — or paste rows below</div></label>
       <div class="field" style="margin-top:10px"><label>…or paste CSV rows</label>
         <textarea class="input" id="ocsv-text" style="min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:12px" placeholder="customer,email,invoice #,date,status,total&#10;Lakeside High School,jamie@example.edu,INV-2041,2025-09-14,paid,1284.00"></textarea></div>
       <div id="ocsv-out" style="margin-top:12px"></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn ghost" id="ocsv-preview">Preview</button><button class="btn" id="ocsv-go" disabled>Import history</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn ghost" id="ocsv-preview">Preview</button><button class="btn" id="ocsv-go" disabled>Import history</button>`,
     onMount: (bg) => {
       const fileInput = $('#ocsv-file', bg)
       const mapper = mappingEditor(bg, 'ocsv', 'orders')
@@ -255,14 +255,14 @@ export function importOrders(after) {
 
 export function contactForm(c, after) {
   modal({
-    title: c ? 'Edit Customer' : 'New Customer',
+    title: c ? 'Edit Cliente' : 'New Cliente',
     body: `<div class="grid2">
         <div class="field"><label>Name *</label><input class="input" name="name" value="${esc(c?.name || '')}" placeholder="Jamie Rivera"></div>
-        <div class="field"><label>Company</label><input class="input" name="company" value="${esc(c?.company || '')}" placeholder="Lakeside High School"></div>
+        <div class="field"><label>Empresa</label><input class="input" name="company" value="${esc(c?.company || '')}" placeholder="Lakeside High School"></div>
       </div>
       <div class="grid2">
-        <div class="field"><label>Email</label><input class="input" name="email" type="email" value="${esc(c?.email || '')}" placeholder="jamie@example.com"></div>
-        <div class="field"><label>Phone</label><input class="input" name="phone" value="${esc(c?.phone || '')}" placeholder="(714) 555-0142"></div>
+        <div class="field"><label>Correo electrónico</label><input class="input" name="email" type="email" value="${esc(c?.email || '')}" placeholder="jamie@example.com"></div>
+        <div class="field"><label>Teléfono</label><input class="input" name="phone" value="${esc(c?.phone || '')}" placeholder="(714) 555-0142"></div>
       </div>
       <div class="field"><label>Tags (comma separated)</label><input class="input" name="tags" value="${esc((c?.tags || []).join(', '))}" placeholder="school, repeat, net-30"></div>
       <div class="grid2">
@@ -283,7 +283,7 @@ export function contactForm(c, after) {
       </div>
       ${billingFields(c || {})}<p class="dim">Billing defaults apply to new quotes and invoices. Existing documents keep their saved delivery contacts.</p>
       <div class="field"><label>Notes</label><textarea class="input" name="notes" placeholder="Sizing preferences, PO requirements, who signs off…">${esc(c?.notes || '')}</textarea></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="save">${c ? 'Save' : 'Create Customer'}</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="save">${c ? 'Save' : 'Create Cliente'}</button>`,
     onMount: (bg) => {
       // Only ask for the certificate number once the box is ticked.
       bindBillingFields(bg)
@@ -297,7 +297,7 @@ export function contactForm(c, after) {
         try {
           const saved = c ? await api.put(`/api/contacts/${c.id}`, d) : await api.post('/api/contacts', d)
           closeModal()
-          toast(c ? 'Customer saved' : 'Customer created')
+          toast(c ? 'Cliente saved' : 'Cliente created')
           after?.(saved)
         } catch (e) { toast(e.message, true) }
       })
@@ -308,8 +308,8 @@ export function contactForm(c, after) {
 export async function contactDetailView(id) {
   const d = await api.get(`/api/contacts/${id}`)
   const c = d.contact
-  setPage(c.name, `<a class="btn ghost" href="/api/contacts/${id}/statement.pdf" target="_blank">Statement</a><button class="btn ghost" id="edit">Edit</button>${d.jobs.length || d.estimates.length ? '<button class="btn ghost" id="same-again">↻ Same as last time</button>' : ''}<button class="btn" id="new-est">+ New Estimate</button><button class="btn danger" id="del-contact">Delete</button>`,
-    `<a href="#/contacts">Customers</a> /`)
+  setPage(c.name, `<a class="btn ghost" href="/api/contacts/${id}/statement.pdf" target="_blank">Statement</a><button class="btn ghost" id="edit">Editar</button>${d.jobs.length || d.estimates.length ? '<button class="btn ghost" id="same-again">↻ Same as last time</button>' : ''}<button class="btn" id="new-est">+ New Cotización</button><button class="btn danger" id="del-contact">Eliminar</button>`,
+    `<a href="#/contacts">Clientes</a> /`)
 
   const docRow = (rows, kind) => rows.length ? `<table class="tbl"><tbody>${rows.map((r) => `
     <tr class="click" data-go="/${kind}s/${r.id}">
@@ -330,9 +330,9 @@ export async function contactDetailView(id) {
           </div>
         </div>
         <div class="grid2" style="gap:10px">
-          <div><div class="lbl dim" style="font-size:10px;text-transform:uppercase;letter-spacing:.6px">Email</div>
+          <div><div class="lbl dim" style="font-size:10px;text-transform:uppercase;letter-spacing:.6px">Correo electrónico</div>
             <div>${c.email ? `<a href="mailto:${esc(c.email)}" style="color:var(--accent)">${esc(c.email)}</a>` : '<span class="dim">—</span>'}</div></div>
-          <div><div class="lbl dim" style="font-size:10px;text-transform:uppercase;letter-spacing:.6px">Phone</div>
+          <div><div class="lbl dim" style="font-size:10px;text-transform:uppercase;letter-spacing:.6px">Teléfono</div>
             <div>${c.phone ? `<a href="tel:${esc(c.phone)}" style="color:var(--accent)">${esc(c.phone)}</a>` : '<span class="dim">—</span>'}</div></div>
         </div>
         ${c.billing_address || c.shipping_address ? `<div class="grid2" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)"><div><strong>Billing address</strong><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(c.billing_address || 'Not set')}</div></div><div><strong>Shipping address</strong><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(c.shipping_address || c.billing_address || 'Not set')}</div>${!c.shipping_address && c.billing_address ? '<small class="dim">Same as billing</small>' : ''}</div></div>` : ''}
@@ -356,8 +356,8 @@ export async function contactDetailView(id) {
           </tr>`).join('')}</tbody></table>` : '<div class="card-b dim">No jobs yet.</div>'}
       </div>
 
-      <div class="card"><div class="card-h"><h3>Estimates</h3></div>${docRow(d.estimates, 'estimate')}</div>
-      <div class="card"><div class="card-h"><h3>Invoices</h3></div>${docRow(d.invoices, 'invoice')}</div>
+      <div class="card"><div class="card-h"><h3>Cotizacións</h3></div>${docRow(d.estimates, 'estimate')}</div>
+      <div class="card"><div class="card-h"><h3>Facturas</h3></div>${docRow(d.invoices, 'invoice')}</div>
     </div>
 
     <div class="card">
@@ -365,7 +365,7 @@ export async function contactDetailView(id) {
       <div class="card-b">
         <div class="row" style="margin-bottom:14px">
           <input class="input" id="note" placeholder="Log a call, a note…">
-          <button class="btn ghost sm" id="add-note">Add</button>
+          <button class="btn ghost sm" id="add-note">Agregar</button>
         </div>
         ${d.activities.length ? `<div class="tl">${d.activities.map((a) => `
           <div class="tl-i ${['stage', 'note'].includes(a.type) ? 'gray' : ''}">
