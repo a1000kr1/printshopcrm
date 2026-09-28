@@ -1,12 +1,12 @@
 import { api, $, esc, setPage, on, toast, modal, closeModal, formData, fmtDate, onOnce, confirmModal } from '../core.js'
 
 /**
- * Developers — API key, webhook subscriptions, delivery log, docs. On every plan: the
+ * Desarrolladores — API key, webhook subscriptions, delivery log, docs. On every plan: the
  * incumbents all gate this behind their top tier, and it costs them named customers.
  */
 
 export async function developersView() {
-  setPage('Developers', '', '<span class="dim">More</span>')
+  setPage('Desarrolladores', '', '<span class="dim">More</span>')
   $('#view').innerHTML = '<div class="dim">Loading…</div>'
   /* Belt to the nav's braces. The sidebar no longer offers this to staff, but a bookmark, a
    * pasted link or a demotion mid-session all still land here, and an uncaught 403 falls to the
@@ -17,7 +17,7 @@ export async function developersView() {
   try { data = await api.get('/api/developers') } catch (e) {
     if (e?.status === 403) {
       $('#view').innerHTML = `<div class="card"><div class="card-b">
-        <h3 style="margin:0 0 6px">Developers</h3>
+        <h3 style="margin:0 0 6px">Desarrolladores</h3>
         <p class="dim" style="margin:0">The API key and webhooks are managed by an owner or a manager. Ask one of them if you need access.</p>
       </div></div>`
       return
@@ -105,8 +105,8 @@ function paint(d) {
       <p class="dim">Full REST access to customers, estimates, invoices, jobs and payments — every plan, 120 requests/min. <a href="${esc(d.docs)}" target="_blank">Read the docs →</a></p>
       <div class="dev-key-row">
         <code id="dev-key">${d.api_key_set ? esc(d.api_key_preview) : 'No key yet'}</code>
-        <button class="btn" id="dev-rotate">${d.api_key_set ? 'Rotate key' : 'Create key'}</button>
-        ${d.api_key_set ? '<button class="btn ghost" id="dev-revoke">Revoke</button>' : ''}
+        <button class="btn" id="dev-rotate">${d.api_key_set ? 'Rotate key' : 'Crear clave'}</button>
+        ${d.api_key_set ? '<button class="btn ghost" id="dev-revoke">Revocar</button>' : ''}
       </div>
       <div id="dev-key-full"></div>
     </div>
