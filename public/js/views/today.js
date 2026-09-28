@@ -1,7 +1,7 @@
 import { api, $, esc, money0, setPage, empty, shopLocale } from '../core.js'
 
 /**
- * Today: the role-aware action center that replaces the flat dashboard. One ranked "do this next"
+ * Hoy: the role-aware action center that replaces the flat dashboard. One ranked "do this next"
  * queue instead of a wall of equally-weighted counters: the highest-risk money and production items
  * float to the top, shaped to who's signed in. Owners/managers see money first; staff see the floor first.
  */
@@ -14,7 +14,7 @@ const KIND_TINT = { collect: 'var(--red)', risk: 'var(--amber)', approval: 'var(
  * that prompted this. Nothing created yet → show the start card instead.
  */
 // The onboarding demo seeds exactly one estimate and one contact, so "no rows at all" flipped to
-// false the moment the owner ran the sample quote, and Today then showed "all caught up" with zero
+// false the moment the owner ran the sample quote, and Hoy then showed "all caught up" with zero
 // next actions. Keep the start card until there is real work: an invoice, or a second estimate or
 // contact beyond the demo's one.
 const isFirstRun = (_lite, c) => !!c && !c.jobs && !c.invoices && (c.estimates || 0) <= 1 && (c.contacts || 0) <= 1
@@ -53,7 +53,7 @@ const startCard = (lite) => `<div class="card">
 </div>`
 
 export async function todayView() {
-  setPage('Today', '<a class="btn" href="#/estimates/new">New estimate</a>')
+  setPage('Hoy', '<a class="btn" href="#/estimates/new">New estimate</a>')
   $('#view').innerHTML = '<div class="dim">Loading your day…</div>'
   const me = window.__me || {}
   const lite = window.__EDITION === 'lite'
