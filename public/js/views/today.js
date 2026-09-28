@@ -22,7 +22,7 @@ const isFirstRun = (_lite, c) => !!c && !c.jobs && !c.invoices && (c.estimates |
 /** Lite tiles: money and paperwork only. The pro version links to /capacity, /art and /board, none
  *  of which exist in this edition, so those tiles were dead ends. */
 const litePulse = (p, c) => `<div class="tdy-pulse">
-  <a class="tdy-stat ${p.money_at_risk > 0 ? 'bad' : ''}" href="#/invoices"><div class="tdy-stat-v">${money0(p.money_at_risk)}</div><div class="tdy-stat-l">Money at risk</div></a>
+  <a class="tdy-stat ${p.money_at_risk > 0 ? 'bad' : ''}" href="#/invoices"><div class="tdy-stat-v">${money0(p.money_at_risk)}</div><div class="tdy-stat-l">Dinero en riesgo</div></a>
   <a class="tdy-stat" href="#/invoices"><div class="tdy-stat-v">${c ? c.open : 0}</div><div class="tdy-stat-l">Unpaid invoices</div></a>
   <a class="tdy-stat" href="#/estimates"><div class="tdy-stat-v">${c ? c.estimates : 0}</div><div class="tdy-stat-l">Estimates</div></a>
   <a class="tdy-stat" href="#/contacts"><div class="tdy-stat-v">${c ? c.contacts : 0}</div><div class="tdy-stat-l">Customers</div></a>
@@ -53,7 +53,7 @@ const startCard = (lite) => `<div class="card">
 </div>`
 
 export async function todayView() {
-  setPage('Hoy', '<a class="btn" href="#/estimates/new">New estimate</a>')
+  setPage('Hoy', '<a class="btn" href="#/estimates/new">Nueva cotización</a>')
   $('#view').innerHTML = '<div class="dim">Loading your day…</div>'
   const me = window.__me || {}
   const lite = window.__EDITION === 'lite'
@@ -62,7 +62,7 @@ export async function todayView() {
   const counts = d.counts
 
   const hour = new Date().getHours()
-  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greet = hour < 12 ? 'Buenos días' : hour < 17 ? 'Buenas tardes' : 'Buenas noches'
   const name = (me.member?.name || me.shop_name || '').split(' ')[0]
   const p = d.pulse
 
@@ -78,15 +78,15 @@ export async function todayView() {
     </div>
 
     ${lite ? litePulse(p, counts) : `<div class="tdy-pulse">
-      <a class="tdy-stat ${p.money_at_risk > 0 ? 'bad' : ''}" href="#/invoices"><div class="tdy-stat-v">${money0(p.money_at_risk)}</div><div class="tdy-stat-l">Money at risk</div></a>
-      <a class="tdy-stat ${p.jobs_at_risk ? 'warn' : ''}" href="#/capacity"><div class="tdy-stat-v">${p.jobs_at_risk}</div><div class="tdy-stat-l">Deadlines slipping</div></a>
-      <a class="tdy-stat ${p.approvals ? 'warn' : ''}" href="#/art"><div class="tdy-stat-v">${p.approvals}</div><div class="tdy-stat-l">Proofs waiting</div></a>
-      <a class="tdy-stat" href="#/board"><div class="tdy-stat-v">${p.due_week}</div><div class="tdy-stat-l">Due in 7 days${p.overdue_jobs ? ` · ${p.overdue_jobs} overdue` : ''}</div></a>
+      <a class="tdy-stat ${p.money_at_risk > 0 ? 'bad' : ''}" href="#/invoices"><div class="tdy-stat-v">${money0(p.money_at_risk)}</div><div class="tdy-stat-l">Dinero en riesgo</div></a>
+      <a class="tdy-stat ${p.jobs_at_risk ? 'warn' : ''}" href="#/capacity"><div class="tdy-stat-v">${p.jobs_at_risk}</div><div class="tdy-stat-l">Plazos en riesgo</div></a>
+      <a class="tdy-stat ${p.approvals ? 'warn' : ''}" href="#/art"><div class="tdy-stat-v">${p.approvals}</div><div class="tdy-stat-l">Pruebas pendientes</div></a>
+      <a class="tdy-stat" href="#/board"><div class="tdy-stat-v">${p.due_week}</div><div class="tdy-stat-l">Vence en 7 días${p.overdue_jobs ? ` · ${p.overdue_jobs} overdue` : ''}</div></a>
     </div>`}
 
     ${isFirstRun(lite, counts) ? startCard(lite) : `<div class="card">
-      <div class="card-h"><h3>Do this next</h3><div class="spacer"></div>
-        <span class="dim" style="font-size:12px">ranked by what's most at stake</span></div>
+      <div class="card-h"><h3>Haz esto ahora</h3><div class="spacer"></div>
+        <span class="dim" style="font-size:12px">ordenado por lo más urgente</span></div>
       <div class="card-b">
         ${d.actions.length ? `<div class="tdy-list">${d.actions.map(row).join('')}</div>`
           : empty('✓', "You're all caught up", lite ? 'No overdue invoices and no estimates waiting. Nice.' : 'No overdue money, no slipping deadlines, no proofs waiting. Nice.')}
