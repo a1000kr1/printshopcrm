@@ -1,7 +1,7 @@
 import { api, $, $$, el, esc, money, fmtDate, relTime, pill, setPage, empty, toast, undoable, go, on, modal, closeModal, confirmModal, formData, dueClass, dueLabel, daysOut, initials, onceClick } from '../core.js'
 import { SIZES, sizeSummary, sizeKeys } from '../shared/pricing.js'
 import { contactForm } from './contacts.js'
-import { mountArtProduction } from '../art-production.js'
+import { mountArtProducción } from '../art-production.js'
 
 const STAGE_COLOR = { new: '#5f6b7d', art_approval: '#f7b955', prepress: '#7c6cff', production: '#4aa8ff', qc: '#10d39a', shipping: '#10d39a', complete: '#333b49' }
 const DECORATIONS = ['Screen Print', 'DTF Transfer', 'Embroidery', 'UV DTF', 'Vinyl', 'Patch', 'Laser', 'Promo']
@@ -30,8 +30,8 @@ const decoOptions = (cur) => {
 const boardState = { filter: 'all', assignee: 'all' }
 
 export async function boardView() {
-  setPage('Job Board', `<a class="btn ghost" href="#/calendar">Calendar</a><button class="btn" id="new-job">+ New Job</button>`)
-  // The Job Board is the shared screen. A realtime 'board' event re-runs this whole function
+  setPage('Tablero de trabajos', `<a class="btn ghost" href="#/calendar">Calendar</a><button class="btn" id="new-job">+ Nuevo trabajo</button>`)
+  // The Tablero de trabajos is the shared screen. A realtime 'board' event re-runs this whole function
   // (app.js handleRealtime), and so does every filter chip and the assignee select — and the
   // render below is `#view`.innerHTML, which destroys whatever had focus. A keyboard user tabbing
   // across job cards, or sitting on the assignee select they just used, was thrown back to the top
@@ -42,7 +42,7 @@ export async function boardView() {
   const keep = a && $('#view')?.contains(a)
     ? (a.id ? `#${a.id}` : a.dataset?.id ? `.jcard[data-id="${a.dataset.id}"]` : a.dataset?.f ? `[data-f="${a.dataset.f}"]` : null)
     : null
-  if (!$('#board')) $('#view').innerHTML = '<div class="dim">Loading…</div>'
+  if (!$('#board')) $('#view').innerHTML = '<div class="dim">Cargando…</div>'
   const d = await api.get(`/api/board?filter=${boardState.filter}&assignee=${encodeURIComponent(boardState.assignee)}`)
 
   const chip = (k, label, n) => `<button type="button" data-f="${k}" class="${boardState.filter === k ? 'on' : ''}" aria-pressed="${boardState.filter === k}">${label}${n != null ? ` <span>${n}</span>` : ''}</button>`
@@ -189,7 +189,7 @@ function wireDnd() {
     // Commit the move to the server NOW, not on a 6-second timer. The old code deferred the write
     // behind the undo window, and that write was lost entirely if the tab closed, the laptop shut,
     // or an emailed link was clicked inside those six seconds — the board said "Moved to
-    // Production" and the job was back in Prepress on the next load. Undo issues the reverse move
+    // Producción" and the job was back in Prepress on the next load. Undo issues the reverse move
     // instead, so the server always holds what the operator last saw.
     api.patch(`/api/jobs/${s.id}/stage`, { stage })
       .then(() => { if (stage === 'complete') boardView() })
@@ -215,8 +215,8 @@ export async function jobForm(job, after) {
   // of the first em-dash because that is what costFor() reads.
   const { garments = [] } = await api.get('/api/products').catch(() => ({ garments: [] }))
   modal({
-    title: job ? `Edit ${job.job_number}` : 'New Job',
-    body: `<div class="field"><label>Customer *</label>${job || contacts.length
+    title: job ? `Edit ${job.job_number}` : 'Nuevo trabajo',
+    body: `<div class="field"><label>Cliente *</label>${job || contacts.length
         ? `<select class="input" name="contact_id" ${job ? 'disabled' : ''}>
             ${job ? '' : '<option value="">Choose a customer…</option>'}
             ${contacts.map((c) => `<option value="${c.id}" ${c.id === job?.contact_id ? 'selected' : ''}>${esc(c.name)}${c.company ? ` — ${esc(c.company)}` : ''}</option>`).join('')}</select>`
@@ -234,14 +234,14 @@ export async function jobForm(job, after) {
         <datalist id="garment-styles">${garments.map((g) => `<option value="${esc([g.brand, g.style, g.name].filter(Boolean).join(' '))}">`).join('')}</datalist>
         <div class="dim" style="font-size:11.5px;margin-top:4px">What the purchase order buys. Keep the style number first.</div></div>
       <div class="grid2">
-        <div class="field"><label>Due date</label><input class="input" name="due_date" type="date" value="${esc(job?.due_date || '')}"></div>
+        <div class="field"><label>Fecha de entrega</label><input class="input" name="due_date" type="date" value="${esc(job?.due_date || '')}"></div>
         <div class="field"><label>Assigned to</label><input class="input" name="assigned_to" value="${esc(job?.assigned_to || '')}" placeholder="Press 1 / Marco"></div>
       </div>
       <div class="field"><label for="job-shipping-address">Shipping address</label><textarea class="input" id="job-shipping-address" name="shipping_address" rows="4" maxlength="600">${esc(job?.shipping_address || '')}</textarea>
         <div class="dim" style="font-size:12px;margin-top:4px">Up to 8 lines. Prints on the packing slip. Saved for this job; invoice addresses are edited separately.</div></div>
       <div class="field"><label>Notes</label><textarea class="input" name="notes" placeholder="Ink colors, placement, packing…">${esc(job?.notes || '')}</textarea></div>
       <label class="row" style="gap:7px;cursor:pointer"><input type="checkbox" name="rush" ${job?.rush ? 'checked' : ''}> <span style="font-size:13px">Rush job</span></label>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="save">${job ? 'Save' : 'Create Job'}</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="save">${job ? 'Save' : 'Create Job'}</button>`,
     onMount: (bg) => {
       if (!job) $('[name="contact_id"]', bg)?.addEventListener('change', event => {
         const contact = contacts.find(c => c.id === +event.target.value)
@@ -308,7 +308,7 @@ function splitForm(job, lines, rest, after) {
           ${cols.map((sz) => `<th class="dim" style="padding:6px 4px;font-size:11.5px">${esc(sz)}</th>`).join('')}</tr></thead>
         <tbody>${lines.map(rowOf).join('')}</tbody></table></div>
       <div class="dim" style="font-size:12px;margin-top:9px" id="split-total"></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="split-save">Save split</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="split-save">Save split</button>`,
     onMount: (bg) => {
       const read = () => lines.map((l, i) => {
         const style = $(`[data-garment="${i}"]`, bg)?.value?.trim() || l.garment || l.description || ''
@@ -345,7 +345,7 @@ function splitForm(job, lines, rest, after) {
 
 export async function jobDetailView(id) {
   const [j, roi] = await Promise.all([api.get(`/api/jobs/${id}`), api.get(`/api/roi/${id}`).catch(() => null)])
-  const STAGES = [['new', 'New'], ['art_approval', 'Art Approval'], ['prepress', 'Prepress'], ['production', 'Production'], ['qc', 'QC'], ['shipping', 'Shipping'], ['complete', 'Complete']]
+  const STAGES = [['new', 'New'], ['art_approval', 'Art Approval'], ['prepress', 'Prepress'], ['production', 'Producción'], ['qc', 'QC'], ['shipping', 'Shipping'], ['complete', 'Complete']]
   const grid = (() => { try { return JSON.parse(j.sizes || '{}') } catch { return {} } })()
   const sizes = sizeKeys(grid).map((s) => [s, grid[s]])
   const total = sizes.reduce((s, [, n]) => s + n, 0)
@@ -366,7 +366,7 @@ export async function jobDetailView(id) {
     : `<div class="schednote ok"><div><strong>Art approved ${fmtDate(sc.approvedOn)}</strong></div>
         <div class="dim">${j.turnaround_days} working days from approval → due ${fmtDate(sc.due)}.</div></div>`
 
-  setPage(j.title, `<a class="btn ghost" href="#/production/jobs/${id}">Production tasks</a>${window.__me?.can_manage===false?'':`<a class="btn ghost" href="#/costing/jobs/${id}">Job margin</a>`}<button class="btn ghost" id="edit">Edit</button><button class="btn" id="upload-btn">+ Upload Art</button>`,
+  setPage(j.title, `<a class="btn ghost" href="#/production/jobs/${id}">Producción tasks</a>${window.__me?.can_manage===false?'':`<a class="btn ghost" href="#/costing/jobs/${id}">Job margin</a>`}<button class="btn ghost" id="edit">Editar</button><button class="btn" id="upload-btn">+ Upload Art</button>`,
     `<a href="#/board">Board</a> /`)
 
   $('#view').innerHTML = `<div class="cols">
@@ -409,18 +409,18 @@ export async function jobDetailView(id) {
                   ${a.status !== 'draft' ? `<a class="btn ghost sm" href="${esc(a.share_url)}" target="_blank">Proof link</a>` : ''}
                   ${a.id===j.art[0]?.id && a.status === 'sent' ? `<button class="btn ghost sm" data-decide="${a.id}" data-v="${a.version}">Approved by phone</button>` : ''}
                   <a class="btn ghost sm" href="${esc(a.url || `/uploads/${a.filename}`)}" target="_blank">Open</a>
-                  <button class="btn ghost sm" data-delart="${a.id}" data-v="${a.version}" data-st="${a.status}">Delete</button>
+                  <button class="btn ghost sm" data-delart="${a.id}" data-v="${a.version}" data-st="${a.status}">Eliminar</button>
                 </div>
               </div></div>`).join('')}</div>` : ''}
         </div>
       </div>
 
-      <section id="art-production" class="card" aria-label="Production files and review"><div class="card-h"><h3>Production files & review</h3></div><div class="card-b" role="status">Loading file review…</div></section>
+      <section id="art-production" class="card" aria-label="Producción files and review"><div class="card-h"><h3>Producción files & review</h3></div><div class="card-b" role="status">Loading file review…</div></section>
 
       <div class="card"><div class="card-h"><h3>Job Details</h3><div class="spacer"></div>
         <button class="btn ghost sm" id="print-ticket">Work ticket</button></div><div class="card-b">
         <div class="grid2" style="gap:14px">
-          ${[['Decoration', j.decoration], ['Garment', j.garment], ['Due date', fmtDate(j.due_date)], ['Assigned to', j.assigned_to || '—']]
+          ${[['Decoration', j.decoration], ['Garment', j.garment], ['Fecha de entrega', fmtDate(j.due_date)], ['Assigned to', j.assigned_to || '—']]
             .map(([k, v]) => `<div><div class="dim" style="font-size:10px;text-transform:uppercase;letter-spacing:.6px">${k}</div><div>${esc(v || '—')}</div></div>`).join('')}
         </div>
         ${sizes.length ? `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
@@ -491,7 +491,7 @@ export async function jobDetailView(id) {
     </div>
   </div>`
 
-  mountArtProduction($('#art-production'), id, j)
+  mountArtProducción($('#art-production'), id, j)
   $('#po-order')?.addEventListener('click', () => openPO(id, j.job_number))
   loadReceiving(id)
   $('#print-ticket').onclick = () => window.open(j.ticket_url || `/p/ticket/${id}`, '_blank')
@@ -600,7 +600,7 @@ async function openPO(id, jobNumber) {
         <strong>${po.est_cost ? money(po.est_cost) + ' est.' : ''}</strong></div>
       ${recorded ? '' : `<div class="grid2" style="margin-top:16px"><div class="field"><label for="po-supplier">Supplier</label><input class="input" id="po-supplier" maxlength="100" value="${esc(po.supplier || '')}" placeholder="Supplier name"></div><div class="field"><label for="po-reference">Supplier order / confirmation reference</label><input class="input" id="po-reference" maxlength="120" placeholder="From the supplier confirmation"></div></div><label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="po-confirmed" style="width:auto"><span>I checked the supplier confirmation and it matches these garments, colors, sizes and quantities.</span></label><p class="dim" style="font-size:12px;margin-top:8px">Recording this acknowledgement does not place an order or receive any garments.</p>`}
       <div id="po-note" class="dim" role="status" style="font-size:12px;margin-top:10px"></div>`,
-    footer: `<button class="btn ghost" data-close>Close</button><a class="btn ghost" href="/api/jobs/${id}/po?download=1">Download PO</a>${recorded || !po.lines?.length ? '' : '<button class="btn" id="po-confirm">Record supplier confirmation</button>'}`,
+    footer: `<button class="btn ghost" data-close>Cerrar</button><a class="btn ghost" href="/api/jobs/${id}/po?download=1">Download PO</a>${recorded || !po.lines?.length ? '' : '<button class="btn" id="po-confirm">Record supplier confirmation</button>'}`,
     onMount: (bg) => {
       const btn = $('#po-confirm', bg); if (!btn) return
       btn.onclick = async () => {
@@ -713,7 +713,7 @@ function openReceive(jobId, po) {
       <table class="tbl"><thead><tr><th>Blank</th><th>Size</th><th class="num">Ordered</th><th class="num">Received</th><th class="num">Short</th><th>Receiving now</th></tr></thead>
         <tbody>${rows}</tbody></table>
       <div id="recv-note" class="dim" style="font-size:12px;margin-top:10px"></div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="recv-save">Receive</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="recv-save">Receive</button>`,
     onMount: (bg) => {
       const save = $('#recv-save', bg)
       save.onclick = async () => {
