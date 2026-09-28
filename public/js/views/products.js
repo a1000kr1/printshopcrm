@@ -1,9 +1,9 @@
 import { api, $, $$, esc, money, setPage, empty, toast, on } from '../core.js'
 
-/* Products / blank catalog — browse the built-in catalog and run live distributor lookups. */
+/* Productoos / blank catalog — browse the built-in catalog and run live distributor lookups. */
 
 export async function productsView() {
-  setPage('Products')
+  setPage('Productoos')
   const data = await api.get('/api/products')
   const sup = data.suppliers || {}
   const connected = sup.connected
