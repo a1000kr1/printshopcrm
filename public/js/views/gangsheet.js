@@ -3,7 +3,7 @@ import { nest, priceSheet, round2 } from '../shared/gangnest.js'
 import { addPngDpi, canvasToPngBlob, loadImage, SHEET_SIZES } from '../shared/dtftrim.js'
 
 /**
- * Gang Sheet Builder — the shop's own version of the builder its customers get on the website.
+ * Creador de planchas DTF — the shop's own version of the builder its customers get on the website.
  *
  * Drop in as many designs as you like, set the printed size and quantity of each, and they nest onto
  * the roll live. The same nest() engine drives the customer embed, so what a shop sees here and what
@@ -25,15 +25,15 @@ const MIN_EXPORT_DPI = 150
 const dpiForLength = (inches) => Math.min(EXPORT_DPI, Math.floor(MAX_CANVAS_PX / Math.max(1, inches)))
 
 let designs = []          // { id, name, img, wIn, hIn, qty }
-let cfg = { sheetWidth: 22, pricePerInch: 0.95, minCharge: 10 }
+let cfg = { sheetAncho: 22, pricePerInch: 0.95, minCharge: 10 }
 let seq = 0
 
 export async function gangSheetView() {
   designs = []; seq = 0
-  setPage('Gang Sheet Builder', '<button class="btn ghost" id="gs-clear">Clear sheet</button>')
+  setPage('Creador de planchas DTF', '<button class="btn ghost" id="gs-clear">Clear sheet</button>')
   const s = (await api.get('/api/settings').catch(() => ({ settings: {} }))).settings || {}
   cfg = {
-    sheetWidth: Number(s.dtf_sheet_width) || 22,
+    sheetAncho: Number(s.dtf_sheet_width) || 22,
     pricePerInch: Number(s.dtf_price_per_inch) || 0.95,
     minCharge: Number(s.dtf_min_charge) || 10,
   }
@@ -42,7 +42,7 @@ export async function gangSheetView() {
     <div class="gsb-side">
       <div class="card">
         <div class="card-h"><h3>Designs</h3><div class="spacer"></div>
-          <span class="dim" style="font-size:11px">${cfg.sheetWidth}&quot; roll</span></div>
+          <span class="dim" style="font-size:11px">${cfg.sheetAncho}&quot; roll</span></div>
         <div class="card-b">
           <label class="csv-drop" id="gsb-drop">
             <input type="file" id="gsb-file" accept="image/png,image/webp" multiple hidden>
@@ -66,7 +66,7 @@ export async function gangSheetView() {
           <div id="gsb-warn" class="dtf-q-row warn" style="margin-top:10px;font-size:12.5px" hidden></div>
           <div class="row" style="gap:8px;margin-top:12px">
             <button class="btn" id="gsb-export">Export print-ready PNG</button>
-            <a class="btn ghost" id="gsb-dl" hidden download>Download</a>
+            <a class="btn ghost" id="gsb-dl" hidden download>Descargar</a>
           </div>
           <div class="dim" style="font-size:11px;margin-top:8px;line-height:1.6">Exports at ${EXPORT_DPI} DPI with real size metadata (very long sheets drop DPI to fit, and say so). Art never leaves your browser.</div>
         </div>
@@ -121,7 +121,7 @@ async function addFiles(files) {
     try {
       const img = await loadImage(URL.createObjectURL(f))
       // Default to a sensible print width that still fits the roll.
-      const wIn = Math.min(cfg.sheetWidth, 10)
+      const wIn = Math.min(cfg.sheetAncho, 10)
       designs.push({ id: ++seq, name: f.name, img, wIn, hIn: round2(wIn * (img.height / img.width)), qty: 1 })
     } catch { toast(`Could not read ${f.name}`, true) }
   }
@@ -151,14 +151,14 @@ function renderList() {
 function computed() {
   const gap = Math.max(0, Number($('#gsb-gap')?.value) || 0)
   const items = designs.map((d, i) => ({ w: d.wIn, h: d.hIn, qty: d.qty, i }))
-  const n = nest(items, { sheetWidth: cfg.sheetWidth, gap })
+  const n = nest(items, { sheetAncho: cfg.sheetAncho, gap })
   // A fixed sheet length still bills for the whole sheet even if the art doesn't fill it — but it
   // must never bill for LESS than the art actually needs. Picking a 60" sheet for 149" of nested art
   // used to quote the 60" price and then export a cropped sheet with half the pieces missing.
   const pick = $('#gsb-size')?.value
   const chosen = pick && pick !== 'auto' ? Number(pick) : 0
-  const overflows = chosen > 0 && n.usedHeight > chosen + 1e-6
-  const billed = Math.max(chosen, n.usedHeight)
+  const overflows = chosen > 0 && n.usedAlto > chosen + 1e-6
+  const billed = Math.max(chosen, n.usedAlto)
   return { n, gap, billed, chosen, overflows, price: priceSheet(billed, cfg) }
 }
 
@@ -166,7 +166,7 @@ function renderFacts() {
   const { n, billed, chosen, overflows, price } = computed()
   const area = designs.reduce((a, d) => a + d.wIn * d.hIn * d.qty, 0)
   // Efficiency is against the length actually consumed, so it can never read over 100%.
-  const eff = billed > 0 ? Math.min(100, Math.round((area / (cfg.sheetWidth * billed)) * 100)) : 0
+  const eff = billed > 0 ? Math.min(100, Math.round((area / (cfg.sheetAncho * billed)) * 100)) : 0
   $('#gsb-facts').innerHTML = `
     <div><span class="dim">Pieces</span><strong>${n.count}</strong></div>
     <div><span class="dim">Roll used</span><strong>${Math.ceil(billed)}&quot;</strong></div>
@@ -187,10 +187,10 @@ function draw() {
   c.hidden = n.count === 0
   renderFacts()
   $('#gsb-lbl').textContent = n.count ? `${n.count} piece${n.count === 1 ? '' : 's'} · ${Math.ceil(billed)}" of roll` : 'Sheet preview'
-  $('#gsb-price').textContent = n.count ? `${money(price.subtotal)} · ${cfg.sheetWidth}" roll` : ''
+  $('#gsb-price').textContent = n.count ? `${money(price.subtotal)} · ${cfg.sheetAncho}" roll` : ''
   if (!n.count) return
 
-  const W = Math.round(cfg.sheetWidth * PPI)
+  const W = Math.round(cfg.sheetAncho * PPI)
   const H = Math.round(Math.max(4, billed) * PPI)
   c.width = W; c.height = H
   const ctx = c.getContext('2d')
@@ -220,7 +220,7 @@ async function exportSheet() {
       const maxIn = Math.floor(MAX_CANVAS_PX / MIN_EXPORT_DPI)
       throw new Error(`A ${Math.ceil(billed)}" sheet is too long to export in one file — build it as two sheets of ${maxIn}" or less`)
     }
-    const W = Math.round(cfg.sheetWidth * dpi)
+    const W = Math.round(cfg.sheetAncho * dpi)
     const H = Math.round(billed * dpi)
     const c = document.createElement('canvas'); c.width = W; c.height = H
     const ctx = c.getContext('2d')
@@ -236,11 +236,11 @@ async function exportSheet() {
     const dl = $('#gsb-dl')
     if (dl.href.startsWith('blob:')) URL.revokeObjectURL(dl.href)
     dl.href = URL.createObjectURL(blob)
-    dl.download = `gangsheet-${cfg.sheetWidth}x${Math.ceil(billed)}in-${dpi}dpi.png`
+    dl.download = `gangsheet-${cfg.sheetAncho}x${Math.ceil(billed)}in-${dpi}dpi.png`
     dl.hidden = false
     toast(dpi < EXPORT_DPI
-      ? `Sheet built — ${cfg.sheetWidth}" × ${Math.ceil(billed)}" at ${dpi} DPI (lowered to fit this length)`
-      : `Sheet built — ${cfg.sheetWidth}" × ${Math.ceil(billed)}" at ${dpi} DPI`)
+      ? `Sheet built — ${cfg.sheetAncho}" × ${Math.ceil(billed)}" at ${dpi} DPI (lowered to fit this length)`
+      : `Sheet built — ${cfg.sheetAncho}" × ${Math.ceil(billed)}" at ${dpi} DPI`)
   } catch (e) { toast(e.message, true) }
   btn.disabled = false; btn.textContent = 'Export print-ready PNG'
 }
