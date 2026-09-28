@@ -124,14 +124,14 @@ export async function contactsView() {
   let t
   $('#q').oninput = (e) => { ++sequence; disableExport(); clearTimeout(t); t = setTimeout(() => render(e.target.value), 180) }
   $('#new-c').onclick = () => contactForm(null, () => render($('#q').value))
-  $('#import-c').onclick = () => importContactos(() => render($('#q').value))
+  $('#import-c').onclick = () => importContacts(() => render($('#q').value))
   $('#import-o').onclick = () => importOrders(() => render($('#q').value))
   if (new URLSearchParams(location.hash.split('?')[1] || '').get('new')) { history.replaceState(null, '', location.hash.split('?')[0]); contactForm(null, () => render($('#q').value)) }
   await render()
 }
 
 /** Import a customer list from a CSV export of the shop's old tool — preview first, then import. */
-export function importContactos(after) {
+export function importContacts(after) {
   modal({
     title: 'Import customers from CSV',
     wide: true,
