@@ -7,7 +7,7 @@ export function mountDesktopNavigation({ root, sidebar, button, media, read, wri
     const hidingFocusedNav = media.matches && collapsed && sidebar.contains(root.ownerDocument.activeElement)
     root.dataset.navigation = collapsed ? 'collapsed' : 'expanded'
     button.setAttribute('aria-expanded', String(!collapsed))
-    button.textContent = collapsed ? 'Show navigation' : 'Hide navigation'
+    button.textContent = collapsed ? 'Mostrar navegación' : 'Ocultar navegación'
     if (hidingFocusedNav) button.focus()
   }
   button.addEventListener('click', () => {
