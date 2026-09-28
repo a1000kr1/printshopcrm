@@ -68,7 +68,7 @@ function fuzzy(query, text) {
  * spoke nothing at all; and Tab walked invisibly out into the sidebar behind a dimmed backdrop
  * where Enter fired whatever it landed on.
  */
-export function openBuscar() {
+export function openSearch() {
   if (box) return
   boxReturnFocus = focusKeeper()
   box = el(`<div class="cmd-bg">
@@ -80,7 +80,7 @@ export function openBuscar() {
       <div class="cmd-list" id="cmd-list" role="listbox" aria-label="Results"></div>
     </div></div>`)
   document.body.appendChild(box)
-  box.addEventListener('mousedown', (e) => { if (e.target === box) closeBuscar() })
+  box.addEventListener('mousedown', (e) => { if (e.target === box) closeSearch() })
   const input = $('#cmd-q', box)
   // The palette is Arrow-driven and its only focusable control is the input, so trapTab's
   // first/last wrap collapses to "stay here" — which is exactly right, and is the same rule
@@ -111,7 +111,7 @@ export function openBuscar() {
 
   const pick = (i) => {
     const r = items[i]; if (!r) return
-    closeBuscar()
+    closeSearch()
     if (r.isCmd) r.run(); else go(r.href)
   }
 
@@ -135,7 +135,7 @@ export function openBuscar() {
   }
 
   input.onkeydown = (e) => {
-    if (e.key === 'Escape') return closeBuscar()
+    if (e.key === 'Escape') return closeSearch()
     if (e.key === 'ArrowDown') { e.preventDefault(); cursor = Math.min(cursor + 1, items.length - 1); draw(); scrollTo() }
     if (e.key === 'ArrowUp') { e.preventDefault(); cursor = Math.max(cursor - 1, 0); draw(); scrollTo() }
     if (e.key === 'Enter') { e.preventDefault(); pick(cursor) }
@@ -146,7 +146,7 @@ export function openBuscar() {
   input.focus()
 }
 
-export function closeBuscar() {
+export function closeSearch() {
   const back = boxReturnFocus
   boxReturnFocus = null
   box?.remove(); box = null; items = []; cursor = 0
@@ -154,8 +154,8 @@ export function closeBuscar() {
 }
 
 /** ⌘K / Ctrl-K anywhere. (`/` and other keys are handled by the keyboard system.) */
-export function wireBuscarHotkey() {
+export function wireSearchHotkey() {
   window.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); box ? closeBuscar() : openBuscar() }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); box ? closeSearch() : openSearch() }
   })
 }
