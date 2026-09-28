@@ -8,15 +8,15 @@ import { createNavGuard } from './shared/navguard.js'
  * and actionable answer.
  */
 function httpMessage(status, text) {
-  if (status === 502 || status === 503 || status === 504) return 'The server is restarting — try that again in a moment.'
-  if (status === 413) return 'That was too large to send.'
-  if (status === 429) return 'Too many requests just now — wait a moment and try again.'
-  if (status === 404) return 'Not found.'
-  if (status === 0 || !status) return 'No connection to the server.'
+  if (status === 502 || status === 503 || status === 504) return 'El servidor se está reiniciando — inténtalo de nuevo en un momento.'
+  if (status === 413) return 'El contenido es demasiado grande para enviarlo.'
+  if (status === 429) return 'Hay demasiadas solicitudes en este momento — espera un momento e inténtalo de nuevo.'
+  if (status === 404) return 'No encontrado.'
+  if (status === 0 || !status) return 'Sin conexión con el servidor.'
   // A short plain-text body ("Not found", "unknown shop") is worth showing; a wall of HTML is not.
   const plain = String(text || '').trim()
   if (plain && plain.length <= 120 && !/^\s*</.test(plain)) return plain
-  return `Something went wrong (${status}).`
+  return `Algo salió mal (${status}).`
 }
 
 /**
@@ -44,7 +44,7 @@ export const api = {
     else if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body) }
     const r = await fetch(url, opts)
     // Session expired or not signed in → bounce to the login page.
-    if (r.status === 401 && !url.startsWith('/api/auth/')) { location.href = '/login' + (/^#\/production\/jobs\/\d+(?:\?shop=[a-zA-Z0-9_-]+)?$/.test(location.hash)?location.hash:''); throw new Error('Not signed in') }
+    if (r.status === 401 && !url.startsWith('/api/auth/')) { location.href = '/login' + (/^#\/production\/jobs\/\d+(?:\?shop=[a-zA-Z0-9_-]+)?$/.test(location.hash)?location.hash:''); throw new Error('Sesión no iniciada') }
     const text = await r.text()
     // Not everything that answers this app speaks JSON. A proxy 502/504 during a deploy, an
     // Express default HTML 404 on a mistyped path, "unknown shop" from the tenant resolver — all
@@ -135,11 +135,11 @@ export function relTime(ts) {
   if (!ts) return ''
   const dt = new Date(String(ts).replace(' ', 'T') + (String(ts).endsWith('Z') ? '' : 'Z'))
   const mins = Math.round((Date.now() - dt.getTime()) / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  if (mins < 1440) return `${Math.round(mins / 60)}h ago`
+  if (mins < 1) return 'justo ahora'
+  if (mins < 60) return `hace ${mins} min`
+  if (mins < 1440) return `hace ${Math.round(mins / 60)} h`
   const days = Math.round(mins / 1440)
-  if (days < 30) return `${days}d ago`
+  if (days < 30) return `hace ${days} d`
   return fmtDate(ts)
 }
 
@@ -156,11 +156,11 @@ export function dueClass(d) {
 
 export function dueLabel(d) {
   const n = daysOut(d)
-  if (n === null) return 'No due date'
-  if (n === 0) return 'Due today'
-  if (n === 1) return 'Due tomorrow'
-  if (n < 0) return `${Math.abs(n)}d late`
-  return `Due ${fmtDate(d)}`
+  if (n === null) return 'Sin fecha de entrega'
+  if (n === 0) return 'Vence hoy'
+  if (n === 1) return 'Vence mañana'
+  if (n < 0) return `${Math.abs(n)} d de atraso`
+  return `Vence ${fmtDate(d)}`
 }
 
 export const STATUS_COLOR = {
@@ -327,7 +327,7 @@ if (typeof window !== 'undefined' && !window.__pscUndoFlush) {
   })
 }
 
-export function undoable(msg, { commit, undo, label = 'Undo', delay = 6000 } = {}) {
+export function undoable(msg, { commit, undo, label = 'Deshacer', delay = 6000 } = {}) {
   // Starting a new undoable COMMITS the previous one rather than orphaning its timer. Before, a
   // second toast in the 6s window removed the Undo element while the old timer kept running, so
   // the user was shown they could undo and then could not; flushing makes the earlier change final
@@ -341,7 +341,7 @@ export function undoable(msg, { commit, undo, label = 'Undo', delay = 6000 } = {
     <span class="toast-bar"><span class="toast-bar-fill"></span></span></div>`)
   document.body.appendChild(t)
   // The undo window is six seconds of time-limited choice — the one message that must not be silent.
-  announce(`${msg}. Press ${label} to undo.`)
+  announce(`${msg}. Presiona ${label} para deshacer.`)
   requestAnimationFrame(() => { const f = $('.toast-bar-fill', t); if (f) { f.style.transition = `width ${delay}ms linear`; f.style.width = '0%' } })
   const settle = (fn) => { if (done) return; done = true; clearTimeout(timer); t.remove(); if (pendingUndoable === handle) pendingUndoable = null; try { fn?.() } catch (e) { console.error(e) } }
   const timer = setTimeout(() => settle(commit), delay)
