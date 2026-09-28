@@ -51,8 +51,8 @@ function releaseArt() {
 let mode = store.get('psc-ap-mode') || 'review' // conservative default
 
 export async function autopilotView() {
-  setPage('Autopilot')
-  // uploadedArt is module state, so it outlives the render — and "Run another" IS this function,
+  setPage('Piloto automático')
+  // uploadedArt is module state, so it outlives the render — and "Ejecutar otro" IS this function,
   // as is navigating away and coming back. It was only ever written, never cleared, while the drop
   // zone repainted to its neutral placeholder: the screen said no file was attached and run() still
   // preferred `uploadedArt` over synthArt(). The next customer's proof, mockup and job art therefore
@@ -78,7 +78,7 @@ export async function autopilotView() {
               <div class="field"><label>Correo electrónico</label><input class="input" id="ap-email" placeholder="dana@example.org"></div>
             </div>
             <div class="field"><label>The message</label>
-              <textarea class="input" id="ap-text" style="min-height:200px;font-size:13px" placeholder="Paste what the customer sent…"></textarea></div>
+              <textarea class="input" id="ap-text" style="min-height:200px;font-size:13px" placeholder="Pega lo que envió el cliente…"></textarea></div>
             <div class="field"><label>Artwork reference (optional)</label>
               <div class="drop" id="ap-drop" style="padding:14px">Drop a PNG or JPG for a local concept preview. Add the actual proof on the job.</div>
               <input type="file" id="ap-file" accept="image/*" hidden>
@@ -133,7 +133,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 async function run(resume = null) {
   const text = $('#ap-text').value.trim()
-  if (text.length < 8) return toast('Paste the customer email first', true)
+  if (text.length < 8) return toast('Primero pega el correo del cliente', true)
 
   // Draw the pipeline skeleton, then light each node as it completes.
   $('#ap-stage').innerHTML = `<div class="ap-pipe">
@@ -182,7 +182,7 @@ async function run(resume = null) {
       mockUrl = renderMockup(artImg, garment.hex).toDataURL('image/png')
       complete('mockup', 'Generic concept only · no proof attached')
     } else {
-      complete('art', 'No artwork supplied')
+      complete('art', 'No se proporcionó arte')
       complete('mockup', 'Skipped · upload the actual proof on the job')
     }
 
@@ -198,7 +198,7 @@ async function run(resume = null) {
   } catch (e) {
     /* run() replaced #ap-stage.innerHTML at the top, and the ONLY Run button in the product lives
      * in the block it replaced — so appending an error message here left the screen the product is
-     * named for with no control on it at all. "Run another" exists only on the two success paths.
+     * named for with no control on it at all. "Ejecutar otro" exists only on the two success paths.
      * Clicking Autopilot in the sidebar sets the hash it is already on, which fires no hashchange
      * and repaints nothing, so the sole escape was F5 — and a reload re-runs autopilotView(), which
      * draws #ap-text empty and takes the pasted customer email with it. Often the shop's only copy.
@@ -210,7 +210,7 @@ async function run(resume = null) {
     $('#ap-stage').innerHTML = `<div class="ap-empty">
       <div class="ap-orbit"><span>◆</span></div>
       <p class="ap-err" role="alert">${esc(e.message)}</p>
-      <button class="btn ap-go" id="ap-run">${lastRun ? 'Finish the preview →' : 'Intentar de nuevo →'}</button>
+      <button class="btn ap-go" id="ap-run">${lastRun ? 'Finalizar vista previa →' : 'Intentar de nuevo →'}</button>
     </div>`
     // A failure BEFORE the server wrote anything re-runs the whole thing, which is right. A failure
     // after it re-enters at the art step against the estimate and job that already exist, so the
@@ -225,7 +225,7 @@ function reviewReveal(r, mockUrl) {
   $('#ap-stage').innerHTML = `<div class="ap-reveal">
     ${mockUrl ? `<div class="ap-mockup"><img src="${mockUrl}" alt="Generic T-shirt concept using the supplied artwork; not the ordered garment"></div>
       <p class="ap-review-note">Generic T-shirt concept only. Garment, color and placement are approximate. This preview stays on this device and is not attached as a proof. Add the actual proof on the job.</p>` : '<p class="ap-review-note">Artwork still needed. Open the job to upload the actual proof when it is ready.</p>'}
-    <div class="ap-review-h">${r.held_for_review?.length ? 'Held for your call' : 'Draft ready for your call'}</div>
+    <div class="ap-review-h">${r.held_for_review?.length ? 'En espera de tu decisión' : 'Borrador listo para tu revisión'}</div>
     ${r.ai_note ? `<p class="ap-review-note ap-held">${esc(r.ai_note)}</p>` : ''}
     <div class="ap-stats">
       <div><span>${money(r.estimate.total)}</span><em>quoted (not sent)</em></div>
@@ -237,7 +237,7 @@ function reviewReveal(r, mockUrl) {
       <button class="btn" id="ap-commit">Send it to the customer →</button>
       <a class="btn ghost" href="#/estimates/${r.estimate.id}/edit">Edit the estimate</a>
       <a class="btn ghost" href="#/jobs/${r.job.id}">Open the job</a>
-      <button class="btn ghost" id="ap-again">Run another</button>
+      <button class="btn ghost" id="ap-again">Ejecutar otro</button>
     </div>
     <p class="ap-foot">Cliente <strong>${esc(r.contact.name)}</strong> and estimate <strong>${esc(r.estimate.estimate_number)}</strong> exist as a <strong>draft</strong>. This is the conservative default — flip to Full auto to skip this gate once you trust it.</p>
   </div>`
@@ -268,7 +268,7 @@ function doneReveal(r, mockUrl) {
   $('#ap-stage').innerHTML = `<div class="ap-reveal">
     ${mockUrl ? `<div class="ap-mockup"><img src="${mockUrl}" alt="Generic T-shirt concept using the supplied artwork; not the ordered garment"></div>
       <p class="ap-review-note">Generic T-shirt concept only. Garment, color and placement are approximate. This preview stays on this device and is not attached as a proof. Add the actual proof on the job.</p>` : '<p class="ap-review-note">Artwork still needed. Open the job to upload the actual proof when it is ready.</p>'}
-    <div class="ap-done-h">${approved ? 'Cotización approved.' : 'Sent. Waiting on the customer.'}</div>
+    <div class="ap-done-h">${approved ? 'Cotización approved.' : 'Enviado. Esperando al cliente.'}</div>
     <div class="ap-stats">
       <div><span>${money(r.estimate.total)}</span><em>quoted &amp; ${approved ? 'approved' : 'sent'}</em></div>
       ${r.invoice ? `<div><span>${money(paid)}</span><em>${paid > 0 ? 'collected' : 'invoiced, unpaid'}</em></div>` : ''}
@@ -278,7 +278,7 @@ function doneReveal(r, mockUrl) {
       <a class="btn" href="#/jobs/${r.job.id}">Open the job →</a>
       ${r.invoice ? `<a class="btn ghost" href="#/invoices/${r.invoice.id}">Factura</a>` : ''}
       <a class="btn ghost" href="#/conversations/${r.contact.id}">Conversation</a>
-      <button class="btn ghost" id="ap-again">Run another</button>
+      <button class="btn ghost" id="ap-again">Ejecutar otro</button>
     </div>
     <p class="ap-foot">Cliente <strong>${esc(r.contact.name)}</strong>, estimate <strong>${esc(r.estimate.estimate_number)}</strong>${r.invoice ? `, invoice <strong>${esc(r.invoice.invoice_number)}</strong>` : ''} and job <strong>${esc(r.job.job_number)}</strong> now exist.
       ${approved ? '' : 'The estimate still needs customer approval. Sending it does not collect a payment or approve artwork.'}</p>
@@ -292,12 +292,12 @@ function doneReveal(r, mockUrl) {
  * These used to live in the separations module. Only the mockup needs them, so they moved here
  * when that tool was removed rather than keeping a shared file alive for two constants. */
 const GARMENT_COLORS = [
-  { name: 'White', hex: '#f4f4f4', dark: false },
-  { name: 'Black', hex: '#151515', dark: true },
-  { name: 'Navy', hex: '#1b2a44', dark: true },
-  { name: 'Heather', hex: '#9aa0a6', dark: false },
-  { name: 'Red', hex: '#7a1f24', dark: true },
-  { name: 'Sand', hex: '#d8cbb0', dark: false },
+  { name: 'Blanco', hex: '#f4f4f4', dark: false },
+  { name: 'Negro', hex: '#151515', dark: true },
+  { name: 'Azul marino', hex: '#1b2a44', dark: true },
+  { name: 'Jaspe', hex: '#9aa0a6', dark: false },
+  { name: 'Rojo', hex: '#7a1f24', dark: true },
+  { name: 'Arena', hex: '#d8cbb0', dark: false },
 ]
 
 function hexToRgb(hex) {
@@ -307,10 +307,10 @@ function hexToRgb(hex) {
 }
 
 // Map the parsed garment color onto a swatch the mockup can render (with a few synonyms).
-const COLOR_MAP = { navy: 'Navy', royal: 'Navy', black: 'Black', charcoal: 'Black', forest: 'Navy',
-  white: 'White', heather: 'Heather', gray: 'Heather', grey: 'Heather', sand: 'Sand', red: 'Red', maroon: 'Red' }
+const COLOR_MAP = { navy: 'Azul marino', royal: 'Azul marino', black: 'Negro', charcoal: 'Negro', forest: 'Azul marino',
+  white: 'Blanco', heather: 'Jaspe', gray: 'Jaspe', grey: 'Jaspe', sand: 'Arena', red: 'Rojo', maroon: 'Rojo' }
 const garmentFor = (order) => {
-  const name = COLOR_MAP[order.garment_color] || (order.dark_garment ? 'Black' : 'White')
+  const name = COLOR_MAP[order.garment_color] || (order.dark_garment ? 'Negro' : 'Blanco')
   return GARMENT_COLORS.find((g) => g.name === name) || GARMENT_COLORS[0]
 }
 
