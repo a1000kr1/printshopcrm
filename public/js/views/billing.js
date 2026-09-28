@@ -101,7 +101,7 @@ export async function billingView() {
       <a class="btn ghost" href="https://github.com/ColeLundstrom/printshopcrm" target="_blank" rel="noopener noreferrer">Source code and community</a>
     </div></div>`}
     ${d.live && canManage && st.stripe_customer_id ? '<div class="row" style="justify-content:center;margin-top:18px"><button class="btn ghost" id="manage">Manage hosting</button></div>' : ''}
-    ${d.live ? '<p class="dim">Payment covers managed hosting and basic setup. The same software is free to self-host.</p>' : ''}
+    ${d.live ? '<p class="dim">Pago covers managed hosting and basic setup. The same software is free to self-host.</p>' : ''}
     <p class="dim">Want to help maintain the free software? <a href="#/support">Support the project</a>. Contributions are optional and separate from hosting.</p>
     ${adminCard}
   </div>`
@@ -154,7 +154,7 @@ export async function billingView() {
       try {
         const result=await api.post(path,payload)
         if(openCheckout && result.url) { location.href=result.url;return }
-        toast(result.intent?.state === 'complete' ? 'Hosting payment confirmed.' : result.intent?.state === 'expired' ? 'Unpaid checkout closed.' : 'Payment status checked. Review the details below.')
+        toast(result.intent?.state === 'complete' ? 'Hosting payment confirmed.' : result.intent?.state === 'expired' ? 'Unpaid checkout closed.' : 'Pago status checked. Review the details below.')
       } catch(error) { toast(error.message,true) }
       finally { recovering=false;await rerender() }
     }
