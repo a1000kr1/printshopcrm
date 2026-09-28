@@ -3,7 +3,7 @@ import { importContacts, importOrders } from './contacts.js'
 
 // A map of the existing working setup paths, not another copy of their forms.
 export async function setupView() {
-  setPage('Configuración y conexiones', '<a class="btn ghost" href="#/">Go to Today</a>')
+  setPage('Configuración y conexiones', '<a class="btn ghost" href="#/">Ir a Hoy</a>')
   if (window.__me?.can_manage === false) {
     $('#view').innerHTML = '<p class="dim">An owner or manager connects services. Your daily work is available from Today.</p>'
     return
@@ -18,14 +18,14 @@ export async function setupView() {
   const row = (n, title, text, href, action, state='') => `<div class="setup-row"><span class="setup-number" aria-hidden="true">${n}</span><div><h3>${title}</h3><p>${text}</p>${state ? `<span class="setup-status">${esc(state)}</span>` : ''}</div><a class="btn ghost" href="${href}">${action}</a></div>`
   const aiOn = !!s.ai_provider
   $('#view').innerHTML = `<div class="setup-workspace">
-    <header class="setup-intro"><h1>Your shop. Your way of working.</h1><a class="btn ghost" href="#/branding">Make it yours · logo & colors</a><p>Start with the essentials and connect services as you need them. Quotes, invoices, pricing, production, and customer records work without AI.</p></header>
-    <section class="setup-section"><h2>1. Make it yours</h2>
-      ${row('01','Shop details & pricing','Put your name on documents. Review your currency, tax rate and costing before your first quote.','#/welcome?step=basics','Review basics',s.shop_name || '')}
-      ${row('02','Bring your history','Import customer lists and order history from CSV exports. Preview the records before anything is written.','#/welcome?step=import','Import data')}
-      <details><summary>Migration formats & checks</summary><p>Export customers and orders separately from Printavo, another CRM, or a spreadsheet. Keep the original files. Standard headers are recognized automatically; rename unfamiliar columns using the examples below.</p><pre>Customers: name,email,phone,company,notes,tags
+    <header class="setup-intro"><h1>Tu negocio. Tu forma de trabajar.</h1><a class="btn ghost" href="#/branding">Personalízalo · logo y colores</a><p>Comienza con lo esencial y conecta servicios cuando los necesites. Las cotizaciones, facturas, precios, producción y registros de clientes funcionan sin IA.</p></header>
+    <section class="setup-section"><h2>1. Personaliza tu negocio</h2>
+      ${row('01','Datos del negocio y precios','Incluye tu nombre en los documentos. Revisa la moneda, la tasa de impuestos y los costos antes de tu primera cotización.','#/welcome?step=basics','Revisar datos',s.shop_name || '')}
+      ${row('02','Importa tu historial','Importa listas de clientes e historial de pedidos desde archivos CSV. Previsualiza los registros antes de guardar cualquier dato.','#/welcome?step=import','Importar datos')}
+      <details><summary>Formatos y verificaciones de migración</summary><p>Export customers and orders separately from Printavo, another CRM, or a spreadsheet. Keep the original files. Standard headers are recognized automatically; rename unfamiliar columns using the examples below.</p><pre>Customers: name,email,phone,company,notes,tags
 Orders: customer,email,invoice #,date,status,product,qty,unit price,total</pre><p>Use YYYY-MM-DD dates. Review names, order numbers, totals, and payment states in a small sample first. Customer duplicates match by email; records without email need manual review. PDF invoices, artwork files, mailbox archives, and custom fields are not imported by this CSV tool.</p><div class="setup-actions"><button class="btn ghost" id="setup-customers">Import customers</button><button class="btn ghost" id="setup-orders">Import order history</button><a class="btn ghost" href="/api/export/all.json" download>Export shop backup</a></div></details>
     </section>
-    <section class="setup-section"><h2>Suppliers & production</h2><div class="setup-actions"><a class="btn ghost" href="#/suppliers">Conectar suppliers</a><a class="btn ghost" href="#/production/workflows">Workflow templates</a><a class="btn ghost" href="#/matrices">Price matrices</a><a class="btn ghost" href="#/costing/settings">Shop costs & machines</a></div></section>
+    <section class="setup-section"><h2>Proveedores y producción</h2><div class="setup-actions"><a class="btn ghost" href="#/suppliers">Conectar suppliers</a><a class="btn ghost" href="#/production/workflows">Plantillas de flujo de trabajo</a><a class="btn ghost" href="#/matrices">Matrices de precios</a><a class="btn ghost" href="#/costing/settings">Costos del negocio y máquinas</a></div></section>
     <section class="setup-section"><h2>2. Conectar your communications</h2><p>Your team can send and reply manually. Conectaring email or SMS does not require an AI account.</p>
       ${row('03','Email from your domain','Conectar your existing mailbox or email service. Send yourself a test before emailing customers.','#/welcome?step=email','Conectar email',status.shop_email ? 'Email credentials saved — verify delivery with a test' : 'No conectado')}
       <details><summary>Domain & incoming email</summary><p>Use a mailbox on your domain, such as quotes@yourshop.com. Your mail provider supplies the server and authentication settings. Follow its SPF, DKIM and DMARC instructions; DNS records are provider-specific.</p><p>SMTP connects outgoing mail. Replies currently arrive in your existing mailbox; automatic mailbox sync into Conversations is not included yet.</p><a href="https://support.google.com/a/answer/176600" target="_blank" rel="noopener noreferrer">Google Workspace email setup</a></details>
