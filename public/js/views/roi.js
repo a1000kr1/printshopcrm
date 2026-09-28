@@ -1,18 +1,18 @@
 import { api, $, $$, esc, money, money0, setPage, empty, on, go , onOnce} from '../core.js'
 
 /**
- * Job Profitability: real revenue vs. real cost on every
+ * Job Rentabilidad: real revenue vs. real cost on every
  * job, so a shop finds a money-loser the day they quote it, not months later on the P&L.
  */
 let sortBy = 'margin'
 
 export async function roiView() {
-  setPage('Profitability', `<a class="btn ghost" href="#/costing">Machine & employee costs</a><a class="btn ghost" href="/api/export/quickbooks.iif" download>Export to QuickBooks</a>`)
+  setPage('Rentabilidad', `<a class="btn ghost" href="#/costing">Machine & employee costs</a><a class="btn ghost" href="/api/export/quickbooks.iif" download>Export to QuickBooks</a>`)
   // The sort tabs are inside the #view repaint their own click triggers, so pressing one dropped
   // focus on <body>. Same shape board.js already uses, and the gate already asserts it there.
   const active = document.activeElement
   const keepSort = active && $('#view')?.contains(active) && active.dataset?.s ? active.dataset.s : null
-  $('#view').innerHTML = '<div class="dim">Costing every job…</div>'
+  $('#view').innerHTML = '<div class="dim">Costoing every job…</div>'
   const d = await api.get('/api/roi')
   const t = d.totals
 
@@ -21,9 +21,9 @@ export async function roiView() {
 
   $('#view').innerHTML = `
     <div class="kpis">
-      <div class="kpi"><div class="lbl">Revenue</div><div class="val">${money0(t.revenue)}</div><div class="sub">${t.count} costed jobs</div></div>
-      <div class="kpi bad"><div class="lbl">Cost to produce</div><div class="val">${money0(t.cost)}</div><div class="sub">blanks · decoration · labor · screens</div></div>
-      <div class="kpi"><div class="lbl">Profit</div><div class="val">${money0(t.profit)}</div><div class="sub">what you actually keep</div></div>
+      <div class="kpi"><div class="lbl">Ingresos</div><div class="val">${money0(t.revenue)}</div><div class="sub">${t.count} costed jobs</div></div>
+      <div class="kpi bad"><div class="lbl">Costo to produce</div><div class="val">${money0(t.cost)}</div><div class="sub">blanks · decoration · labor · screens</div></div>
+      <div class="kpi"><div class="lbl">Utilidad</div><div class="val">${money0(t.profit)}</div><div class="sub">what you actually keep</div></div>
       <div class="kpi ${t.margin < 40 ? 'warn' : ''}"><div class="lbl">Avg margin</div><div class="val">${t.margin}%</div>
         <div class="sub">${t.losers ? `<span style="color:var(--red)">${t.losers} losing money</span> · ` : ''}${t.thin} thin</div></div>
     </div>
@@ -44,7 +44,7 @@ export async function roiView() {
           <button type="button" data-s="revenue" class="${sortBy === 'revenue' ? 'on' : ''}" aria-pressed="${sortBy === 'revenue'}">By revenue</button>
         </div></div>
       ${d.jobs.length ? `<table class="tbl">
-        <thead><tr><th>Job</th><th class="num">Pieces</th><th class="num">Revenue</th><th class="num">Cost</th><th class="num">Profit</th><th class="num">Margin</th></tr></thead>
+        <thead><tr><th>Job</th><th class="num">Pieces</th><th class="num">Ingresos</th><th class="num">Costo</th><th class="num">Utilidad</th><th class="num">Margen</th></tr></thead>
         <tbody>${sorted.map((r) => `<tr class="click" data-job="${r.job_id}">
           <td><div style="font-weight:600">${esc(r.title)}</div><div class="mono">${esc(r.job_number)}${!r.blank_matched ? ' · <span class="dim" title="No catalog match, cost estimated">est. cost</span>' : ''}</div></td>
           <td class="num">${r.pieces}</td>
