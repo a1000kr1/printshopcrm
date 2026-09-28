@@ -7,10 +7,10 @@ import { api, $, esc, money, setPage, on, toast, empty, confirmModal, onOnce } f
  */
 
 export async function booksView() {
-  setPage('Books', '', '<span class="dim">Money</span>')
+  setPage('Contabilidad', '', '<span class="dim">Money</span>')
   $('#view').innerHTML = '<div class="dim">Adding it up…</div>'
   /* The A/R aging report is open to every role — /api/reports/ar-aging carries no requireRole —
-   * and "Books & A/R" is in every role's sidebar. /api/qbo/queue is manager-only, and this
+   * and "Contabilidad y cuentas por cobrar" is in every role's sidebar. /api/qbo/queue is manager-only, and this
    * Promise.all was unguarded, so for a STAFF account the 403 rejected the whole thing and the
    * page they were sent to showed an error instead of the receivables report they can read.
    * The QuickBooks half degrades to a line that says who can see it; the report renders. */
@@ -48,14 +48,14 @@ function render(aging, qbo) {
 
   $('#view').innerHTML = `
     <div class="kpis">
-      ${kpi('Current', t.current)} ${kpi('1–30 days', t.d30)} ${kpi('31–60', t.d60, true)} ${kpi('61–90', t.d90, true)} ${kpi('90+', t.d90p, true)}
+      ${kpi('Al corriente', t.current)} ${kpi('1–30 days', t.d30)} ${kpi('31–60', t.d60, true)} ${kpi('61–90', t.d90, true)} ${kpi('90+', t.d90p, true)}
       <div class="kpi"><div class="kpi-n">${money(t.due)}</div><div class="kpi-l">Total receivable</div></div>
     </div>
 
     <div class="card">
       <h2>A/R aging by customer <span class="dim" style="font-weight:400;font-size:12px">as of ${esc(aging.as_of)}</span></h2>
       ${aging.customers.length ? `<table class="tbl">
-        <tr><th>Cliente</th><th class="r">Current</th><th class="r">1–30</th><th class="r">31–60</th><th class="r">61+</th><th class="r">Total</th><th></th></tr>
+        <tr><th>Cliente</th><th class="r">Al corriente</th><th class="r">1–30</th><th class="r">31–60</th><th class="r">61+</th><th class="r">Total</th><th></th></tr>
         ${aging.customers.map(custRow).join('')}
       </table>` : empty('✅', 'Nothing outstanding', 'Every invoice is paid up.')}
     </div>
@@ -78,7 +78,7 @@ function render(aging, qbo) {
              ${qbo.rows.map(qboRow).join('')}
            </table>` : '<p class="dim">No sync activity yet — record a payment and it will queue itself.</p>'}
            <div class="row" style="gap:8px;margin-top:12px">
-             <button class="btn ghost sm" type="button" id="qbo-disconnect">Disconnect QuickBooks</button>
+             <button class="btn ghost sm" type="button" id="qbo-disconnect">Desconectar QuickBooks</button>
              <span class="dim" style="font-size:11.5px">Removes the saved keys and tokens. Nothing already synced is touched.</span>
            </div>`}
     </div>`
@@ -86,18 +86,18 @@ function render(aging, qbo) {
   // The only way to take QuickBooks back out. Its keys and tokens are all secrets, so blanking
   // them on the settings form was a deliberate no-op and there was no route that cleared them —
   // a shop whose bookkeeper left could not disconnect the books from any screen.
-  if ($('#qbo-disconnect')) $('#qbo-disconnect').onclick = () => confirmModal('Disconnect QuickBooks?',
+  if ($('#qbo-disconnect')) $('#qbo-disconnect').onclick = () => confirmModal('¿Desconectar QuickBooks?',
     'The saved app keys and tokens are removed from this shop. Facturas already synced stay in QuickBooks, and anything waiting will queue until you connect again.',
     async () => {
-      try { await api.post('/api/settings/disconnect/quickbooks', {}); toast('QuickBooks disconnected'); booksView() }
+      try { await api.post('/api/settings/disconnect/quickbooks', {}); toast('QuickBooks desconectado'); booksView() }
       catch (e) { toast(e.message, true) }
-    }, 'Disconnect')
+    }, 'Desconectar')
 
   onOnce($('#view'), '[data-qbo-retry]', async (e) => {
     const btn = e.target.closest('[data-qbo-retry]')
-    btn.disabled = true; btn.textContent = 'Retrying…'
-    try { await api.post(`/api/qbo/queue/${btn.dataset.qboRetry}/retry`); toast('Synced to QuickBooks'); booksView() }
-    catch (err) { toast(err.message, true); btn.disabled = false; btn.textContent = 'Retry' }
+    btn.disabled = true; btn.textContent = 'Reintentaring…'
+    try { await api.post(`/api/qbo/queue/${btn.dataset.qboReintentar}/retry`); toast('Sincronizado con QuickBooks'); booksView() }
+    catch (err) { toast(err.message, true); btn.disabled = false; btn.textContent = 'Reintentar' }
   })
   onOnce($('#view'), '[data-qbo-dismiss]', async (e) => {
     const btn = e.target.closest('[data-qbo-dismiss]')
