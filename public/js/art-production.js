@@ -6,7 +6,7 @@ import { api, esc, fmtDate, guardLeave, confirmModal, go } from './core.js'
 
 const drafts = new Map()
 let active = null
-const methods = ['Screen Print', 'DTF', 'Embroidery', 'UV DTF', 'Vinyl', 'Patch', 'Laser', 'Other']
+const methods = ['Screen Print', 'DTF', 'Embroidery', 'UV DTF', 'Vinyl', 'Patch', 'Laser', 'Otro']
 const checked = value => value ? ' checked' : ''
 const bytes = size => Number(size) >= 1048576 ? `${(Number(size) / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.ceil(Number(size || 0) / 1024))} KB`
 const safeUrl = value => {
@@ -39,33 +39,33 @@ export function artProductionContent(data, draft, manager, jobId) {
     const files = data[`${role}_files`] || []
     return files.length ? `<ul class="artp-files">${files.map(file => `<li><div>${fileLink(file)}<small>${esc(file.mime || 'File')} · ${bytes(file.size)}</small>${file.sha256 ? `<details><summary>File fingerprint</summary><code>${esc(file.sha256)}</code></details>` : ''}</div></li>`).join('')}</ul>` : `<p class="artp-muted">${role === 'source' ? 'Keep the customer’s original artwork here.' : 'Add the files your team will actually print, cut or stitch.'}</p>`
   }
-  const upload = role => `<form class="artp-upload" data-artp-upload="${role}"><label class="artp-file-picker">Choose ${role === 'source' ? 'original' : 'production file'}<input type="file" name="file" accept="${esc(accept)}" aria-describedby="artp-message-${jobId}" aria-label="Choose ${role === 'source' ? 'original artwork' : 'prepared production file'}"></label><span class="artp-selected" data-artp-selected="${role}">${esc(draft.files[role]?.name || 'No file chosen')} · ${bytes(limit)} maximum</span><button class="btn ghost" type="submit"${draft.files[role] ? '' : ' disabled'}>Upload file</button></form>`
-  const selections = role => `<fieldset class="artp-file-selection"><legend>${role === 'source' ? 'Originals used (optional)' : 'Production files reviewed'}</legend>${(data[`${role}_files`] || []).map(file => `<label class="artp-check"><input type="checkbox" name="${role}_asset" value="${file.id}"${checked(draft[role].includes(file.id))}><span>${esc(file.original_name || `File ${file.id}`)}</span></label>`).join('') || `<p class="artp-muted">${role === 'source' ? 'No original files attached.' : 'Upload at least one production file first.'}</p>`}</fieldset>`
+  const upload = role => `<form class="artp-upload" data-artp-upload="${role}"><label class="artp-file-picker">Choose ${role === 'source' ? 'original' : 'production file'}<input type="file" name="file" accept="${esc(accept)}" aria-describedby="artp-message-${jobId}" aria-label="Choose ${role === 'source' ? 'original artwork' : 'prepared production file'}"></label><span class="artp-selected" data-artp-selected="${role}">${esc(draft.files[role]?.name || 'Ningún archivo seleccionado')} · ${bytes(limit)} maximum</span><button class="btn ghost" type="submit"${draft.files[role] ? '' : ' disabled'}>Upload file</button></form>`
+  const selections = role => `<fieldset class="artp-file-selection"><legend>${role === 'source' ? 'Originales utilizados (opcional)' : 'Archivos de producción revisados'}</legend>${(data[`${role}_files`] || []).map(file => `<label class="artp-check"><input type="checkbox" name="${role}_asset" value="${file.id}"${checked(draft[role].includes(file.id))}><span>${esc(file.original_name || `File ${file.id}`)}</span></label>`).join('') || `<p class="artp-muted">${role === 'source' ? 'No hay archivos originales adjuntos.' : 'Primero sube al menos un archivo de producción.'}</p>`}</fieldset>`
   const input = (name, label, options = '') => `<label class="artp-field">${label}<input class="input" name="${name}" value="${esc(draft[name])}" ${options}></label>`
   const methodOptions = [...new Set([draft.method, ...methods].filter(Boolean))]
   return `<div class="card-h"><h3>Production files & review</h3></div><div class="card-b artp-body">
-    <div class="artp-status-row"><span>Customer appearance</span><strong>${appearance ? `v${appearance.version} · ${approved ? 'Approved' : esc(appearance.status)}` : 'No proof'}</strong></div>
+    <div class="artp-status-row"><span>Customer appearance</span><strong>${appearance ? `v${appearance.version} · ${approved ? 'Aprobado' : esc(appearance.status)}` : 'Sin prueba'}</strong></div>
     ${appearanceUrl ? `<a class="artp-proof-link" href="${appearanceUrl}" target="_blank" rel="noopener">View current proof</a>` : ''}
-    <div class="artp-status-row"><span>Technical review</span><strong class="${data.technical_ready ? 'artp-ready' : ''}">${data.technical_ready ? 'Released for production' : 'Not released'}</strong></div>
+    <div class="artp-status-row"><span>Technical review</span><strong class="${data.technical_ready ? 'artp-ready' : ''}">${data.technical_ready ? 'Liberado para producción' : 'No liberado'}</strong></div>
     <p class="artp-muted">Customer approval records the appearance. A shop reviewer checks the separate production files for the equipment and method.</p>
-    ${data.release && data.technical_ready ? `<div class="artp-record"><p>Reviewed by ${esc(data.release.reviewed_by || 'Shop reviewer')} · ${fmtDate(data.release.reviewed_at)}</p>${reviewedSpecs.method ? `<p>${esc(reviewedSpecs.method)} · ${esc(reviewedSpecs.print_width)} × ${esc(reviewedSpecs.print_height)} ${esc(reviewedSpecs.units)}</p>` : ''}${reviewedSpecs.machine_profile ? `<p>${esc(reviewedSpecs.machine_profile)}</p>` : ''}${reviewedSpecs.ink_notes ? `<p>${esc(reviewedSpecs.ink_notes)}</p>` : ''}${data.release.notes ? `<p>${esc(data.release.notes)}</p>` : ''}</div>` : ''}
+    ${data.release && data.technical_ready ? `<div class="artp-record"><p>Reviewed by ${esc(data.release.reviewed_by || 'Revisor del negocio')} · ${fmtDate(data.release.reviewed_at)}</p>${reviewedSpecs.method ? `<p>${esc(reviewedSpecs.method)} · ${esc(reviewedSpecs.print_width)} × ${esc(reviewedSpecs.print_height)} ${esc(reviewedSpecs.units)}</p>` : ''}${reviewedSpecs.machine_profile ? `<p>${esc(reviewedSpecs.machine_profile)}</p>` : ''}${reviewedSpecs.ink_notes ? `<p>${esc(reviewedSpecs.ink_notes)}</p>` : ''}${data.release.notes ? `<p>${esc(data.release.notes)}</p>` : ''}</div>` : ''}
     ${data.blocking_reasons?.length ? `<ul class="artp-reasons">${data.blocking_reasons.map(reason => `<li>${esc(reason)}</li>`).join('')}</ul>` : ''}
     <section class="artp-section"><h4>Original artwork</h4>${list('source')}${upload('source')}</section>
     <section class="artp-section"><h4>Prepared production files</h4>${list('production')}${upload('production')}</section>
     <div class="artp-message" id="artp-message-${jobId}" role="status" aria-live="polite" data-artp-message></div>
-    <button class="btn ghost" type="button" data-artp-refresh>Refresh files</button>
+    <button class="btn ghost" type="button" data-artp-refresh>Actualizar archivos</button>
     ${manager ? `<details class="artp-review"${draft.reviewOpen ? ' open' : ''}><summary>Review and release</summary>
       <form data-artp-review>
         <p class="artp-muted">Open and check the files below. This records your review; the software does not verify separations, stitch files or machine output.</p>
         <p data-artp-proof-note>Current customer proof: ${appearance ? `v${appearance.version} · ${approved ? 'approved' : esc(appearance.status)}` : 'none'}. ${approved ? '' : 'An approved current proof is needed to release.'}</p>
         ${selections('production')}${selections('source')}
         <label class="artp-field">Decoration method<select class="input" name="method" required aria-required="true"><option value="">Choose method</option>${methodOptions.map(method => `<option value="${esc(method)}"${draft.method === method ? ' selected' : ''}>${esc(method)}</option>`).join('')}</select></label>
-        <div class="artp-dimensions">${input('print_width', 'Reviewed width', 'type="number" min="0.001" step="any" inputmode="decimal" required aria-required="true"')}${input('print_height', 'Reviewed height', 'type="number" min="0.001" step="any" inputmode="decimal" required aria-required="true"')}<label class="artp-field">Units<select class="input" name="units"><option value="in"${draft.units === 'in' ? ' selected' : ''}>Inches</option><option value="cm"${draft.units === 'cm' ? ' selected' : ''}>Centimeters</option><option value="mm"${draft.units === 'mm' ? ' selected' : ''}>Millimeters</option></select></label></div>
+        <div class="artp-dimensions">${input('print_width', 'Ancho revisado', 'type="number" min="0.001" step="any" inputmode="decimal" required aria-required="true"')}${input('print_height', 'Reviewed height', 'type="number" min="0.001" step="any" inputmode="decimal" required aria-required="true"')}<label class="artp-field">Units<select class="input" name="units"><option value="in"${draft.units === 'in' ? ' selected' : ''}>Inches</option><option value="cm"${draft.units === 'cm' ? ' selected' : ''}>Centimeters</option><option value="mm"${draft.units === 'mm' ? ' selected' : ''}>Millimeters</option></select></label></div>
         <p class="artp-muted">Enter the dimensions you checked; this does not resize or generate a file. Record multiple placements and machine-specific requirements in the review notes.</p>
-        ${input('ink_notes', 'Inks / thread / material notes', 'maxlength="2000"')}${input('machine_profile', 'Machine / RIP / stitch profile', 'maxlength="500"')}
+        ${input('ink_notes', 'Notas de tintas / hilo / material', 'maxlength="2000"')}${input('machine_profile', 'Machine / RIP / stitch profile', 'maxlength="500"')}
         <label class="artp-field">Review notes<textarea class="input" name="notes" rows="3" maxlength="2000">${esc(draft.notes)}</textarea></label>
         <label class="artp-check artp-confirm"><input type="checkbox" name="reviewed_confirmed" required aria-required="true"${checked(draft.confirmed)}><span>I checked the selected files, dimensions and equipment requirements against the current approved proof.</span></label>
-        <p class="artp-muted" data-artp-draft-note>${draft.dirty ? 'Review edits are not saved.' : ''}</p>
+        <p class="artp-muted" data-artp-draft-note>${draft.dirty ? 'Los cambios de revisión no están guardados.' : ''}</p>
         <p class="artp-muted">Recording a release also requires a new review when this job’s proof or files change.</p><button class="btn" type="submit"${!approved || !(data.production_files || []).length ? ' disabled' : ''}>Release for production</button>
       </form>
     </details>
@@ -90,7 +90,7 @@ export async function mountArtProduction(root, jobId, job) {
   guardLeave(to => {
     if (!root.isConnected || !pending()) return true
     if (busy) { message('Wait for the current file operation to finish before leaving.', true); return false }
-    confirmModal('Leave without saving?', 'The review edits and selected uploads are only in this browser. Leaving discards them.', () => { drafts.delete(key); draft.dirty = false; draft.files = {}; draft.revokeNote = ''; go(to) }, 'Discard changes')
+    confirmModal('¿Salir sin guardar?', 'The review edits and selected uploads are only in this browser. Leaving discards them.', () => { drafts.delete(key); draft.dirty = false; draft.files = {}; draft.revokeNote = ''; go(to) }, 'Discard changes')
     return false
   })
   function message(text, error = false) {
@@ -135,8 +135,8 @@ export async function mountArtProduction(root, jobId, job) {
     } catch (error) {
       if (!root.isConnected) return
       stale = true
-      if (!data) root.innerHTML = `<div class="card-h"><h3>Production files & review</h3></div><div class="card-b artp-body"><p role="alert">${esc(error.message)}</p><button class="btn ghost" type="button" data-artp-refresh>Retry loading files</button></div>`
-      else message(`${success ? `${success} The file list could not refresh. ` : ''}${error.message} Refresh files before another change.`, true)
+      if (!data) root.innerHTML = `<div class="card-h"><h3>Production files & review</h3></div><div class="card-b artp-body"><p role="alert">${esc(error.message)}</p><button class="btn ghost" type="button" data-artp-refresh>Reintentar cargar archivos</button></div>`
+      else message(`${success ? `${success} The file list could not refresh. ` : ''}${error.message} Actualizar archivos before another change.`, true)
       const retry = root.querySelector('[data-artp-refresh]'); if (retry) retry.onclick = () => refresh('', true)
     } finally {
       busy = false; root.removeAttribute('aria-busy'); syncDisabled()
@@ -150,7 +150,7 @@ export async function mountArtProduction(root, jobId, job) {
       el.disabled = busy || stale || (uploadRole ? !draft.files[uploadRole] : el.closest('[data-artp-review]') ? !data?.appearance?.approved || !data?.production_files?.length : el.matches('[data-artp-required]') && data?.appearance?.purpose === 'appearance_mockup')
     })
     const button = root.querySelector('[data-artp-refresh]')
-    if (button) { button.disabled = busy; button.textContent = busy ? 'Refreshing…' : data ? 'Refresh files' : 'Retry loading files' }
+    if (button) { button.disabled = busy; button.textContent = busy ? 'Refreshing…' : data ? 'Actualizar archivos' : 'Reintentar cargar archivos' }
   }
   async function mutate(path, body, button, success, after) {
     if (busy || stale) return
@@ -166,7 +166,7 @@ export async function mountArtProduction(root, jobId, job) {
         stale = true; draft.confirmed = false
         const confirm = root.querySelector('[name="reviewed_confirmed"]'); if (confirm) confirm.checked = false
       }
-      message(`${error.message}${stale ? ' Refresh files before retrying; your review notes are kept.' : ''}`, true)
+      message(`${error.message}${stale ? ' Actualizar archivos before retrying; your review notes are kept.' : ''}`, true)
     } finally {
       busy = false; root.removeAttribute('aria-busy')
       if (button) button.textContent = oldLabel
@@ -183,12 +183,12 @@ export async function mountArtProduction(root, jobId, job) {
         const limit = Number(data.max_file_bytes) || 40 * 1024 * 1024
         if (file && file.size > limit) {
           delete draft.files[role]; form.elements.file.value = ''; form.elements.file.setAttribute('aria-invalid', 'true')
-          root.querySelector(`[data-artp-selected="${role}"]`).textContent = 'No file chosen'
+          root.querySelector(`[data-artp-selected="${role}"]`).textContent = 'Ningún archivo seleccionado'
           message(`That file exceeds ${bytes(limit)}. Choose a smaller file.`, true); syncDisabled(); return
         }
         form.elements.file.removeAttribute('aria-invalid')
         if (file) draft.files[role] = file; else delete draft.files[role]
-        root.querySelector(`[data-artp-selected="${role}"]`).textContent = file?.name || 'No file chosen'
+        root.querySelector(`[data-artp-selected="${role}"]`).textContent = file?.name || 'Ningún archivo seleccionado'
         syncDisabled()
       }
       form.onsubmit = async event => {
@@ -203,7 +203,7 @@ export async function mountArtProduction(root, jobId, job) {
     if (review) {
       review.closest('details').ontoggle = event => { draft.reviewOpen = event.target.open }
       review.addEventListener('invalid', event => { event.target.setAttribute('aria-invalid', 'true') }, true)
-      review.oninput = event => { capture(review); draft.dirty = true; event.target.removeAttribute('aria-invalid'); root.querySelector('[data-artp-draft-note]').textContent = 'Review edits are not saved.' }
+      review.oninput = event => { capture(review); draft.dirty = true; event.target.removeAttribute('aria-invalid'); root.querySelector('[data-artp-draft-note]').textContent = 'Los cambios de revisión no están guardados.' }
       review.onchange = review.oninput
       review.onsubmit = async event => {
         event.preventDefault(); capture(review)
@@ -219,7 +219,7 @@ export async function mountArtProduction(root, jobId, job) {
     const requirement = root.querySelector('[data-artp-required]')
     if (requirement) requirement.onchange = async () => {
       const required = requirement.checked
-      await mutate('art-production/require', { revision: data.revision, required }, null, required ? 'Technical release is now required.' : 'Technical release is optional. File review status is unchanged.')
+      await mutate('art-production/require', { revision: data.revision, required }, null, required ? 'Ahora se requiere liberación técnica.' : 'Technical release is optional. File review status is unchanged.')
       requirement.checked = !!data.required
     }
     const revoke = root.querySelector('[data-artp-revoke]')
