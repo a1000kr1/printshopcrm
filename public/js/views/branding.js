@@ -10,7 +10,7 @@ window.addEventListener('beforeunload', (e) => {
   }
 })
 export async function brandingView() {
-  setPage('Make it yours', '<a class="btn ghost" href="#/setup">Setup guide</a>')
+  setPage('Hazlo tuyo', '<a class="btn ghost" href="#/setup">Setup guide</a>')
   if (window.__me?.can_manage === false) {
     $('#view').innerHTML =
       '<p>An owner or manager changes the shop’s branding. You can switch light and dark mode from the header.</p>'
@@ -21,22 +21,22 @@ export async function brandingView() {
   const colorField = (key, label, fallback) =>
     `<div class="field"><label for="${key}">${label}</label><div class="brand-color"><input type="color" aria-label="${label} picker" data-picker="${key}" value="${esc(s[key] || fallback)}"><input class="input" id="${key}" name="${key}" value="${esc(s[key] || '')}" placeholder="Default" maxlength="7" pattern="#[0-9a-fA-F]{6}|" autocomplete="off"></div></div>`
   $('#view').innerHTML =
-    `<div class="branding-workspace"><p>Your logo, workspace name and colors belong to this shop. Everyone on your team sees the same branding; each person can switch appearance on their device.</p><div class="branding-layout"><section class="card card-b"><h2>Your shop identity</h2><div class="logo-row"><div class="logo-prev" id="brand-logo-preview"></div><div><input id="brand-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden><button class="btn ghost" id="brand-upload">Upload logo</button><button class="btn ghost" id="brand-remove" ${s.shop_logo ? '' : 'hidden'}>Remove logo</button><p class="dim">PNG, JPG, WebP, GIF or SVG, up to 5 MB. Logo changes save immediately and appear on customer documents.</p></div></div><form id="branding-form"><label class="field" for="workspace-name">Workspace name<input class="input" id="workspace-name" name="brand_name" maxlength="120" required value="${esc(s.brand_name)}"></label><label class="field" for="workspace-tag">Workspace tagline<input class="input" id="workspace-tag" name="brand_tagline" maxlength="180" value="${esc(s.brand_tagline)}"></label><h3>Colors & appearance</h3><div class="brand-color-grid">${colorField('brand_primary', 'Primary color', '#10d39a')}${colorField('brand_secondary', 'Secondary color', '#8b7cff')}</div><label class="field" for="brand-appearance">Default appearance<select class="input" id="brand-appearance" name="brand_theme">${[
+    `<div class="branding-workspace"><p>Your logo, workspace name and colors belong to this shop. Everyone on your team sees the same branding; each person can switch appearance on their device.</p><div class="branding-layout"><section class="card card-b"><h2>Your shop identity</h2><div class="logo-row"><div class="logo-prev" id="brand-logo-preview"></div><div><input id="brand-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden><button class="btn ghost" id="brand-upload">Upload logo</button><button class="btn ghost" id="brand-remove" ${s.shop_logo ? '' : 'hidden'}>Remove logo</button><p class="dim">PNG, JPG, WebP, GIF or SVG, up to 5 MB. Logo changes save immediately and appear on customer documents.</p></div></div><form id="branding-form"><label class="field" for="workspace-name">Workspace name<input class="input" id="workspace-name" name="brand_name" maxlength="120" required value="${esc(s.brand_name)}"></label><label class="field" for="workspace-tag">Workspace tagline<input class="input" id="workspace-tag" name="brand_tagline" maxlength="180" value="${esc(s.brand_tagline)}"></label><h3>Colors & appearance</h3><div class="brand-color-grid">${colorField('brand_primary', 'Color principal', '#10d39a')}${colorField('brand_secondary', 'Color secundario', '#8b7cff')}</div><label class="field" for="brand-appearance">Default appearance<select class="input" id="brand-appearance" name="brand_theme">${[
       ['', 'Default'],
-      ['system', 'Follow device'],
-      ['light', 'Light'],
-      ['dark', 'Dark']
+      ['system', 'Seguir dispositivo'],
+      ['light', 'Claro'],
+      ['dark', 'Oscuro']
     ]
       .map(([v, label]) => `<option value="${v}" ${s.brand_theme === v ? 'selected' : ''}>${label}</option>`)
       .join(
         ''
-      )}</select></label><p class="dim">Preview before saving. We adjust shades to keep links and buttons readable; alerts keep their meaning. Leave colors blank for the defaults.</p><div class="brand-actions"><button class="btn primary">Save branding</button><button class="btn ghost" type="button" id="brand-reset">Reset colors</button></div><p id="branding-status" role="status"></p></form></section><section aria-label="Branding preview"><h2>Preview</h2><div id="brand-previews"></div><p class="dim">Example interface only. No order or payment is created.</p></section></div><p class="dim">Your workspace stays open source. Source and license links remain available.</p></div>`
+      )}</select></label><p class="dim">Preview before saving. We adjust shades to keep links and buttons readable; alerts keep their meaning. Leave colors blank for the defaults.</p><div class="brand-actions"><button class="btn primary">Save branding</button><button class="btn ghost" type="button" id="brand-reset">Reset colors</button></div><p id="branding-status" role="status"></p></form></section><section aria-label="Vista previa de marca"><h2>Preview</h2><div id="brand-previews"></div><p class="dim">Example interface only. No order or payment is created.</p></section></div><p class="dim">Your workspace stays open source. Source and license links remain available.</p></div>`
   const form = $('#branding-form')
   const values = () => Object.fromEntries(new FormData(form))
   const showLogo = () => {
     const f = s.shop_logo
     $('#brand-logo-preview').innerHTML = f
-      ? `<img src="/uploads/${encodeURIComponent(f)}" alt="Shop logo">`
+      ? `<img src="/uploads/${encodeURIComponent(f)}" alt="Logotipo del negocio">`
       : '<span class="dim">No logo</span>'
     $('#brand-remove').hidden = !f
   }
@@ -45,7 +45,7 @@ export async function brandingView() {
     $('#brand-previews').innerHTML = ['light', 'dark']
       .map(
         (mode) =>
-          `<div class="branding-preview ${mode}" data-preview="${mode}"><div class="brand-preview-head">${s.shop_logo ? `<img src="/uploads/${encodeURIComponent(s.shop_logo)}" alt="Shop logo">` : ''}<div><strong>${esc(v.brand_name || 'Your workspace')}</strong><p>${esc(v.brand_tagline)}</p></div></div><small>${mode === 'light' ? 'Light' : 'Dark'} appearance</small><h3>Ready for production</h3><p class="preview-muted">The next task, in your shop’s colors.</p><div class="brand-actions"><span class="preview-button">Open job</span><span class="preview-link">View workflow</span></div></div>`
+          `<div class="branding-preview ${mode}" data-preview="${mode}"><div class="brand-preview-head">${s.shop_logo ? `<img src="/uploads/${encodeURIComponent(s.shop_logo)}" alt="Logotipo del negocio">` : ''}<div><strong>${esc(v.brand_name || 'Your workspace')}</strong><p>${esc(v.brand_tagline)}</p></div></div><small>${mode === 'light' ? 'Claro' : 'Oscuro'} appearance</small><h3>Ready for production</h3><p class="preview-muted">The next task, in your shop’s colors.</p><div class="brand-actions"><span class="preview-button">Open job</span><span class="preview-link">View workflow</span></div></div>`
       )
       .join('')
     for (const mode of ['dark', 'light'])
@@ -56,7 +56,7 @@ export async function brandingView() {
   preview()
   form.addEventListener('input', (e) => {
     dirty = true
-    $('#branding-status').textContent = 'Preview updated · not saved'
+    $('#branding-status').textContent = 'Vista previa actualizada · sin guardar'
     const key = e.target.dataset.picker
     if (key) form.elements[key].value = e.target.value
     else if (
@@ -87,8 +87,8 @@ export async function brandingView() {
       dirty = false
       applyShopBranding(s, { resetTheme: true })
       window.dispatchEvent(new Event('psc:settings'))
-      $('#branding-status').textContent = 'Branding saved for your shop'
-      toast('Branding saved')
+      $('#branding-status').textContent = 'Identidad visual guardada para tu negocio'
+      toast('Identidad visual guardada')
     } catch (err) {
       toast(err.message, true)
     }
@@ -110,7 +110,7 @@ export async function brandingView() {
       showLogo()
       preview()
       applyShopBranding(s)
-      toast('Logo saved')
+      toast('Logotipo guardado')
     } catch (err) {
       toast(err.message, true)
     } finally {
@@ -125,7 +125,7 @@ export async function brandingView() {
       showLogo()
       preview()
       applyShopBranding(s)
-      toast('Logo removed')
+      toast('Logotipo eliminado')
     } catch (err) {
       toast(err.message, true)
     }
@@ -139,7 +139,7 @@ export async function brandingView() {
         dirty = false
         go(to)
       },
-      'Discard changes'
+      'Descartar cambios'
     )
     return false
   })
