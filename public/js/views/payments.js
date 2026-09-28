@@ -6,7 +6,7 @@ let viewSequence = 0
 export async function paymentsView() {
   const generation=++viewSequence, hash=location.hash, who=window.__me
   const current=()=>generation===viewSequence && location.hash===hash && window.__me===who
-  setPage('Payment connections','<a class="btn ghost" href="#/setup">Back to setup</a>')
+  setPage('Pago connections','<a class="btn ghost" href="#/setup">Back to setup</a>')
   let s, setup
   try { [{settings:s},setup]=await Promise.all([api.get('/api/settings'),api.get('/api/payments/setup').catch(e=>{if(e.status===403)return null;throw e})]) }
   catch(e) { if(!current())return; if(e.status===403) { $('#view').innerHTML='<p>An owner or manager connects payment accounts.</p>';return } throw e }
@@ -15,7 +15,7 @@ export async function paymentsView() {
   if(window.__EDITION==='lite') { $('#view').innerHTML='<p>This installation uses Stripe Connect. <a href="#/settings?section=online">Manage its payment account in Settings.</a></p><div id="payment-collections"></div>';await mountCollections($('#payment-collections'));return }
   const secret=(key,label,hint)=>`<div class="field"><label for="pay-${key}">${label}</label><input class="input" type="password" autocomplete="new-password" name="${key}" id="pay-${key}" placeholder="${s[key+'_set'] ? 'Saved — leave blank to keep' : 'Paste credential'}"><small class="dim">${hint}</small></div>`
   const text=(key,label)=>`<div class="field"><label for="pay-${key}">${label}</label><input class="input" name="${key}" id="pay-${key}" value="${esc(s[key] || '')}"></div>`
-  const callback=(id,url)=>url ? `<label for="${id}">Callback URL</label><input class="input" readonly id="${id}" value="${esc(url)}"><button class="btn ghost" type="button" data-copy="${id}">Copy URL</button>${!url.startsWith('https://') ? '<p class="setup-status">Local preview only. Payment callbacks need the public HTTPS address of your installation.</p>' : ''}` : '<p>Set your public HTTPS address before enabling payment callbacks.</p>'
+  const callback=(id,url)=>url ? `<label for="${id}">Callback URL</label><input class="input" readonly id="${id}" value="${esc(url)}"><button class="btn ghost" type="button" data-copy="${id}">Copy URL</button>${!url.startsWith('https://') ? '<p class="setup-status">Local preview only. Pago callbacks need the public HTTPS address of your installation.</p>' : ''}` : '<p>Set your public HTTPS address before enabling payment callbacks.</p>'
   $('#view').innerHTML=`<div class="setup-workspace">
     <header class="setup-intro"><h1>Get paid into your account.</h1><p>Choose a provider for invoice deposits, balances and gang-sheet checkout. You can always record cash, checks, bank transfers or payments taken elsewhere on an invoice. AI is never required.</p></header>
     <form id="payment-form">
