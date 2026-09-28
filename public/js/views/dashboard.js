@@ -3,7 +3,7 @@ import { api, $, el, esc, money0, money, fmtDate, relTime, pill, setPage, empty,
 const ICON = { estimate: '▤', invoice: '▣', payment: '⊕', job: '▦', stage: '→', art: '◈', contact: '◉', note: '✎' }
 
 export async function dashboardView() {
-  setPage('Dashboard', `<button class="btn" id="new-est">+ New Estimate</button>`)
+  setPage('Panel', `<button class="btn" id="new-est">+ Nueva cotización</button>`)
   $('#view').innerHTML = skeleton('dashboard')
   const [d, ob] = await Promise.all([api.get('/api/dashboard'), api.get('/api/onboarding').catch(() => null)])
   const k = d.kpis
@@ -48,7 +48,7 @@ export async function dashboardView() {
         <td class="muted">${esc(j.contact_name || '—')}</td>
         <td><span style="text-decoration:line-through;color:var(--txt-3)">${fmtDate(j.due_date)}</span></td>
         <td><strong style="color:var(--amber)">${fmtDate(j.projected_due)}</strong> <span class="dim" style="font-size:11px">+${j.slip}d</span></td>
-        <td class="num">${j.waiting_days != null ? `<span style="color:${j.waiting_days >= 2 ? 'var(--red)' : 'var(--txt-2)'}">${j.waiting_days} day${j.waiting_days === 1 ? '' : 's'}</span>` : '<span class="dim">no proof sent</span>'}</td>
+        <td class="num">${j.waiting_days != null ? `<span style="color:${j.waiting_days >= 2 ? 'var(--red)' : 'var(--txt-2)'}">${j.waiting_days} day${j.waiting_days === 1 ? '' : 's'}</span>` : '<span class="dim">sin prueba enviada</span>'}</td>
       </tr>`).join('')}</tbody></table>
       <div class="card-b" style="border-top:1px solid var(--line);padding:10px 16px">
         <span class="dim" style="font-size:11.5px">Turnaround starts at art approval, not at order. These dates already slipped — the customer just doesn't know yet.</span>
@@ -72,7 +72,7 @@ export async function dashboardView() {
         </div>
 
         ${d.awaiting_art.length ? `<div class="card">
-          <div class="card-h"><h3>Waiting on Customer Art Approval</h3><div class="spacer"></div><span class="pill amber">${d.awaiting_art.length} stuck</span></div>
+          <div class="card-h"><h3>Waiting on Customer Art Approval</h3><div class="spacer"></div><span class="pill amber">${d.awaiting_art.length} detenidos</span></div>
           <table class="tbl"><tbody>${d.awaiting_art.map(jobRow).join('')}</tbody></table></div>` : ''}
       </div>
 
