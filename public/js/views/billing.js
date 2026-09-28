@@ -2,7 +2,7 @@ import { api, $, esc, setPage, on, toast } from '../core.js'
 
 // The software is free. This screen manages optional server hosting and basic setup.
 export async function billingView() {
-  setPage('Hosting')
+  setPage('Alojamiento')
   const [d, me] = await Promise.all([api.get('/api/billing'), api.get('/api/auth/me').catch(() => ({}))])
   const st = d.state || {}
   const plans = d.plans || {}
@@ -42,9 +42,9 @@ export async function billingView() {
       <ul class="plan-feats">${p.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
       ${isCurrent ? '<button class="btn ghost" disabled>Current plan</button>'
         : !canManage ? '<p class="dim">Your shop owner manages hosting.</p>'
-        : pending || needsReview ? `<button class="btn ghost" disabled>${needsReview ? 'Resolve the payment review first' : 'Resolve the saved checkout first'}</button>`
+        : pending || needsReview ? `<button class="btn ghost" disabled>${needsReview ? 'Resuelve primero la revisión del pago' : 'Resolve the saved checkout first'}</button>`
         : manageExisting ? '<button class="btn ghost" disabled>Use Manage hosting below</button>'
-        : `<button class="btn ${p.popular ? '' : 'ghost'}" data-plan="${key}">${isFree ? 'Start on Free' : (st.subscribed ? 'Switch to ' + esc(p.name) : 'Choose ' + esc(p.name))}</button>`}
+        : `<button class="btn ${p.popular ? '' : 'ghost'}" data-plan="${key}">${isFree ? 'Comenzar con Gratis' : (st.subscribed ? 'Switch to ' + esc(p.name) : 'Choose ' + esc(p.name))}</button>`}
     </div>`
   }
 
@@ -61,7 +61,7 @@ export async function billingView() {
       <div class="card-h"><h3 id="hosting-recovery-title">${needsReview ? 'Hosting payment needs review' : 'Continue your hosting checkout'}</h3></div>
       <div class="card-b">
         <p>${esc(messages[intent?.state] || 'A hosting payment needs to be checked by the server operator before another checkout can begin.')}</p>
-        ${intent ? `<p class="dim">${esc(plans[intent.plan]?.name || 'Managed hosting')} · ${intent.interval === 'year' ? 'Annual' : 'Monthly'}</p>` : ''}
+        ${intent ? `<p class="dim">${esc(plans[intent.plan]?.name || 'Alojamiento administrado')} · ${intent.interval === 'year' ? 'Anual' : 'Mensual'}</p>` : ''}
         ${needsReview ? `<p>${needsVerification ? 'A received hosting payment is awaiting verification.' : 'A payment could not be matched safely to this shop.'} Contact the server operator before paying again.</p>` : ''}
         <div class="row hosting-recovery-actions">
           ${d.live && intent?.can_retry && !needsReview ? '<button type="button" class="btn" id="hosting-resume">Continue checkout</button>' : ''}
@@ -91,8 +91,8 @@ export async function billingView() {
     ${banner()}
     ${checkoutCard()}
     ${d.live ? `<div class="bill-toggle">
-      <button type="button" class="${interval === 'month' ? 'on' : ''}" data-int="month" aria-pressed="${interval === 'month'}">Monthly</button>
-      <button type="button" class="${interval === 'year' ? 'on' : ''}" data-int="year" aria-pressed="${interval === 'year'}">Annual · 2 months free</button>
+      <button type="button" class="${interval === 'month' ? 'on' : ''}" data-int="month" aria-pressed="${interval === 'month'}">Mensual</button>
+      <button type="button" class="${interval === 'year' ? 'on' : ''}" data-int="year" aria-pressed="${interval === 'year'}">Anual · 2 months free</button>
     </div>
     <div class="plans">${order.map(planCard).join('')}</div>` : `<div class="card"><div class="card-b">
       <h3>Run it yourself, or let us host it</h3>
@@ -154,7 +154,7 @@ export async function billingView() {
       try {
         const result=await api.post(path,payload)
         if(openCheckout && result.url) { location.href=result.url;return }
-        toast(result.intent?.state === 'complete' ? 'Hosting payment confirmed.' : result.intent?.state === 'expired' ? 'Unpaid checkout closed.' : 'Pago status checked. Review the details below.')
+        toast(result.intent?.state === 'complete' ? 'Pago de alojamiento confirmado.' : result.intent?.state === 'expired' ? 'Proceso de pago sin pagar cerrado.' : 'Pago status checked. Review the details below.')
       } catch(error) { toast(error.message,true) }
       finally { recovering=false;await rerender() }
     }
@@ -165,7 +165,7 @@ export async function billingView() {
     recoveryAction('#hosting-expire','/api/billing/checkout/expire',()=>({}))
     recoveryAction('#hosting-recover','/api/billing/checkout/reconcile',()=>{
       const id=$('#hosting-session-id').value.trim()
-      if(!/^cs_[A-Za-z0-9_]{1,200}$/.test(id)) { toast('Enter the Checkout Session ID from Stripe.',true);return null }
+      if(!/^cs_[A-Za-z0-9_]{1,200}$/.test(id)) { toast('Ingresa el ID de sesión de pago de Stripe.',true);return null }
       return {session_id:id}
     })
   }
@@ -173,10 +173,10 @@ export async function billingView() {
   if (me.is_admin) $('#pk-save').onclick = async () => {
     const secret = $('#pk-secret').value.trim()
     const webhook_secret = $('#pk-webhook').value.trim()
-    if (!secret && !webhook_secret) { toast('Paste your platform secret key'); return }
+    if (!secret && !webhook_secret) { toast('Pega la clave secreta de tu plataforma'); return }
     try {
       const r = await api.post('/api/admin/billing', { platform_secret: secret, webhook_secret })
-      toast(r.live ? 'Stripe connected — billing is live' : 'Saved')
+      toast(r.live ? 'Stripe connected — billing is live' : 'Guardado')
       rerender()
     } catch (e) { toast(e.message, true) }
   }
