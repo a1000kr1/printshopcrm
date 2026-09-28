@@ -2,7 +2,7 @@ import { api, $, $$, esc, money, fmtDate, setPage, toast, go, on, modal, closeMo
 import { mountShipments } from '../shared/shipments.js'
 
 /**
- * Order board — the lite edition's whiteboard. Five columns (Estimate → Paid → Mockup Approved →
+ * Pedido board — the lite edition's whiteboard. Five columns (Estimate → Paid → Mockup Approved →
  * Printing → Shipped) and one card per order, dragged by hand. Deliberately dumb: a card sits where
  * a person put it. Payments and mockup approvals nudge a card FORWARD server-side, never back, so
  * nobody's manual move gets undone by a late deposit.
@@ -14,7 +14,7 @@ import { mountShipments } from '../shared/shipments.js'
 const STAGE_TONE = { quote: 'gray', paid: 'green', mockup: 'blue', printing: 'amber', shipped: 'green' }
 
 export async function ordersView() {
-  setPage('Orders', '<button class="btn ghost" id="ob-refresh">Refresh</button>')
+  setPage('Pedidos', '<button class="btn ghost" id="ob-refresh">Refresh</button>')
   const d = await api.get('/api/orders')
 
   const card = (c) => {
