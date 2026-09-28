@@ -160,7 +160,7 @@ function render() {
 }
 
 /* -------------------------------------------------------------------------------------------------
- * A step's form exists only in the browser until "Save & continue" — saveConfiguración() is wired to
+ * A step's form exists only in the browser until "Save & continue" — saveSettings() is wired to
  * that button and to nothing else. The nine-item rail beside the form, "Atrás", and
  * "Finalizar later — take me in →" all repainted straight over it. A shop copying a Twilio SID, auth
  * token and number across from another tab, who then clicks a rail item — which is what a rail is
@@ -169,7 +169,7 @@ function render() {
  * work.
  *
  * The offer is to SAVE rather than to discard, because that is this wizard's own promise: every
- * step is optional and saves as you go. saveConfiguración() here is the exact write the Siguiente button
+ * step is optional and saves as you go. saveSettings() here is the exact write the Siguiente button
  * performs.
  * ---------------------------------------------------------------------------------------------- */
 let stepDirty = false
@@ -182,7 +182,7 @@ async function leaveStep(then) {
   confirmModal('Save this step first?',
     'What you typed on this screen has not been saved yet.',
     async () => {
-      try { await saveConfiguración(form); await markStep(FLOW[state.i], 'done') } catch (e) { toast(e.message, true) }
+      try { await saveSettings(form); await markStep(FLOW[state.i], 'done') } catch (e) { toast(e.message, true) }
       stepDirty = false
       then()
     }, 'Save and continue')
@@ -390,7 +390,7 @@ function markStep(key, status) {
   return api.post('/api/onboarding/step', { key, status })
     .catch((e) => { console.warn('setup step not recorded', e); toast('Saved — but the setup checklist could not be updated', true) })
 }
-function saveConfiguración(root) {
+function saveSettings(root) {
   const out = {}
   for (const el of $$('[name]', root)) out[el.name] = el.type === 'number' && el.value === '' ? '' : el.value
   return api.put('/api/settings', out)
@@ -498,7 +498,7 @@ function wire(key) {
       // shop's own address/number, so ask where it should land (prefilled with a sensible guess).
       try {
         const form = $('#ob-form')
-        if (form && $$('[name]', form).length) await saveConfiguración(form)
+        if (form && $$('[name]', form).length) await saveSettings(form)
       } catch (e) { note.textContent = `Could not save: ${e.message}`; return }
       const guess = channel === 'email'
         ? (($('[name=smtp_from]') || {}).value || ($('[name=smtp_user]') || {}).value || '').trim()
@@ -550,7 +550,7 @@ function wire(key) {
   if (key === 'distributors') {
     $('#dist-check').onclick = async () => {
       const note = $('#dist-note'); note.textContent = 'Saving & checking…'
-      try { await saveConfiguración($('#ob-form')); const st = await api.get('/api/suppliers/status')
+      try { await saveSettings($('#ob-form')); const st = await api.get('/api/suppliers/status')
         note.innerHTML = st.connected ? `<span style="color:var(--accent)">✓ Connected: ${[st.ss && 'S&S', st.sanmar && 'SanMar', st.alpha && 'AlphaBroder'].filter(Boolean).join(', ')}</span>` : '<span style="color:var(--amber)">No distributor connected yet — check the credentials.</span>'
         announce(st.connected
           ? `Distributor connected: ${[st.ss && 'S&S', st.sanmar && 'SanMar', st.alpha && 'AlphaBroder'].filter(Boolean).join(', ')}`
@@ -570,7 +570,7 @@ function wire(key) {
     next.disabled = true; next.textContent = 'Saving…'
     try {
       const form = $('#ob-form')
-      if (form && $$('[name]', form).length) await saveConfiguración(form)
+      if (form && $$('[name]', form).length) await saveSettings(form)
       if (key === 'pricing') {
         const svc = {}; $$('[data-svc]').forEach((el) => { svc[el.dataset.svc] = el.value })
         // No .catch here. This is the shop's per-service pricing — the numbers every quote it
