@@ -54,7 +54,7 @@ test('shipment rows escape customer text and distinguish recorded, dispatched, l
   const f=fixture(),r={id:1,kind:'parcel',carrier:'<UPS>',tracking_number:'<script>',note:'A & B',created_at:'2026-09-04',created_by:'Sam',status:'recorded',dispatched_on:'',history:[]}
   const html=f.ctx.rows({records:[r]});assert.match(html,/&lt;script&gt;/);assert.doesNotMatch(html,/<script>/);assert.match(html,/Referencia registrada/);assert.doesNotMatch(html,/Despacho registrado/)
   assert.match(f.ctx.rows({records:[{...r,dispatched_on:'2026-09-04'}]}),/Despacho registrado/)
-  assert.match(f.ctx.rows({records:[{...r,status:'void',dispatched_on:'2026-09-04'}]}),/Voided/)
+  assert.match(f.ctx.rows({records:[{...r,status:'void',dispatched_on:'2026-09-04'}]}),/Anulado/)
   assert.match(f.ctx.rows({records:[{...r,kind:'legacy_unspecified',created_at:null}]}),/original date unknown/)
 })
 
