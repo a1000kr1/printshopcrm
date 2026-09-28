@@ -8697,7 +8697,7 @@ const CHAT_WIDGET_JS = String.raw`(function(){
       '<div class="body" id="body"></div><div class="quick" id="quick"></div>'+
       '<div class="ft"><input id="in" placeholder="Type a message..." autocomplete="off"><button id="send">Send</button></div>'+
       '<div class="powered">Powered by <a href="https://printshopcrm.com" target="_blank" rel="noopener">PrintShopCRM</a>'+
-      ' · <a href="__PSC_SOURCE_URL__" target="_blank" rel="noopener noreferrer" class="source-link">Source · AGPL-3.0</a></div></div>';
+      ' · <a href="__PSC_SOURCE_URL__" target="_blank" rel="noopener noreferrer" class="source-link">Código fuente · AGPL-3.0</a></div></div>';
 
   var $=function(id){return root.getElementById(id)};
   function api(path,body){return fetch(ORIGIN+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({shop:KEY},body||{}))}).then(function(r){return r.json()})}
@@ -9842,7 +9842,7 @@ const EDITION = process.env.PSC_EDITION === 'lite' ? 'lite' : 'pro'
 const BRAND_NAME = process.env.PSC_BRAND_NAME || (EDITION === 'lite' ? 'InkVoice' : 'PrintShopCRM')
 const BRAND_TAG = process.env.PSC_BRAND_TAG || (EDITION === 'lite'
   ? 'Estimates & invoices for print shops — no fuss.'
-  : "The print shop management system that doesn't need a separate CRM")
+  : "El sistema de gestión para imprentas que no necesita un CRM adicional")
 const BRAND_ACCENT = process.env.PSC_BRAND_ACCENT || (EDITION === 'lite' ? '#2563eb' : '')
 // A rounded-square favicon in the brand accent with the brand's first initial.
 const faviconFor = (accent, letter) => `data:image/svg+xml,${encodeURIComponent(
@@ -9893,7 +9893,7 @@ const hostBadgeHtml = () => {
 const SOURCE_URL = safeHttpUrl(process.env.PSC_SOURCE_URL) || 'https://github.com/ColeLundstrom/printshopcrm'
 const sourceLinkHtml = () =>
   `<a class="source-link" href="${htmlEscape(SOURCE_URL)}" target="_blank" rel="noopener noreferrer"
-      title="This software is free and open source (AGPL-3.0). Click for the source code.">Source · AGPL-3.0</a>`
+      title="This software is free and open source (AGPL-3.0). Click for the source code.">Código fuente · AGPL-3.0</a>`
 
 /**
  * The same offer, on the pages that are NOT the app shell.
