@@ -9,17 +9,17 @@ import { contactForm } from './contacts.js'
  */
 const STAGE_COLOR = { lead: '#5f6b7d', quoted: '#7c6cff', sent: '#4aa8ff', negotiation: '#f7b955', won: '#10d39a', lost: '#ff5f6d' }
 // Mirrors lib/pipeline.mjs STAGES. The board's only way to change a stage was to DRAG a card, so a
-// deal could never be marked Won or Lost without a mouse: no keyboard path, and after the touch
+// deal could never be marked Ganado or Perdido without a mouse: no keyboard path, and after the touch
 // fix in wireDnd() no finger path either. The stage was printed in the deal as dead text.
 const STAGE_OPTIONS = [
-  ['lead', 'Lead'], ['quoted', 'Quoted'], ['sent', 'Sent'],
-  ['negotiation', 'Negotiating'], ['won', 'Won'], ['lost', 'Lost'],
+  ['lead', 'Prospecto'], ['quoted', 'Quoted'], ['sent', 'Sent'],
+  ['negotiation', 'Negotiating'], ['won', 'Ganado'], ['lost', 'Perdido'],
 ]
 let dragEndedAt = 0
 let st = null
 
 export async function pipelineView() {
-  setPage('Pipeline', `<button class="btn" id="new-opp">+ New Opportunity</button>`)
+  setPage('Embudo', `<button class="btn" id="new-opp">+ New Opportunity</button>`)
   if (!$('#pipe')) $('#view').innerHTML = '<div class="dim">Loading…</div>'
   const d = await api.get('/api/pipeline')
 
@@ -27,8 +27,8 @@ export async function pipelineView() {
     <div class="kpis">
       <div class="kpi info"><div class="lbl">Open pipeline</div><div class="val">${money0(d.stats.open_value)}</div><div class="sub">${d.stats.open_count} live deal${d.stats.open_count === 1 ? '' : 's'}</div></div>
       <div class="kpi"><div class="lbl">Weighted</div><div class="val">${money0(d.stats.weighted_value)}</div><div class="sub">By stage probability</div></div>
-      <div class="kpi"><div class="lbl">Won</div><div class="val">${money0(d.stats.won_value)}</div><div class="sub">Closed business</div></div>
-      <div class="kpi ${d.stats.win_rate != null && d.stats.win_rate < 50 ? 'warn' : ''}"><div class="lbl">Win rate</div><div class="val">${d.stats.win_rate == null ? '—' : d.stats.win_rate + '%'}</div><div class="sub">Won ÷ decided</div></div>
+      <div class="kpi"><div class="lbl">Ganado</div><div class="val">${money0(d.stats.won_value)}</div><div class="sub">Closed business</div></div>
+      <div class="kpi ${d.stats.win_rate != null && d.stats.win_rate < 50 ? 'warn' : ''}"><div class="lbl">Win rate</div><div class="val">${d.stats.win_rate == null ? '—' : d.stats.win_rate + '%'}</div><div class="sub">Ganado ÷ decided</div></div>
     </div>
     <div class="board" id="pipe">
       ${d.columns.map((c) => `<div class="col" data-stage="${c.key}">
@@ -91,7 +91,7 @@ function wireDnd() {
     dragEndedAt = Date.now()
     const col = s.col; if (!col || col === s.from) return
     const stage = col.dataset.stage
-    if (stage === 'lost') return promptLost(s.id) // capture why we lost it
+    if (stage === 'lost') return promptPerdido(s.id) // capture why we lost it
     const fromCol = s.from
     const fromStage = fromCol.dataset.stage
     col.querySelector('.col-b').appendChild(s.card); recount()
@@ -109,10 +109,10 @@ function wireDnd() {
   })
 }
 
-function promptLost(id) {
-  // The card is deliberately NOT moved into the Lost column here. It used to be moved first and
+function promptPerdido(id) {
+  // The card is deliberately NOT moved into the Perdido column here. It used to be moved first and
   // asked afterwards, so Cancel, Escape and a backdrop click all closed the dialog with no server
-  // call and no repaint — leaving a live deal sitting in Lost on screen, and every later read of
+  // call and no repaint — leaving a live deal sitting in Perdido on screen, and every later read of
   // that board (its own recount, the KPI row, the next drag's from-stage) working off a position
   // the server had never agreed to. The drop handler has not moved it either at this point, so the
   // card simply stays where it was until the shop actually answers.
@@ -145,7 +145,7 @@ function oppForm(o) {
       /* A brand-new shop has no contacts, and this select had no empty state and no placeholder.
        * It rendered with ZERO options, Create posted contact_id: '', and POST /api/opportunities
        * answered 400 customer_required — "Pick a customer to open a deal for." — which the dialog
-       * offered no control to satisfy. The first thing a shop is invited to do on the Pipeline was
+       * offered no control to satisfy. The first thing a shop is invited to do on the Embudo was
        * a dead end.
        *
        * The placeholder matters just as much once contacts exist: with no empty first option the
