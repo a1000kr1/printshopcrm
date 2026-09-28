@@ -28,7 +28,7 @@ export function shipmentRows(data) {
 
 // Drafts and ambiguous retries stay with their order/job for this signed-in browser session.
 // A reload can lose unsent drafts; committed records and request receipts stay on the server.
-export async function mountEnvíos(element, options) {
+export async function mountShipments(element, options) {
   if (!element) return
   if (owner !== window.__me) { owner=window.__me; states=new Map() }
   const who=owner, mount=++sequence
@@ -94,7 +94,7 @@ export async function mountEnvíos(element, options) {
     for (const button of element.querySelectorAll('[data-correct-shipment]')) {
       button.disabled=disabled
       button.onclick=()=>{
-        capture(); const r=data.records.find(r=>String(r.id)===button.dataset.correctEnvío)
+        capture(); const r=data.records.find(r=>String(r.id)===button.dataset.correctShipment)
         state.mode=String(r.id)
         if (!state.drafts.has(state.mode)) state.drafts.set(state.mode,{...emptyDraft(),...r,reason:''})
         state.message='The previous entry stays in history.';state.error=false;render()
@@ -123,7 +123,7 @@ export async function mountEnvíos(element, options) {
     try {
       await api.post(state.pending.url,state.pending.body)
       const completed=state.pending.mode
-      state.pending=null;state.busy=false;state.drafts.delete(completed);state.mode='new';state.message='Envío record saved.';state.error=false
+      state.pending=null;state.busy=false;state.drafts.delete(completed);state.mode='new';state.message='Registro de envío guardado.';state.error=false
       await state.notify?.(true)
       if (current()) options.onChange?.()
     } catch(e) {
