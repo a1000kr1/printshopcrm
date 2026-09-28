@@ -8,7 +8,7 @@ const named = value => typeof value === 'string' && value.trim() ? value.trim() 
 function lineMethod(line) {
   if(line?.decoration_pricing) return {supported:false,label:'Per-location decoration (use recorded job costs)'}
   const labels = [named(line?.decoration), named(line?.matrix?.decoration) || named(line?.matrix?.name)].filter(Boolean)
-  return { supported: labels.length > 0 && labels.every(isScreenPrintMethod), label: labels.join(' / ') || 'Unspecified decoration' }
+  return { supported: labels.length > 0 && labels.every(isScreenPrintMethod), label: labels.join(' / ') || 'Decoración sin especificar' }
 }
 
 /** Only sized garment lines carry production work; fees and discounts do not add a machine. */
@@ -26,21 +26,21 @@ const finished = reason => ({ state: 'finished', code: 'production_finished', re
  * from one undifferentiated job quantity. Legacy unenrolled jobs use their board stage.
  */
 export function screenPrintJobScope(job = {}) {
-  if (job.status && job.status !== 'active') return finished('This job is no longer active.')
+  if (job.status && job.status !== 'active') return finished('Este trabajo ya no está activo.')
   const tasks = parsed(job.workflow_tasks, [])
   const enrolled = job.workflow_enrolled === true || job.workflow_enrolled === 1 || (Array.isArray(tasks) && tasks.length > 0)
   if (enrolled) {
-    if (!Array.isArray(tasks) || !tasks.length) return unresolved('workflow_unknown', 'The workflow has no production task to review.')
+    if (!Array.isArray(tasks) || !tasks.length) return unresolved('workflow_unknown', 'El flujo de trabajo no tiene una tarea de producción para revisar.')
     if (tasks.some(task => !task || !['new', 'art_approval', 'prepress', 'production', 'qc', 'shipping'].includes(task.stage) || !['pending', 'done', 'skipped'].includes(task.status)))
       return unresolved('workflow_unknown', 'Review the workflow task stages and completion status.')
     const production = tasks.filter(task => task.stage === 'production')
-    if (!production.length) return unresolved('workflow_unknown', 'The workflow has no production task to review.')
+    if (!production.length) return unresolved('workflow_unknown', 'El flujo de trabajo no tiene una tarea de producción para revisar.')
     if (production.every(task => task.status === 'done' || task.status === 'skipped')) return finished('The workflow records production as finished or skipped.')
     if (production.length > 1) return unresolved('multiple_production_steps', 'Multiple production steps need a manual remaining-time review.')
   } else {
-    if (['qc', 'shipping', 'complete'].includes(job.stage)) return finished('This job is past production on the board.')
+    if (['qc', 'shipping', 'complete'].includes(job.stage)) return finished('Este trabajo ya pasó su fecha de producción en el tablero.')
     if (!['new', 'art_approval', 'prepress', 'production'].includes(job.stage))
-      return unresolved('stage_unknown', 'Set or review the current production stage.')
+      return unresolved('stage_unknown', 'Define o revisa la etapa actual de producción.')
   }
 
   const items = parsed(job.est_items ?? job.items, [])
@@ -55,5 +55,5 @@ export function screenPrintJobScope(job = {}) {
   if (!methods.length) return unresolved('method_unknown', 'Choose an explicit screenprinting method, or schedule this work manually.')
   const unsupported = [...new Set(methods.filter(method => !method.supported).map(method => method.label))]
   if (unsupported.length) return unresolved('method_unsupported', `Outside the screenprinting model: ${unsupported.join(', ')}. Review this work manually.`)
-  return { state: 'modeled', code: 'screen_print', reason: 'Pending screenprinting work.' }
+  return { state: 'modeled', code: 'screen_print', reason: 'Trabajo de serigrafía pendiente.' }
 }
