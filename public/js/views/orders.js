@@ -2,8 +2,8 @@ import { api, $, $$, esc, money, fmtDate, setPage, toast, go, on, modal, closeMo
 import { mountShipments } from '../shared/shipments.js'
 
 /**
- * Pedido board — the lite edition's whiteboard. Five columns (Estimate → Paid → Mockup Approved →
- * Printing → Shipped) and one card per order, dragged by hand. Deliberately dumb: a card sits where
+ * Pedido board — the lite edition's whiteboard. Five columns (Cotización → Pagado → Montaje aprobado →
+ * Impresión → Shipped) and one card per order, dragged by hand. Deliberately dumb: a card sits where
  * a person put it. Payments and mockup approvals nudge a card FORWARD server-side, never back, so
  * nobody's manual move gets undone by a late deposit.
  *
@@ -11,10 +11,10 @@ import { mountShipments } from '../shared/shipments.js'
  * actually lives on a shop floor — native DnD does not fire on touch at all.
  */
 
-const STAGE_TONE = { quote: 'gray', paid: 'green', mockup: 'blue', printing: 'amber', shipped: 'green' }
+const STAGE_TONE = { quote: 'gray', pagado: 'green', mockup: 'blue', printing: 'amber', shipped: 'green' }
 
 export async function ordersView() {
-  setPage('Pedidos', '<button class="btn ghost" id="ob-refresh">Refresh</button>')
+  setPage('Pedidos', '<button class="btn ghost" id="ob-refresh">Actualizar</button>')
   const d = await api.get('/api/orders')
 
   const card = (c) => {
@@ -33,7 +33,7 @@ export async function ordersView() {
       <div class="jc-tags">
         ${c.invoice_status === 'void' ? '<span class="tag">invoice voided</span>'
           : c.balance > 0 ? `<span class="tag ${late ? 'red' : ''}">${late ? '⚠ overdue · ' : ''}${money(c.balance)} due</span>`
-          : c.invoice_id ? '<span class="tag green">paid</span>' : '<span class="tag">not invoiced</span>'}
+          : c.invoice_id ? '<span class="tag green">pagado</span>' : '<span class="tag">sin facturar</span>'}
         ${c.mockup_status === 'approved' ? '<span class="tag green">art ok</span>' : ''}
         ${c.mockup_status === 'sent' ? '<span class="tag amber">art out</span>' : ''}
         ${c.mockup_status === 'rejected' ? '<span class="tag red">art changes</span>' : ''}
@@ -43,7 +43,7 @@ export async function ordersView() {
   }
 
   $('#view').innerHTML = `
-    <p class="dim" style="font-size:12.5px;margin:0 0 12px;line-height:1.6">Drag a card to move the job along. Tap one to open it, add a tracking number, or jump to the estimate.</p>
+    <p class="dim" style="font-size:12.5px;margin:0 0 12px;line-height:1.6">Arrastra una tarjeta para avanzar el trabajo. Ábrela para ver detalles, agregar un número de rastreo o ir a la cotización.</p>
     <div class="board" id="board">
       ${d.columns.map((col) => `<div class="col" data-stage="${col.key}">
         <div class="col-h"><span class="nm">${esc(col.label)}</span><span class="ct">${col.cards.length}</span></div>
@@ -163,7 +163,7 @@ function openCard(c, rerender, stages) {
   const opts = (stages && stages.length ? stages : wireDnd.stages || [])
   modal({
     title: `${c.estimate_number}${c.invoice_number ? ` · ${c.invoice_number}` : ''}`,
-    body: `<div class="dim" style="font-size:13px;margin-bottom:14px">${esc(c.contact_name || '')}${c.company ? ` · ${esc(c.company)}` : ''} — ${money(c.total)}${c.invoice_status === 'void' ? ' · invoice voided' : c.balance > 0 ? ` · ${money(c.balance)} still due` : c.invoice_id ? ' · paid in full' : ''}</div>
+    body: `<div class="dim" style="font-size:13px;margin-bottom:14px">${esc(c.contact_name || '')}${c.company ? ` · ${esc(c.company)}` : ''} — ${money(c.total)}${c.invoice_status === 'void' ? ' · invoice voided' : c.balance > 0 ? ` · ${money(c.balance)} still due` : c.invoice_id ? ' · pagado in full' : ''}</div>
       ${opts.length ? `<div class="field"><label for="ob-stage">Stage</label>
         <select class="input" id="ob-stage" name="stage">
           ${opts.map((o) => `<option value="${esc(o.key)}"${c.stage === o.key ? ' selected' : ''}>${esc(o.label)}</option>`).join('')}
