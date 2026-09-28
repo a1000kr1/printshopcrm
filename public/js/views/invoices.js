@@ -6,7 +6,7 @@ import { mountCollections } from '../shared/payment-collections.js'
 let filter = 'all'
 
 export async function invoicesView() {
-  setPage('Invoices')
+  setPage('Facturas')
   const render = async () => {
     const rows = await api.get(`/api/invoices?status=${filter}`)
     // A voided invoice is a cancelled demand, not money owed — and the void dialog's own copy
@@ -18,14 +18,14 @@ export async function invoicesView() {
     const totalOpen = rows.filter(owes).reduce((s, r) => s + r.amount_due - r.amount_paid, 0)
     $('#sum').innerHTML = rows.length ? `<span class="dim">${rows.length} invoice${rows.length > 1 ? 's' : ''} · <strong style="color:var(--amber)">${money0(totalOpen)}</strong> outstanding</span>` : ''
     $('#list').innerHTML = rows.length ? `<table class="tbl stack">
-      <thead><tr><th>Invoice</th><th>Customer</th><th>Status</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th><th class="num">Due</th></tr></thead>
+      <thead><tr><th>Factura</th><th>Cliente</th><th>Status</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th><th class="num">Due</th></tr></thead>
       <tbody>${rows.map((i) => {
         // Same rule per row: a cancelled invoice is not owing and cannot be late.
         const bal = i.status === 'void' ? 0 : i.amount_due - i.amount_paid
         const late = owes(i) && daysOut(i.due_date) < 0
         return `<tr class="click" data-id="${i.id}">
-          <td class="mono" data-label="Invoice" style="color:var(--txt)">${esc(i.invoice_number)}</td>
-          <td data-label="Customer"><div style="font-weight:600">${esc(i.contact_name || '—')}</div><div class="dim" style="font-size:12px">${esc(i.company || '')}</div></td>
+          <td class="mono" data-label="Factura" style="color:var(--txt)">${esc(i.invoice_number)}</td>
+          <td data-label="Cliente"><div style="font-weight:600">${esc(i.contact_name || '—')}</div><div class="dim" style="font-size:12px">${esc(i.company || '')}</div></td>
           <td data-label="Status">${i.payment_review ? '<span class="pill amber">Review payment</span>' : pill(late ? 'overdue' : i.status)}</td>
           <td class="num" data-label="Total">${money(i.amount_due)}</td>
           <td class="num muted" data-label="Paid">${money(i.amount_paid)}</td>
@@ -65,21 +65,21 @@ export async function invoiceDetailView(id) {
     && Math.abs(Math.round((Number(i.subtotal) + (Number(i.tax) || 0)) * 100) / 100 - (Number(i.amount_due) || 0)) <= 0.005
 
   // A voided invoice is a cancelled demand. `bal > 0` is true of one — the balance is still on the
-  // row, it just is not owed — so this screen went on offering Request Payment and Email Invoice,
+  // row, it just is not owed — so this screen went on offering Request Pago and Email Factura,
   // and the server built a live pay link and mailed the customer a demand for money the shop had
   // already withdrawn. The list's own balance expression got this right; the detail screen's did not.
   const manager=['owner','manager'].includes(cfg.role)
   const chaseable = bal > 0 && i.status !== 'void' && !i.payment_review
   setPage(i.invoice_number, `
-    ${chaseable ? `<button class="btn" id="reqpay">Request Payment</button>` : ''}
-    ${chaseable ? `<button class="btn ghost" id="pay">Record Payment</button>` : ''}
-    ${i.status === 'void' || i.payment_review ? '' : '<button class="btn ghost" id="send">Email Invoice</button>'}
+    ${chaseable ? `<button class="btn" id="reqpay">Request Pago</button>` : ''}
+    ${chaseable ? `<button class="btn ghost" id="pay">Record Pago</button>` : ''}
+    ${i.status === 'void' || i.payment_review ? '' : '<button class="btn ghost" id="send">Email Factura</button>'}
     ${i.status !== 'void' && manager ? '<button class="btn ghost" id="credit">Issue credit</button>' : ''}
     <a class="btn ghost" href="/api/invoices/${id}/pdf" target="_blank">PDF</a>
     ${i.status === 'void' ? '' : `<button class="btn ghost" id="void">Void</button>`}`,
-    `<a href="#/invoices">Invoices</a> /`)
+    `<a href="#/invoices">Facturas</a> /`)
 
-  $('#view').innerHTML = `${i.payment_review ? `<section class="setup-section" role="status"><h2>Review this payment change</h2><p>${esc(i.payment_review)}</p><p>Payment requests and invoice automations are paused. A refund returns money; an invoice credit reduces what the customer owes. Check both before resuming.</p>${manager ? '<button class="btn" id="review-payment">Review balance</button>' : '<p>An owner or manager must complete this review.</p>'} <a class="btn ghost" href="#/payments">Payment history & recheck</a></section>` : ''}<div class="cols invoice-workspace">
+  $('#view').innerHTML = `${i.payment_review ? `<section class="setup-section" role="status"><h2>Review this payment change</h2><p>${esc(i.payment_review)}</p><p>Pago requests and invoice automations are paused. A refund returns money; an invoice credit reduces what the customer owes. Check both before resuming.</p>${manager ? '<button class="btn" id="review-payment">Review balance</button>' : '<p>An owner or manager must complete this review.</p>'} <a class="btn ghost" href="#/payments">Pago history & recheck</a></section>` : ''}<div class="cols invoice-workspace">
     <div class="card">
       <div class="card-h"><h3>${esc(i.invoice_number)}</h3>${pill(i.status)}<div class="spacer"></div>
         <a class="dim" href="#/contacts/${i.contact_id}" style="font-size:13px">${esc(i.contact_name || '')} →</a></div>
@@ -98,7 +98,7 @@ export async function invoiceDetailView(id) {
           ${reconciles ? `<div><span>Subtotal</span><span>${money(i.subtotal)}</span></div>
           <div><span>Tax${i.tax_rate ? ` (${i.tax_rate}%)` : ''}</span><span>${money(i.tax)}</span></div>` : ''}
           ${i.credit_base ? `<div><span>Original invoice</span><span>${money(i.credit_base.amount_due)}</span></div>${i.credits.filter(c=>!c.cancelled_at).map(c=>`<div><span>Credit: ${esc(c.reason)}${c.tax_cents ? ` (includes ${money(c.tax_cents/100)} tax)` : ''}</span><span>-${money((c.subtotal_cents+c.tax_cents)/100)}</span></div>`).join('')}` : ''}
-          <div><span>Invoice total</span><span>${money(i.amount_due)}</span></div>
+          <div><span>Factura total</span><span>${money(i.amount_due)}</span></div>
           <div><span>Net received</span><span style="color:var(--accent)">-${money(i.amount_paid)}</span></div>
           <div class="g"><span>Balance due</span><span style="${bal > 0 ? 'color:var(--amber)' : 'color:var(--accent)'}">${money(bal)}</span></div>
         </div>
@@ -119,11 +119,11 @@ export async function invoiceDetailView(id) {
           ${bal > 0 && daysOut(i.due_date) < 0 ? `<span style="color:var(--red);font-weight:600">${Math.abs(daysOut(i.due_date))} days late</span>` : ''}
         </div>
         ${manager ? '<div class="row" style="margin-top:10px"><button class="btn ghost sm" id="terms">Edit terms &amp; addresses</button></div>' : ''}
-        ${i.billing_address || i.shipping_address ? `<details style="margin-top:12px"><summary>Invoice addresses</summary>${[['Billing address',i.billing_address],['Ship to',i.shipping_address]].map(([label,value]) => `<p><strong>${label}</strong></p><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(value || 'Not set')}</div>`).join('')}</details>` : ''}
+        ${i.billing_address || i.shipping_address ? `<details style="margin-top:12px"><summary>Factura addresses</summary>${[['Billing address',i.billing_address],['Ship to',i.shipping_address]].map(([label,value]) => `<p><strong>${label}</strong></p><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(value || 'Not set')}</div>`).join('')}</details>` : ''}
       </div></div>
 
       <div class="card" id="pay-list">
-        <div class="card-h"><h3>Payments</h3><div class="spacer"></div>${chaseable ? `<button class="btn ghost sm" id="pay2">+ Add</button>` : ''}</div>
+        <div class="card-h"><h3>Pagos</h3><div class="spacer"></div>${chaseable ? `<button class="btn ghost sm" id="pay2">+ Add</button>` : ''}</div>
         ${i.payments.length ? `<table class="tbl"><tbody>${i.payments.map((p) => `<tr>
           <td><strong>${money(p.amount)}</strong><div class="dim" style="font-size:11.5px">${esc(p.method)}${p.note ? ` · ${esc(p.note)}` : ''}</div></td>
           <td class="num dim" style="font-size:12px">${fmtDate(p.created_at)}</td>
@@ -134,7 +134,7 @@ export async function invoiceDetailView(id) {
       ${chaseable ? `<div class="card"><div class="card-b">
         <div class="row" style="justify-content:space-between;margin-bottom:6px"><span class="dim" style="font-size:11px;text-transform:uppercase;letter-spacing:.6px">Online payment</span>
           <span class="pill ${i.stripe_ready ? 'green' : 'gray'}" style="font-size:9.5px">${i.stripe_ready ? esc(i.payment_provider_label)+' on' : 'Not connected'}</span></div>
-        <p class="dim" style="font-size:12px;line-height:1.55;margin-bottom:8px">${i.stripe_ready ? 'Customers pay a deposit or balance through '+esc(i.payment_provider_label)+'. Verified payments are recorded here automatically.' : 'Connect Stripe or Authorize.net in Setup & connections, or record payments taken elsewhere.'}</p>
+        <p class="dim" style="font-size:12px;line-height:1.55;margin-bottom:8px">${i.stripe_ready ? 'Clientes pay a deposit or balance through '+esc(i.payment_provider_label)+'. Verified payments are recorded here automatically.' : 'Connect Stripe or Authorize.net in Setup & connections, or record payments taken elsewhere.'}</p>
         <div class="row" style="gap:8px">
           <button class="btn ghost sm" id="copylink">Copy pay link</button>
           <a class="btn ghost sm" href="${esc(i.pay_link)}" target="_blank">Preview ↗</a>
@@ -152,9 +152,9 @@ export async function invoiceDetailView(id) {
     let reference
     try { ({reference}=await api.get(`/api/invoices/${id}/credit-reference`)) }
     catch(e) {toast(e.message,true);return}
-    modal({title:'Issue invoice credit',body:`<p>This reduces the invoice. It does not return money to the customer. Refund cards in your payment provider first when needed.</p><div class="field"><label for="credit-sub">Credit before tax</label><input class="input" type="number" min="0" step="0.01" name="subtotal" id="credit-sub" value="${Math.max(0,bal).toFixed(2)}"></div><div class="field"><label for="credit-tax">Tax to credit</label><input class="input" type="number" min="0" step="0.01" name="tax" id="credit-tax" value="0"></div><div class="field"><label for="credit-reason">Reason shown on invoice</label><input class="input" name="reason" id="credit-reason" maxlength="500" placeholder="e.g. Canceled 12 shirts"></div><p class="dim">Enter the actual tax adjustment; tax is not guessed. Review the balance afterward. Credit documents in QuickBooks require manual reconciliation.</p>`,footer:'<button class="btn ghost" data-close>Cancel</button><button class="btn" id="credit-save">Issue credit</button>',onMount:bg=>onceClick($('#credit-save',bg),'Saving…',async()=>{try{await api.post(`/api/invoices/${id}/credits`,{reference,...formData(bg)});closeModal();toast('Credit recorded; review the balance');await invoiceDetailView(id)}catch(e){toast(e.message,true)}})})
+    modal({title:'Issue invoice credit',body:`<p>This reduces the invoice. It does not return money to the customer. Refund cards in your payment provider first when needed.</p><div class="field"><label for="credit-sub">Credit before tax</label><input class="input" type="number" min="0" step="0.01" name="subtotal" id="credit-sub" value="${Math.max(0,bal).toFixed(2)}"></div><div class="field"><label for="credit-tax">Tax to credit</label><input class="input" type="number" min="0" step="0.01" name="tax" id="credit-tax" value="0"></div><div class="field"><label for="credit-reason">Reason shown on invoice</label><input class="input" name="reason" id="credit-reason" maxlength="500" placeholder="e.g. Canceled 12 shirts"></div><p class="dim">Enter the actual tax adjustment; tax is not guessed. Review the balance afterward. Credit documents in QuickBooks require manual reconciliation.</p>`,footer:'<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="credit-save">Issue credit</button>',onMount:bg=>onceClick($('#credit-save',bg),'Saving…',async()=>{try{await api.post(`/api/invoices/${id}/credits`,{reference,...formData(bg)});closeModal();toast('Credit recorded; review the balance');await invoiceDetailView(id)}catch(e){toast(e.message,true)}})})
   })
-  $('#review-payment')?.addEventListener('click',()=>modal({title:'Review the remaining balance',body:`<p>Invoice total: <strong>${money(i.amount_due)}</strong><br>Net received after refunds: <strong>${money(i.amount_paid)}</strong><br>Remaining balance: <strong>${money(bal)}</strong></p><p>If work was canceled, issue a credit before completing this review. If no money remains and the whole invoice was canceled, void the invoice. Continuing allows new payment requests for a positive balance. Old draft messages remain blocked.</p><div class="field"><label for="review-note">What did you verify?</label><textarea class="input" id="review-note" name="note" maxlength="1000" rows="3"></textarea></div>`,footer:'<button class="btn ghost" data-close>Back</button><button class="btn" id="review-save">Confirm reviewed balance</button>',onMount:bg=>onceClick($('#review-save',bg),'Saving…',async()=>{try{await api.post(`/api/invoices/${id}/payment-review`,formData(bg));closeModal();toast('Review saved');await invoiceDetailView(id)}catch(e){toast(e.message,true)}})}))
+  $('#review-payment')?.addEventListener('click',()=>modal({title:'Review the remaining balance',body:`<p>Factura total: <strong>${money(i.amount_due)}</strong><br>Net received after refunds: <strong>${money(i.amount_paid)}</strong><br>Remaining balance: <strong>${money(bal)}</strong></p><p>If work was canceled, issue a credit before completing this review. If no money remains and the whole invoice was canceled, void the invoice. Continuing allows new payment requests for a positive balance. Old draft messages remain blocked.</p><div class="field"><label for="review-note">What did you verify?</label><textarea class="input" id="review-note" name="note" maxlength="1000" rows="3"></textarea></div>`,footer:'<button class="btn ghost" data-close>Back</button><button class="btn" id="review-save">Confirm reviewed balance</button>',onMount:bg=>onceClick($('#review-save',bg),'Saving…',async()=>{try{await api.post(`/api/invoices/${id}/payment-review`,formData(bg));closeModal();toast('Review saved');await invoiceDetailView(id)}catch(e){toast(e.message,true)}})}))
   if(i.credits?.length) {
     const section=document.createElement('section');section.className='setup-section'
     section.innerHTML=`<h2>Credit history</h2>${i.credits.map(c=>`<div class="payment-attempt"><div><strong>${money((c.subtotal_cents+c.tax_cents)/100)}${c.cancelled_at ? ' · Canceled' : ''}</strong><p>${esc(c.reason)}${c.tax_cents ? ' · Tax '+money(c.tax_cents/100) : ''}<br>${fmtDate(c.created_at)}${c.cancel_reason ? ' · Canceled: '+esc(c.cancel_reason) : ''}</p></div>${manager && !c.cancelled_at && i.status!=='void' ? `<button class="btn ghost" data-cancel-credit="${esc(c.reference)}">Cancel credit</button>` : ''}</div>`).join('')}`
@@ -172,14 +172,14 @@ export async function invoiceDetailView(id) {
     }})
   }
   const openPay = () => modal({
-    title: 'Record Payment',
+    title: 'Record Pago',
     body: `<div class="field"><label>Amount</label><input class="input" name="amount" type="number" step="0.01" value="${bal.toFixed(2)}"></div>
       <div class="field"><label>Method</label><select class="input" name="method">
         ${['card', 'check', 'cash', 'ach', 'other'].map((m) => `<option>${m}</option>`).join('')}</select></div>
       <div class="field"><label>Note</label><input class="input" name="note" placeholder="Check #1042, deposit, etc."></div>
       <p class="dim" style="font-size:12px">Balance due is ${money(bal)}. Partial payments are fine. The invoice flips to <em>partial</em>.</p>
       <p id="pay-dup" role="alert" hidden style="font-size:12px;color:var(--amber);margin-top:8px"></p>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="go">Record Payment</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="go">Record Pago</button>`,
     onMount: (bg) => {
       // In-flight guard, the same one the Terms dialog below has always had. Without it the button
       // stayed live and the dialog stayed open for the whole round trip, so on shop wifi a second
@@ -198,7 +198,7 @@ export async function invoiceDetailView(id) {
         try {
           await api.post(`/api/invoices/${id}/payments`, { ...formData(bg), ...(confirmDuplicate ? { confirm: true } : {}) })
           closeModal()
-          toast('Payment recorded')
+          toast('Pago recorded')
           invoiceDetailView(id)
         } catch (e) {
           btn.disabled = false
@@ -209,7 +209,7 @@ export async function invoiceDetailView(id) {
             btn.textContent = 'Record it anyway'
             return
           }
-          toast(e.message, true); btn.textContent = 'Record Payment'
+          toast(e.message, true); btn.textContent = 'Record Pago'
         }
       }
     },
@@ -222,8 +222,8 @@ export async function invoiceDetailView(id) {
   // line items, so it stays read-only here rather than letting the two documents disagree.
   $('#terms')?.addEventListener('click', () => modal({
     title: `Terms for ${i.invoice_number}`,
-    body: `<div class="field"><label>Payment due</label><input class="input" name="due_date" type="date" value="${esc(i.due_date || '')}"></div>
-      <div class="field" style="margin-top:10px"><label>Customer PO number (optional)</label>
+    body: `<div class="field"><label>Pago due</label><input class="input" name="due_date" type="date" value="${esc(i.due_date || '')}"></div>
+      <div class="field" style="margin-top:10px"><label>Cliente PO number (optional)</label>
         <input class="input" name="po_number" value="${esc(i.po_number || '')}" placeholder="e.g. 4501-22"></div>
       <div class="grid2">
         <div class="field"><label for="invoice-billing-address">Billing address</label><textarea class="input" id="invoice-billing-address" name="billing_address" rows="4" maxlength="600">${esc(i.billing_address || '')}</textarea></div>
@@ -231,7 +231,7 @@ export async function invoiceDetailView(id) {
       </div>
       <div class="dim" style="font-size:12px">Up to 8 lines each. These addresses belong to this invoice. Update the job separately if its shipping destination changes.</div>
       <div class="dim" style="font-size:11.5px;margin-top:8px;line-height:1.6">The PO shows on the invoice your customer sees. Changing the due date also re-checks whether this invoice counts as overdue.</div>`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="tgo">Save terms</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="tgo">Save terms</button>`,
     onMount: (bg) => {
       $('#tgo', bg).onclick = async () => {
         const btn = $('#tgo', bg); btn.disabled = true; btn.textContent = 'Saving…'
@@ -245,7 +245,7 @@ export async function invoiceDetailView(id) {
   onceClick($('#send'), 'Sending…', async () => {
     try {
       const out = await api.post(`/api/invoices/${id}/send`,{recipient_revision:i.recipient_revision})
-      toast(out?.emailed_to ? `Invoice emailed to ${out.emailed_to}. Check the Outbox` : 'Invoice queued. Check the Outbox')
+      toast(out?.emailed_to ? `Factura emailed to ${out.emailed_to}. Check the Outbox` : 'Factura queued. Check the Outbox')
     } catch (e) { toast(e.message, true) }
   })
   // The way back from an invoice raised against the wrong customer or for the wrong amount. Until
@@ -256,13 +256,13 @@ export async function invoiceDetailView(id) {
     'It stops counting toward money owed and stops chasing the customer. The record stays for your books, and the estimate behind it is freed so you can invoice it again correctly.',
     async () => {
       try { await api.post(`/api/invoices/${id}/void`, {}) } catch (e) { return toast(e.message, true) }
-      toast('Invoice voided')
+      toast('Factura voided')
       invoiceDetailView(id)
     })
   $('#reqpay')?.addEventListener('click', async () => {
     try {
       const r = await api.post(`/api/invoices/${id}/request-payment`,{recipient_revision:i.recipient_revision})
-      toast(r.delivered ? 'Payment link emailed to the customer' : 'Payment email drafted to Outbox (Manual mode)')
+      toast(r.delivered ? 'Pago link emailed to the customer' : 'Pago email drafted to Outbox (Manual mode)')
       if (!r.stripe_ready) toast('Connect a provider in Setup & connections to accept online card payments', true)
     } catch (e) { toast(e.message, true) }
   })
@@ -273,8 +273,8 @@ export async function invoiceDetailView(id) {
   // Scoped to the payments card, not #view: #view survives navigation, so a delegation left here
   // caught [data-del] clicks from other screens and read their index as a payment id.
   on($('#pay-list'), '[data-del-payment]', (_e, t) => confirmModal('Remove payment?', 'The invoice balance will be recalculated.', async () => {
-    await api.del(`/api/payments/${t.dataset.delPayment}`)
-    toast('Payment removed')
+    await api.del(`/api/payments/${t.dataset.delPago}`)
+    toast('Pago removed')
     invoiceDetailView(id)
   }, 'Remove'))
 }
