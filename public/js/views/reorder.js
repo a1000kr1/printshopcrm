@@ -1,7 +1,7 @@
 import { api, $, esc, money0, setPage, empty, on, go, toast, fmtDate } from '../core.js'
 
 /**
- * Reorder Radar: repeat customers who are due (or overdue) to buy again, ranked by value, each
+ * Radar de recompra: repeat customers who are due (or overdue) to buy again, ranked by value, each
  * with their last order and a one-click nudge. The follow-up money every shop leaves on the table.
  */
 
@@ -13,7 +13,7 @@ const STATUS = {
 const CONF = { high: 'Strong pattern', medium: 'Likely', low: 'One order so far' }
 
 export async function reorderView() {
-  setPage('Reorder Radar', '', '<span class="dim">CRM</span>')
+  setPage('Radar de recompra', '', '<span class="dim">CRM</span>')
   $('#view').innerHTML = '<div class="dim">Reading order history…</div>'
   const d = await api.get('/api/reorders')
   render(d)
@@ -45,7 +45,7 @@ function render(d) {
       </div>
       <div class="ro-actions">
         <button class="btn sm" data-nudge="${c.contact_id}" ${c.email ? '' : 'disabled'}>Send nudge</button>
-        <button class="btn ghost sm" data-snooze="${c.contact_id}">Snooze</button>
+        <button class="btn ghost sm" data-snooze="${c.contact_id}">Posponer</button>
       </div>
     </div>`
   }
@@ -68,7 +68,7 @@ function render(d) {
       </div>
     </div>
     ${d.snoozed?.length ? `<div class="card" style="margin-top:16px">
-      <div class="card-h"><h3>Snoozed</h3><div class="spacer"></div>
+      <div class="card-h"><h3>Pospuestos</h3><div class="spacer"></div>
         <span class="dim" style="font-size:11.5px">hidden from the list above — bring one back any time</span></div>
       <div class="card-b" id="ro-snoozed">${d.snoozed.map((sz) => `<div class="row" style="gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)">
         <div style="flex:1;min-width:0">
@@ -85,13 +85,13 @@ function render(d) {
     t.disabled = true; t.textContent = 'Sending…'
     try {
       const r = await api.post(`/api/reorders/${t.dataset.nudge}/nudge`)
-      toast(r.delivered ? 'Reorder nudge sent' : 'Drafted to Outbox (Manual mode)')
+      toast(r.delivered ? 'Recompra nudge sent' : 'Drafted to Outbox (Manual mode)')
       const c = t.closest('.ro-card'); if (c) { c.style.opacity = '.5'; t.textContent = r.delivered ? 'Sent ✓' : 'Drafted ✓' }
     } catch (e) { toast(e.message, true); t.disabled = false; t.textContent = 'Send nudge' }
   })
   on($('#ro-body'), '[data-snooze]', async (_e, t) => {
     t.disabled = true
-    try { await api.post(`/api/reorders/${t.dataset.snooze}/snooze`, { days: 30 }); toast('Snoozed for 30 days'); reorderView() }
+    try { await api.post(`/api/reorders/${t.dataset.snooze}/snooze`, { days: 30 }); toast('Pospuestos for 30 days'); reorderView() }
     catch (e) { toast(e.message, true); t.disabled = false }
   })
   // The way back. POST /api/reorders/:id/unsnooze has existed since the snooze route beside it and
