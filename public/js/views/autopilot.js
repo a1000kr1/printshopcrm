@@ -65,7 +65,7 @@ export async function autopilotView() {
       <div class="ap-hero">
         <div class="ap-badge">◆ AUTOPILOT</div>
         <h1>From inquiry to estimate.</h1>
-        <p>Paste a customer email to draft an estimate and a job. Review it here, or let Full auto send the estimate. Customer approval, payment and production remain separate steps.</p>
+        <p>Paste a customer email to draft an estimate and a job. Review it here, or let Full auto send the estimate. Cliente approval, payment and production remain separate steps.</p>
       </div>
 
       <div class="ap-grid">
@@ -75,7 +75,7 @@ export async function autopilotView() {
           <div class="card-b">
             <div class="grid2">
               <div class="field"><label>From (name)</label><input class="input" id="ap-name" placeholder="Dana Wu"></div>
-              <div class="field"><label>Email</label><input class="input" id="ap-email" placeholder="dana@example.org"></div>
+              <div class="field"><label>Correo electrónico</label><input class="input" id="ap-email" placeholder="dana@example.org"></div>
             </div>
             <div class="field"><label>The message</label>
               <textarea class="input" id="ap-text" style="min-height:200px;font-size:13px" placeholder="Paste what the customer sent…"></textarea></div>
@@ -210,7 +210,7 @@ async function run(resume = null) {
     $('#ap-stage').innerHTML = `<div class="ap-empty">
       <div class="ap-orbit"><span>◆</span></div>
       <p class="ap-err" role="alert">${esc(e.message)}</p>
-      <button class="btn ap-go" id="ap-run">${lastRun ? 'Finish the preview →' : 'Try again →'}</button>
+      <button class="btn ap-go" id="ap-run">${lastRun ? 'Finish the preview →' : 'Intentar de nuevo →'}</button>
     </div>`
     // A failure BEFORE the server wrote anything re-runs the whole thing, which is right. A failure
     // after it re-enters at the art step against the estimate and job that already exist, so the
@@ -239,7 +239,7 @@ function reviewReveal(r, mockUrl) {
       <a class="btn ghost" href="#/jobs/${r.job.id}">Open the job</a>
       <button class="btn ghost" id="ap-again">Run another</button>
     </div>
-    <p class="ap-foot">Customer <strong>${esc(r.contact.name)}</strong> and estimate <strong>${esc(r.estimate.estimate_number)}</strong> exist as a <strong>draft</strong>. This is the conservative default — flip to Full auto to skip this gate once you trust it.</p>
+    <p class="ap-foot">Cliente <strong>${esc(r.contact.name)}</strong> and estimate <strong>${esc(r.estimate.estimate_number)}</strong> exist as a <strong>draft</strong>. This is the conservative default — flip to Full auto to skip this gate once you trust it.</p>
   </div>`
   $('#ap-again').onclick = autopilotView
   $('#ap-commit').onclick = async () => {
@@ -268,7 +268,7 @@ function doneReveal(r, mockUrl) {
   $('#ap-stage').innerHTML = `<div class="ap-reveal">
     ${mockUrl ? `<div class="ap-mockup"><img src="${mockUrl}" alt="Generic T-shirt concept using the supplied artwork; not the ordered garment"></div>
       <p class="ap-review-note">Generic T-shirt concept only. Garment, color and placement are approximate. This preview stays on this device and is not attached as a proof. Add the actual proof on the job.</p>` : '<p class="ap-review-note">Artwork still needed. Open the job to upload the actual proof when it is ready.</p>'}
-    <div class="ap-done-h">${approved ? 'Estimate approved.' : 'Sent. Waiting on the customer.'}</div>
+    <div class="ap-done-h">${approved ? 'Cotización approved.' : 'Sent. Waiting on the customer.'}</div>
     <div class="ap-stats">
       <div><span>${money(r.estimate.total)}</span><em>quoted &amp; ${approved ? 'approved' : 'sent'}</em></div>
       ${r.invoice ? `<div><span>${money(paid)}</span><em>${paid > 0 ? 'collected' : 'invoiced, unpaid'}</em></div>` : ''}
@@ -276,11 +276,11 @@ function doneReveal(r, mockUrl) {
     </div>
     <div class="ap-links">
       <a class="btn" href="#/jobs/${r.job.id}">Open the job →</a>
-      ${r.invoice ? `<a class="btn ghost" href="#/invoices/${r.invoice.id}">Invoice</a>` : ''}
+      ${r.invoice ? `<a class="btn ghost" href="#/invoices/${r.invoice.id}">Factura</a>` : ''}
       <a class="btn ghost" href="#/conversations/${r.contact.id}">Conversation</a>
       <button class="btn ghost" id="ap-again">Run another</button>
     </div>
-    <p class="ap-foot">Customer <strong>${esc(r.contact.name)}</strong>, estimate <strong>${esc(r.estimate.estimate_number)}</strong>${r.invoice ? `, invoice <strong>${esc(r.invoice.invoice_number)}</strong>` : ''} and job <strong>${esc(r.job.job_number)}</strong> now exist.
+    <p class="ap-foot">Cliente <strong>${esc(r.contact.name)}</strong>, estimate <strong>${esc(r.estimate.estimate_number)}</strong>${r.invoice ? `, invoice <strong>${esc(r.invoice.invoice_number)}</strong>` : ''} and job <strong>${esc(r.job.job_number)}</strong> now exist.
       ${approved ? '' : 'The estimate still needs customer approval. Sending it does not collect a payment or approve artwork.'}</p>
   </div>`
   $('#ap-again').onclick = autopilotView
