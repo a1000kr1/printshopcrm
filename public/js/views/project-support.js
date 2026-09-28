@@ -28,31 +28,31 @@ const external = (url, label, className = '') => `<a${className ? ` class="${cla
 
 export function projectSupportOptions(data) {
   const links = projectSupportLinks(data)
-  const separateManage = links.manage && !links.monthly ? `<p class="ps-existing-support">${external(links.manage, 'Manage monthly support', 'ps-manage-link')}</p>` : ''
+  const separateManage = links.manage && !links.monthly ? `<p class="ps-existing-support">${external(links.manage, 'Administrar apoyo mensual', 'ps-manage-link')}</p>` : ''
   if (!links.oneTime && !links.monthly && !links.github) return `<p class="ps-unconfigured">Contribution checkout is not configured. You can still help through the community below.</p>${separateManage}`
   const row = (title, description, link, label, extra = '') => `<div class="ps-support-row"><div><h3>${title}</h3><p>${description}</p></div><div class="ps-row-actions">${external(link, label, 'btn ghost')}${extra}</div></div>`
   return `<div class="ps-support-options">
-    ${links.oneTime ? row('One-time contribution', 'Help cover ongoing maintenance and improvements.', links.oneTime, 'Contribute once') : ''}
-    ${links.monthly ? row('Monthly contribution', 'Provide recurring support for continued project upkeep.', links.monthly, 'Contribute monthly', external(links.manage, 'Manage monthly support', 'ps-manage-link')) : ''}
-    ${links.github ? row('GitHub Sponsors', 'Contribute through the project’s configured GitHub sponsor page.', links.github, 'Support on GitHub') : ''}
+    ${links.oneTime ? row('Contribución única', 'Help cover ongoing maintenance and improvements.', links.oneTime, 'Contribuir una vez') : ''}
+    ${links.monthly ? row('Contribución mensual', 'Provide recurring support for continued project upkeep.', links.monthly, 'Contribuir mensualmente', external(links.manage, 'Administrar apoyo mensual', 'ps-manage-link')) : ''}
+    ${links.github ? row('GitHub Sponsors', 'Contribute through the project’s configured GitHub sponsor page.', links.github, 'Apoyar en GitHub') : ''}
   </div>${separateManage}<p class="ps-checkout-note">Review the amount and billing frequency at checkout before paying. Payment links open in a new tab.</p>`
 }
 
 export async function projectSupportView() {
   supportStyles()
-  setPage('Support the project')
+  setPage('Apoyar el proyecto')
   $('#view').innerHTML = `<article class="project-support" aria-labelledby="ps-title">
     <header class="ps-intro"><h2 id="ps-title">Free software, maintained together</h2><p>PrintShopCRM is free and open source under ${external(`${REPOSITORY}/blob/main/LICENSE`, 'AGPL-3.0')}. Every feature is available without a software subscription. You can run your shop manually; AI is optional.</p></header>
     <section class="ps-funding" aria-labelledby="ps-funding-title"><h2 id="ps-funding-title" tabindex="-1">Help maintain the project</h2><p class="ps-funding-description">Voluntary contributions help fund maintenance, documentation, change review and work from outside contributors. All features stay available to every shop.</p><div id="ps-payment-options" aria-busy="true"><p class="ps-loading" role="status">Loading contribution options…</p></div></section>
     <section class="ps-community" aria-labelledby="ps-community-title"><h2 id="ps-community-title">Help in other ways</h2><p>You know what a print shop needs. Share that experience, whether or not you write code.</p>
       <ul class="ps-community-list">
-        <li><div>${external(`${REPOSITORY}/blob/main/CONTRIBUTING.md`, 'Contribute code')}<p>Fix a bug or improve a workflow. Start with the contribution guide and required checks.</p></div></li>
-        <li><div>${external(`${REPOSITORY}/tree/main/docs`, 'Improve documentation')}<p>Help another shop get set up with clearer instructions and examples.</p></div></li>
-        <li><div>${external(`${REPOSITORY}/issues/new/choose`, 'Report a bug')}<p>Describe what happened, what you expected and how to reproduce it. Use sample data.</p></div></li>
-        <li><div>${external(`${REPOSITORY}/discussions`, 'Test with the community')}<p>Try changes with sample jobs and share feedback from your department or decoration method.</p></div></li>
+        <li><div>${external(`${REPOSITORY}/blob/main/CONTRIBUTING.md`, 'Contribuir código')}<p>Fix a bug or improve a workflow. Start with the contribution guide and required checks.</p></div></li>
+        <li><div>${external(`${REPOSITORY}/tree/main/docs`, 'Mejorar documentación')}<p>Help another shop get set up with clearer instructions and examples.</p></div></li>
+        <li><div>${external(`${REPOSITORY}/issues/new/choose`, 'Reportar un error')}<p>Describe what happened, what you expected and how to reproduce it. Use sample data.</p></div></li>
+        <li><div>${external(`${REPOSITORY}/discussions`, 'Probar con la comunidad')}<p>Try changes with sample jobs and share feedback from your department or decoration method.</p></div></li>
       </ul>
     </section>
-    <footer class="ps-footer">${external(REPOSITORY, 'View the source code')}<span>Community links open on GitHub in a new tab.</span></footer>
+    <footer class="ps-footer">${external(REPOSITORY, 'Ver el código fuente')}<span>Community links open on GitHub in a new tab.</span></footer>
   </article>`
   const root = $('.project-support'), options = $('#ps-payment-options', root)
   let loading = false
