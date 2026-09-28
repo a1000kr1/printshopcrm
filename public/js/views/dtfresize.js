@@ -11,7 +11,7 @@ import { readPngDpi, addPngDpi, canvasToPngBlob, analyzeTrim, resizeToPrint, loa
 let st = null
 const reset = () => { st = { img: null, file: null, url: null, srcDpi: null, crop: null, outUrl: null, outName: null, upUrl: null } }
 
-export async function dtfRedimensionarView() {
+export async function dtfResizeView() {
   reset()
   const lite = window.__EDITION === 'lite'
   setPage(lite ? 'Art Tools' : 'Redimensionar DTF', '', lite ? '' : '<span class="dim">Production</span>')
@@ -94,7 +94,7 @@ export async function dtfRedimensionarView() {
   drop.ondrop = (e) => { e.preventDefault(); drop.style.borderColor = ''; if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]) }
   fileIn.onchange = () => { if (fileIn.files[0]) load(fileIn.files[0]) }
   $('#dtf-apply').onclick = apply
-  $('#dtf-reset').onclick = () => dtfRedimensionarView()
+  $('#dtf-reset').onclick = () => dtfResizeView()
   $('#dtf-lock').onchange = () => syncSize('width')
   $('#dtf-w').oninput = () => { syncSize('width'); quality() }
   $('#dtf-h').oninput = () => { syncSize('height'); quality() }
@@ -144,7 +144,7 @@ export async function dtfRedimensionarView() {
     const out = $('#gs-out')
     const layout = gangSheetLayout({
       pieceW: +$('#gs-w').value, pieceH: +$('#gs-h').value,
-      qty: +$('#gs-q').value, sheetAncho: rollW, gap: +$('#gs-g').value,
+      qty: +$('#gs-q').value, sheetWidth: rollW, gap: +$('#gs-g').value,
     })
     if (!layout) { out.innerHTML = '<span class="dim">Enter a size and quantity.</span>'; return }
     if (layout.error) { out.innerHTML = `<div class="dtf-q-row bad"><strong>Won't fit</strong><span>${esc(layout.error)}</span></div>`; return }
@@ -237,7 +237,7 @@ export async function dtfRedimensionarView() {
     for (let y = 0; y < cv.height; y += 8) for (let x = 0; x < cv.width; x += 8) { ctx.fillStyle = ((x + y) / 8) % 2 ? '#2a2f3a' : '#232833'; ctx.fillRect(x, y, 8, 8) }
     ctx.drawImage(source, 0, 0, cv.width, cv.height)
     if (crop && crop.sourceW) {
-      ctx.strokeStyle = '#10d39a'; ctx.lineAncho = 2; ctx.setLineDash([6, 4])
+      ctx.strokeStyle = '#10d39a'; ctx.lineWidth = 2; ctx.setLineDash([6, 4])
       ctx.strokeRect(crop.x * scale, crop.y * scale, crop.w * scale, crop.h * scale)
     }
   }
