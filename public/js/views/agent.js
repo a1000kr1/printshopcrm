@@ -239,7 +239,7 @@ function renderFaqs(faqs) { $('#faqs').innerHTML = ''; (faqs.length ? faqs : [])
 
 function addFaqRow(q, a) {
   const row = document.createElement('div')
-  row.classNombre = 'faqrow'
+  row.className = 'faqrow'
   row.innerHTML = `<input class="input faq-q" placeholder="Question a customer asks…" value="${esc(q)}">
     <textarea class="input faq-a" placeholder="How the bot answers">${esc(a)}</textarea>
     <button class="btn danger sm faq-x" title="Remove" aria-label="Remove this question and answer">&times;</button>`
@@ -256,7 +256,7 @@ function updateEmbed() {
 
 function addPrev(text, who) {
   const d = document.createElement('div')
-  d.classNombre = `prevmsg ${who}`
+  d.className = `prevmsg ${who}`
   d.textContent = text
   $('#chatprev').appendChild(d)
   $('#chatprev').scrollTop = $('#chatprev').scrollHeight
@@ -269,7 +269,7 @@ async function resetPreview() {
   box.innerHTML = ''
   addPrev(($('#greeting')?.value || cfg.greeting || 'Hi!'), 'bot')
   const chips = ['Get a quote', 'What is your minimum?', 'Talk to a person']
-  const c = document.createElement('div'); c.classNombre = 'prevchips'
+  const c = document.createElement('div'); c.className = 'prevchips'
   c.innerHTML = chips.map((x) => `<button class="chip">${esc(x)}</button>`).join('')
   on(c, '.chip', (_e, t) => sendPrev(t.textContent))
   box.appendChild(c)
@@ -296,7 +296,7 @@ async function sendPrev(text) {
     typing.remove()
     addPrev(r.reply || '…', 'bot')
     if (r.quick && r.quick.length) {
-      const c = document.createElement('div'); c.classNombre = 'prevchips'
+      const c = document.createElement('div'); c.className = 'prevchips'
       c.innerHTML = r.quick.map((x) => `<button class="chip">${esc(x)}</button>`).join('')
       on(c, '.chip', (_e, t) => sendPrev(t.textContent))
       $('#chatprev').appendChild(c)
