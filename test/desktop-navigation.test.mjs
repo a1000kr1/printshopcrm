@@ -15,7 +15,7 @@ function fixture({saved = null, blocked = false} = {}) {
 }
 test('denied storage does not prevent repeated manual hide/show', () => {
   const f = fixture({blocked: true})
-  f.click(); assert.equal(f.attributes['aria-expanded'], 'false'); assert.equal(f.button.textContent, 'Show navigation')
+  f.click(); assert.equal(f.attributes['aria-expanded'], 'false'); assert.equal(f.button.textContent, 'Mostrar navegación')
   f.click(); assert.equal(f.attributes['aria-expanded'], 'true'); assert.equal(f.button.textContent, 'Hide navigation')
 })
 test('desktop preference survives mobile use and focus leaves a hidden drawer on resize', () => {
