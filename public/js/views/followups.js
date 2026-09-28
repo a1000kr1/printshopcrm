@@ -8,7 +8,7 @@ import { api, $, esc, money, money0, fmtDate, setPage, empty, toast, go, on, con
  * $6k quote deserves the call before the $800 one.
  */
 export async function followupsView() {
-  setPage('Follow-ups')
+  setPage('Seguimientos')
   $('#view').innerHTML = '<div class="dim">Loading…</div>'
   const d = await api.get('/api/followups')
 
@@ -20,7 +20,7 @@ export async function followupsView() {
     <div class="kpis">
       <div class="kpi info"><div class="lbl">Quotes waiting</div><div class="val">${money0(d.totals.stale)}</div>
         <div class="sub">${d.stale.length} sent, none approved yet</div></div>
-      <div class="kpi bad"><div class="lbl">Overdue money</div><div class="val">${money0(d.totals.overdue)}</div>
+      <div class="kpi bad"><div class="lbl">Vencido money</div><div class="val">${money0(d.totals.overdue)}</div>
         <div class="sub">${d.overdue.length} invoice${d.overdue.length === 1 ? '' : 's'} past due</div></div>
       <div class="kpi warn"><div class="lbl">Proofs with customers</div><div class="val">${d.proofs.length}</div>
         <div class="sub">Blocking production right now</div></div>
@@ -47,7 +47,7 @@ export async function followupsView() {
         </div>
 
         <div class="card">
-          <div class="card-h"><h3>Overdue invoices</h3></div>
+          <div class="card-h"><h3>Vencido invoices</h3></div>
           ${d.overdue.length ? `<table class="tbl">
             <thead><tr><th>Invoice</th><th>Customer</th><th class="num">Balance</th><th class="num">Late</th><th></th></tr></thead>
             <tbody>${d.overdue.map((i) => `<tr>
