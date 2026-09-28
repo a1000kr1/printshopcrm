@@ -1,7 +1,7 @@
 import { api, $, $$, el, esc, money, fmtDate, relTime, pill, setPage, empty, toast, undoable, go, on, modal, closeModal, confirmModal, formData, dueClass, dueLabel, daysOut, initials, onceClick } from '../core.js'
 import { SIZES, sizeSummary, sizeKeys } from '../shared/pricing.js'
 import { contactForm } from './contacts.js'
-import { mountArtProducción } from '../art-production.js'
+import { mountArtProduction } from '../art-production.js'
 
 const STAGE_COLOR = { new: '#5f6b7d', art_approval: '#f7b955', prepress: '#7c6cff', production: '#4aa8ff', qc: '#10d39a', shipping: '#10d39a', complete: '#333b49' }
 const DECORATIONS = ['Screen Print', 'DTF Transfer', 'Embroidery', 'UV DTF', 'Vinyl', 'Patch', 'Laser', 'Promo']
@@ -491,7 +491,7 @@ export async function jobDetailView(id) {
     </div>
   </div>`
 
-  mountArtProducción($('#art-production'), id, j)
+  mountArtProduction($('#art-production'), id, j)
   $('#po-order')?.addEventListener('click', () => openPO(id, j.job_number))
   loadReceiving(id)
   $('#print-ticket').onclick = () => window.open(j.ticket_url || `/p/ticket/${id}`, '_blank')
