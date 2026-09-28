@@ -1,4 +1,4 @@
-import { api, $, esc, money, fmtFecha, setPage, on, modal, closeModal, toast, go } from '../core.js'
+import { api, $, esc, money, fmtDate, setPage, on, modal, closeModal, toast, go } from '../core.js'
 
 /**
  * Platform Control Room — the admin's cockpit over every shop on this deployment. Only reachable by
@@ -115,7 +115,7 @@ function row(s) {
     <td>${s.invoices}</td>
     <td>${s.customers}</td>
     <td>${money(s.revenue)}</td>
-    <td class="dim" style="font-size:12px">${s.last_login ? esc(fmtFecha(s.last_login)) : 'never'}</td>
+    <td class="dim" style="font-size:12px">${s.last_login ? esc(fmtDate(s.last_login)) : 'never'}</td>
     <td><div>${s.usage ? `${s.usage.days7} / ${s.usage.days30} work days (7 / 30 dates)<br>${s.usage.uncertain_actions30} uncertain actions` : 'Measurement unavailable'}</div>
       <label>Account type <select aria-label="Account type for ${esc(s.shop_name)}">${['unreviewed','customer','demo','test','internal'].map(k=>`<option value="${k}" ${s.usage?.kind===k?'selected':''}>${k==='customer'?'Confirmed customer':k}</option>`).join('')}</select></label>
       <button class="btn ghost sm" data-act="classification" data-id="${s.id}">Save classification</button></td>
@@ -158,7 +158,7 @@ async function hostingReviewModal(tenantId,name) {
           <button type="button" class="btn ghost" data-hosting-resolve="${esc(issue.id)}">Verify and close review</button>
         </div></section>`).join('')}` : verifications.length ? '' : '<p>No unresolved payment reviews.</p>'}
       ${data.resolved_anomalies?.length ? `<details class="hosting-recovery-details"><summary>Recent completed reviews</summary>
-        ${data.resolved_anomalies.map(review=>`<div class="hosting-recovery"><strong>${esc(Number.isSafeInteger(review.resolved_at) && review.resolved_at > 0 && review.resolved_at <= 8640000000000000 ? fmtFecha(new Fecha(review.resolved_at).toISOString()) : 'Fecha unavailable')}</strong><p>${esc(review.resolution_note || '')}</p></div>`).join('')}
+        ${data.resolved_anomalies.map(review=>`<div class="hosting-recovery"><strong>${esc(Number.isSafeInteger(review.resolved_at) && review.resolved_at > 0 && review.resolved_at <= 8640000000000000 ? fmtDate(new Fecha(review.resolved_at).toISOString()) : 'Fecha unavailable')}</strong><p>${esc(review.resolution_note || '')}</p></div>`).join('')}
       </details>` : ''}
       <p class="dim" id="hosting-review-error" role="alert"></p>`,
     footer:'<button class="btn ghost" data-close>Cerrar</button>',
