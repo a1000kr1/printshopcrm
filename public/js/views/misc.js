@@ -641,7 +641,7 @@ export async function settingsView() {
    *
    * location.reload() was worse than a repaint: it also drops the hash route. */
   // Module-level (declared at the foot of this file), NOT here. The beforeunload listener below is
-  // bound once per page load behind window.__pscConfiguraciónGuard, so a flag declared in this function
+  // bound once per page load behind window.__pscSettingsGuard, so a flag declared in this function
   // would be captured from the FIRST render only — and every later visit to Configuración, after a Save,
   // a logo upload, a disconnect, an invite, or simply coming back, made a new one the listener
   // could not see. The reload/tab-close guard worked once per session and then silently never
@@ -689,8 +689,8 @@ export async function settingsView() {
   // The paths the app does not control: tab close, reload, navigating off the origin entirely. NOT
   // the browser's Back button — that is a hash change and fires no beforeunload; the guardLeave
   // above catches it. Bound once, and it only speaks while the settings form is on screen.
-  if (!window.__pscConfiguraciónGuard) {
-    window.__pscConfiguraciónGuard = true
+  if (!window.__pscSettingsGuard) {
+    window.__pscSettingsGuard = true
     window.addEventListener('beforeunload', (e) => {
       if (!settingsDirty || !document.getElementById('save')) return
       e.preventDefault(); e.returnValue = ''
