@@ -9,7 +9,7 @@ import { api, $, $$, el, esc, relTime, setPage, empty, toast, on, modal, closeMo
 let cfg = null
 
 export async function automationsView() {
-  setPage('Automations', `<button class="btn ghost" id="run-tick">Run timed rules now</button><button class="btn" id="new-auto">+ New Automation</button>`)
+  setPage('Automatizaciones', `<button class="btn ghost" id="run-tick">Run timed rules now</button><button class="btn" id="new-auto">+ Nueva automatización</button>`)
   $('#view').innerHTML = '<div class="dim">Cargando…</div>'
   const d = await api.get('/api/automations')
   cfg = d
@@ -109,7 +109,7 @@ export async function automationsView() {
     // outside the catch: either way the checkbox goes back to what the server says.
     try {
       await api.put(`/api/automations/${t.dataset.toggle}`, { enabled: t.checked })
-      toast(t.checked ? 'Automation on' : 'Automation paused')
+      toast(t.checked ? 'Automatización activa' : 'Automatización pausada')
     } catch (err) { toast(err.message, true) }
     automationsView()
   }, 'change')
@@ -117,9 +117,9 @@ export async function automationsView() {
   on($('#au-body'), '[data-del]', (e, t) => {
     e.stopPropagation()
     const a = d.automations.find((x) => x.id === +t.dataset.del)
-    confirmModal('Delete automation?', `“${a.name}” will stop running.`, async () => {
+    confirmModal('¿Eliminar automatización?', `“${a.name}” will stop running.`, async () => {
       await api.del(`/api/automations/${t.dataset.del}`)
-      toast('Automation deleted')
+      toast('Automatización eliminada')
       automationsView()
     })
   })
@@ -154,18 +154,18 @@ export async function automationsView() {
   on($('#au-body'), '[data-cancel-seq]', (e, t) => {
     e.stopPropagation()
     const p = (d.pending || []).find((x) => x.id === +t.dataset.cancelSeq)
-    confirmModal('Cancel this sequence?', `${p?.label || 'This customer'} will get no more steps of “${p?.automation_name || 'this rule'}”.`, async () => {
+    confirmModal('¿Cancelar esta secuencia?', `${p?.label || 'This customer'} will get no more steps of “${p?.automation_name || 'this rule'}”.`, async () => {
       await api.del(`/api/automations/pending/${t.dataset.cancelSeq}`)
-      toast('Sequence cancelled')
+      toast('Secuencia cancelada')
       automationsView()
-    }, 'Cancel sequence')
+    }, 'Cancelar secuencia')
   })
 
   $('#new-auto').onclick = () => autoForm(null)
   if (new URLSearchParams(location.hash.split('?')[1] || '').get('new')) { history.replaceState(null, '', location.hash.split('?')[0]); autoForm(null) }
   $('#run-tick').onclick = async () => {
     const r = await api.post('/api/automations/tick')
-    toast(r.fired.length ? `${r.fired.length} automation${r.fired.length === 1 ? '' : 's'} fired` : 'Nothing was due — already handled')
+    toast(r.fired.length ? `${r.fired.length} automation${r.fired.length === 1 ? '' : 's'} fired` : 'No había nada pendiente — ya fue atendido')
     automationsView()
   }
 }
@@ -183,7 +183,7 @@ function autoForm(a) {
   }
 
   const bg = modal({
-    title: isNew ? 'New Automation' : 'Edit Automation',
+    title: isNew ? 'Nueva automatización' : 'Editar automatización',
     wide: true,
     body: `<div class="field"><label>Nombre</label>
         <input class="input" id="a-name" value="${esc(state.name)}" placeholder="Chase a quote after 3 quiet days"></div>
@@ -193,7 +193,7 @@ function autoForm(a) {
         <div class="ab-step"><div class="ab-badge then">THEN</div><div id="ab-actions" style="flex:1"></div></div>
       </div>
       <div class="dim" style="font-size:11.5px;margin-top:12px">Tokens: <code>{{first_name}} {{contact_name}} {{shop_name}} {{estimate_number}} {{invoice_number}} {{job_number}} {{job_title}} {{total}} {{due_date}} {{version}} {{days}} {{stage}}</code></div>`,
-    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="a-save">${isNew ? 'Create Automation' : 'Save'}</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="a-save">${isNew ? 'Crear automatización' : 'Save'}</button>`,
     onMount: (root) => {
       const drawTrigger = () => {
         const t = cfg.triggers.find((x) => x.key === state.trigger)
@@ -203,7 +203,7 @@ function autoForm(a) {
         // board mailed the customer once per column, on every job in the shop.
         if (t?.param && state.params[t.param.key] == null) state.params[t.param.key] = t.param.default
         $('#ab-trigger', root).innerHTML = `
-          <select class="input" id="a-trig" aria-label="When this happens">${cfg.triggers.map((x) => `<option value="${x.key}" ${x.key === state.trigger ? 'selected' : ''}>${esc(x.label)}${x.timed ? ' (timed)' : ''}</option>`).join('')}</select>
+          <select class="input" id="a-trig" aria-label="Cuando ocurra esto">${cfg.triggers.map((x) => `<option value="${x.key}" ${x.key === state.trigger ? 'selected' : ''}>${esc(x.label)}${x.timed ? ' (timed)' : ''}</option>`).join('')}</select>
           ${t?.param ? `<div class="row" style="margin-top:7px;gap:7px">
             <span class="dim" style="font-size:12px">${esc(t.param.label)}</span>
             ${t.param.options
@@ -218,7 +218,7 @@ function autoForm(a) {
       }
 
       /* The catalogue has declared `kind` on every condition since it was written and nothing
-         read it: every value was a plain text box. 'Job is a rush' therefore wanted the exact
+         read it: every value was a plain text box. 'El trabajo es urgente' therefore wanted the exact
          lowercase string "true", and a new condition is born with ''. */
       const defaultFor = (def) => (def?.kind === 'bool' ? 'true' : '')
       const condInput = (def, c, i) => (def?.kind === 'bool'
@@ -236,7 +236,7 @@ function autoForm(a) {
             <button class="del" data-rmc="${i}" aria-label="Remove condition ${i + 1}">&times;</button></div>`).join('')}
           <button class="btn ghost sm" id="add-cond">+ Add condition</button>
           ${state.conditions.length ? '' : '<span class="dim" style="font-size:11.5px;margin-left:8px">Always runs</span>'}`
-        // Born with its kind's own default, not always ''. A 'Job is a rush' condition added with a
+        // Born with its kind's own default, not always ''. A 'El trabajo es urgente' condition added with a
         // blank value used to mean the opposite of what its label says.
         $('#add-cond', root).onclick = () => { state.conditions.push({ key: 'total_over', value: defaultFor(cfg.conditions.find((x) => x.key === 'total_over')) }); drawConds() }
         on($('#ab-conds', root), '[data-ck]', (_e, t) => {
@@ -300,12 +300,12 @@ function autoForm(a) {
 
       $('#a-save', root).onclick = async () => {
         state.name = $('#a-name', root).value.trim()
-        if (!state.name) return toast('Give it a name', true)
+        if (!state.name) return toast('Asigna un nombre', true)
         try {
           if (isNew) await api.post('/api/automations', state)
           else await api.put(`/api/automations/${a.id}`, state)
           closeModal()
-          toast(isNew ? 'Automation created' : 'Automation saved')
+          toast(isNew ? 'Automatización creada' : 'Automatización guardada')
           automationsView()
         } catch (e) { toast(e.message, true) }
       }
