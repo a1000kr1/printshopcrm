@@ -32,7 +32,7 @@ test('DTF, embroidery and mixed-method quotes do not show a screenprinting profi
   for(const items of [[{...garment,decoration:'DTF Transfer'}],[{...garment,decoration:'Embroidery'}],[garment,{...garment,decoration:'Laser'}],[{...garment,decoration:'',matrix:{name:'Contract Embroidery'}}],[{...garment,decoration:'Screen Print + Embroidery'}],[{...garment,decoration:''}]]) {
     const result=preview(items)
     assert.equal(result.hidden,false)
-    assert.match(result.innerHTML,/Use Job costing/)
+    assert.match(result.innerHTML,/Usa Costeo de trabajo/)
     assert.doesNotMatch(result.innerHTML,/Est\. margin|profit on/)
   }
 })
