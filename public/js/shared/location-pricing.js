@@ -1,7 +1,7 @@
 /** Saved per-location prices. No live matrix lookup: issued documents never reprice themselves. */
 const fail = message => { throw Object.assign(new Error(message), {status:400, expose:true, code:'invalid_location_pricing'}) }
 const amount = value => {
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 10000000) fail('Enter a valid nonnegative decoration or garment price.')
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 10000000) fail('Ingresa un precio válido no negativo para decoración o prenda.')
   return Math.round(value * 100) / 100
 }
 const label = (value, name, max=120) => {
@@ -29,15 +29,15 @@ export function locationPricing(item) {
   if (p.version!==1 || !Array.isArray(p.locations) || !p.locations.length || p.locations.length>20) fail('A garment needs between 1 and 20 decoration locations.')
   const qty=item.sizes ? Object.values(item.sizes).reduce((s,n)=>s+Number(n||0),0) : Number(item.qty??item.quantity)
   if (!Number.isSafeInteger(qty) || qty<=0 || qty>1000000) fail('Enter the garment quantities before pricing its locations.')
-  if(p.customer_supplied!=null && typeof p.customer_supplied!=='boolean') fail('Choose whether the customer supplies the garments.')
+  if(p.customer_supplied!=null && typeof p.customer_supplied!=='boolean') fail('Indica si el cliente proporciona las prendas.')
   const garment=amount(p.garment_price)
-  if(p.customer_supplied && garment!==0) fail('Customer-supplied garments must have a zero garment charge.')
+  if(p.customer_supplied && garment!==0) fail('Las prendas proporcionadas por el cliente deben tener cargo de prenda igual a cero.')
   let perPiece=garment, flat=0
   const locations=p.locations.map(l=>{
-    if(!l || typeof l!=='object' || Array.isArray(l)) fail('Invalid decoration location.')
-    if(l.matrix && (typeof l.matrix!=='object'||Array.isArray(l.matrix))) fail('Invalid saved matrix.')
+    if(!l || typeof l!=='object' || Array.isArray(l)) fail('Ubicación de decoración no válida.')
+    if(l.matrix && (typeof l.matrix!=='object'||Array.isArray(l.matrix))) fail('Matriz guardada no válida.')
     if(l.matrix) for(const key of ['name','row','col']) label(l.matrix[key], 'matrix '+key)
-    const location=label(l.location,'location'), method=label(l.method,'decoration method')
+    const location=label(l.location,'location'), method=label(l.method,'método de decoración')
     if (!['piece','flat'].includes(l.unit)) fail('Choose per-piece or flat decoration pricing.')
     let price=amount(l.price), row=l.matrix?.row || ''
     if (l.tiers!=null) {
@@ -46,7 +46,7 @@ export function locationPricing(item) {
       for (const t of l.tiers) {
         if (!t || !Number.isSafeInteger(t.min)||t.min<0||t.min<=previous||(t.max!==null&&(!Number.isSafeInteger(t.max)||t.max<t.min))) fail('The saved matrix quantity bands overlap or are invalid.')
         previous=t.max===null?Infinity:t.max
-        label(t.row,'matrix row')
+        label(t.row,'fila de matriz')
         if(t.price!==null) amount(t.price)
         if(qty>=t.min&&(t.max===null||qty<=t.max)) match=t
       }
@@ -63,7 +63,7 @@ export function locationPricing(item) {
 export function normalizeLocationItem(item) {
   const result=locationPricing(item);if(!result)return item
   const p=item.decoration_pricing
-  if (p.notes!=null && (typeof p.notes!=='string'||p.notes.length>2000)) fail('Garment notes must be text, at most 2,000 characters.')
+  if (p.notes!=null && (typeof p.notes!=='string'||p.notes.length>2000)) fail('Las notas de la prenda deben ser texto, con un máximo de 2,000 caracteres.')
   const notes=p.notes||''
   const details=result.locations.map(l=>`${l.location}: ${l.method}, ${l.price.toFixed(2)}${l.unit==='flat'?' flat':' / piece'}${l.matrix?` (${l.matrix.name}: ${l.matrix.row} · ${l.matrix.col})`:''}`)
   const detail=[notes,`Garment ${result.garment.toFixed(2)} / piece`,...details].filter(Boolean).join('; ')
