@@ -91,7 +91,7 @@ function wireDnd() {
     dragEndedAt = Date.now()
     const col = s.col; if (!col || col === s.from) return
     const stage = col.dataset.stage
-    if (stage === 'lost') return promptPerdido(s.id) // capture why we lost it
+    if (stage === 'lost') return promptLost(s.id) // capture why we lost it
     const fromCol = s.from
     const fromStage = fromCol.dataset.stage
     col.querySelector('.col-b').appendChild(s.card); recount()
@@ -109,7 +109,7 @@ function wireDnd() {
   })
 }
 
-function promptPerdido(id) {
+function promptLost(id) {
   // The card is deliberately NOT moved into the Perdido column here. It used to be moved first and
   // asked afterwards, so Cancel, Escape and a backdrop click all closed the dialog with no server
   // call and no repaint — leaving a live deal sitting in Perdido on screen, and every later read of
