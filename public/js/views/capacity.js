@@ -63,7 +63,7 @@ function render(d, draft = {}) {
       <div class="stack">
         <div class="card promise">
           <div class="card-h"><h3>Check a screenprint run</h3><div class="spacer"></div>
-            <span class="dim" style="font-size:11.5px">Cotizaciónd print finish, not a shipping promise</span></div>
+            <span class="dim" style="font-size:11.5px">Fin de impresión estimado, not a shipping promise</span></div>
           <div class="card-b">
             <div class="promise-grid">
               <label>Pieces<input type="number" id="pq" min="1" value="${esc(draft.pieces || 144)}" inputmode="numeric"></label>
@@ -119,7 +119,7 @@ function render(d, draft = {}) {
       <div class="card-h"><h3>Active jobs and model coverage</h3><div class="spacer"></div>
         <a class="btn ghost sm" href="#/board">Open board</a></div>
       ${d.jobs.length ? `<table class="tbl stack">
-        <thead><tr><th>Trabajo</th><th class="num">Tiempo de prensa</th><th>Producción due</th><th>Cotizaciónd print finish</th><th class="num">Estado</th></tr></thead>
+        <thead><tr><th>Trabajo</th><th class="num">Tiempo de prensa</th><th>Entrega de producción</th><th>Fin de impresión estimado</th><th class="num">Estado</th></tr></thead>
         <tbody>${[...d.jobs].sort(byDue).map(jobRow).join('')}</tbody></table>
         <div class="card-b" style="border-top:1px solid var(--line);font-size:11.5px">
           <span class="dim">Sooner-due modeled jobs claim the press first. Finishing or skipping production removes its load; QC and shipping do not reserve the press again. Custom workflows with unresolved production steps require manual review. The calendar remains your independent plan.</span></div>`
@@ -142,8 +142,8 @@ function jobRow(j) {
     <td data-label="Trabajo"><div style="font-weight:600">${esc(j.title || 'Untitled')}</div>
       <div class="mono">${esc(j.job_number || '')}${j.rush ? ' · <span style="color:var(--red)">RUSH</span>' : ''}${j.contact_name ? ' · ' + esc(j.contact_name) : ''}</div></td>
     <td data-label="Tiempo de prensa" class="num">${unresolved || finished ? '<span class="dim">—</span>' : hrs(j.minutes)}</td>
-    <td data-label="Producción due">${j.due ? fmtFecha(j.due) : '<span class="dim">—</span>'}</td>
-    <td data-label="Cotizaciónd print finish">${j.projectedFinish ? `<strong style="color:${late ? 'var(--amber)' : 'var(--txt)'}">${fmtFecha(j.projectedFinish)}</strong>` : '<span class="dim">—</span>'}</td>
+    <td data-label="Entrega de producción">${j.due ? fmtFecha(j.due) : '<span class="dim">—</span>'}</td>
+    <td data-label="Fin de impresión estimado">${j.projectedFinish ? `<strong style="color:${late ? 'var(--amber)' : 'var(--txt)'}">${fmtFecha(j.projectedFinish)}</strong>` : '<span class="dim">—</span>'}</td>
     <td data-label="Estado del modelo" class="num">${status}${j.reason ? `<div class="dim" style="font-size:11.5px;margin-top:4px">${esc(j.reason)}</div>` : ''}</td>
   </tr>`
 }
@@ -179,7 +179,7 @@ function wire(d) {
       const finishStr = fmtFecha(r.earliestFinish)
       const cushion = Number(r.slackDays) || 0
       let verdict, cls, note
-      if (!due) { verdict = `Cotizaciónd print finish: ${finishStr}`; cls = 'ok'; note = `${r.hours}h of press time · ${r.workingDaysOut} working day${r.workingDaysOut === 1 ? '' : 's'} out` }
+      if (!due) { verdict = `Fin de impresión estimado: ${finishStr}`; cls = 'ok'; note = `${r.hours}h of press time · ${r.workingDaysOut} working day${r.workingDaysOut === 1 ? '' : 's'} out` }
       else if (r.feasible) { verdict = `Print model fits by ${finishStr}`; cls = 'ok'; note = cushion > 0 ? `${cushion} working day${cushion === 1 ? '' : 's'} before ${fmtFecha(due)}` : `lands on ${fmtFecha(due)} — no model slack` }
       else { verdict = `Print model exceeds ${fmtFecha(due)}`; cls = 'no'; note = `estimated print finish is ${finishStr} — ${Math.abs(cushion)} working day${Math.abs(cushion) === 1 ? '' : 's'} after the requested date. Review the production plan.` }
       note += ' Allow separate time for prerequisites, QC and delivery.'
