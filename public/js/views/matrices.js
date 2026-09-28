@@ -12,7 +12,7 @@ import { api, $, $$, esc, money, fmtDate, setPage, empty, toast, go, on, modal, 
 let cache = null   // last /api/matrices payload — templates and limits don't change mid-session
 
 export async function matricesView() {
-  setPage('Price matrices', `<button class="btn ghost" id="mx-new-blank">+ Blank matrix</button><button class="btn" id="mx-new">＋ New matrix</button>`,
+  setPage('Price matrices', `<button class="btn ghost" id="mx-new-blank">+ Blank matrix</button><button class="btn" id="mx-new">＋ Nueva matriz</button>`,
     `<a href="#/pricing">Pricing</a> /`)
   $('#view').innerHTML = `<div class="stack" id="mx-list"><div class="card"><div class="card-b dim">Loading your price matrices…</div></div></div>`
   await drawList()
@@ -61,9 +61,9 @@ const rowHtml = (m) => `<tr>
   <td class="dim" data-label="Updated" style="font-size:12px">${fmtDate(m.updatedAt)}</td>
   <td class="num mx-actions" data-label="">
     <button class="btn ghost sm" data-edit="${m.id}">Edit</button>
-    <button class="btn ghost sm" data-dup="${m.id}" title="Make a copy of this matrix">Duplicate</button>
+    <button class="btn ghost sm" data-dup="${m.id}" title="Make a copy of this matrix">Duplicar</button>
     ${m.isDefault ? '' : `<button class="btn ghost sm" data-def="${m.id}" title="Pre-select this matrix on new quotes">Make default</button>`}
-    <button class="btn ghost sm" data-del="${m.id}" title="Delete this matrix" aria-label="Delete ${esc(m.name)}">&times;</button>
+    <button class="btn ghost sm" data-del="${m.id}" title="Eliminar this matrix" aria-label="Eliminar ${esc(m.name)}">&times;</button>
   </td></tr>`
 
 const tplHtml = (t) => `<button class="mx-tpl-card" data-tpl="${esc(t.key)}" type="button" aria-label="Start a new matrix from the ${esc(t.name)} template">
@@ -134,11 +134,11 @@ function wireList() {
   })
   onOnce(root, '[data-del]', (_e, el) => {
     const m = cache.matrices.find((x) => String(x.id) === el.dataset.del)
-    confirmModal('Delete this matrix?',
+    confirmModal('Eliminar this matrix?',
       `“${m.name}” and its ${m.filled} price${m.filled === 1 ? '' : 's'} are removed. Estimates already priced from it keep their prices — nothing on a saved quote changes.`,
       async () => { await api.del(`/api/matrices/${m.id}`); toast(`${m.name} deleted`); drawList() })
   })
-  $('#mx-new').onclick = () => newMatrixModal()
+  $('#mx-new').onclick = () => newMatrizModal()
   $('#mx-new-blank').onclick = async () => {
     try {
       const { matrix } = await api.post('/api/matrices', { template: 'blank' })
@@ -148,7 +148,7 @@ function wireList() {
 }
 
 /** Name it and say what the rows and columns mean. Four fields — the fastest path to a real grid. */
-function newMatrixModal() {
+function newMatrizModal() {
   modal({
     title: 'New price matrix',
     body: `<p class="dim" style="font-size:12.5px;line-height:1.6;margin-bottom:14px">Name it whatever you call it in the shop. The row and column labels are just headings on your grid — you can change all of it later.</p>
@@ -186,7 +186,7 @@ function newMatrixModal() {
 
 /* ── the editor ───────────────────────────────────────────────────────────────
    The grid is edited live in the browser and saved in one call, so adding a column and typing
-   into it is one uninterrupted motion. `m` is the working copy; nothing is written until Save. */
+   into it is one uninterrupted motion. `m` is the working copy; nothing is written until Guardar. */
 
 let m = null
 let dirty = false
@@ -194,9 +194,9 @@ let importing = false
 
 export async function matrixEditor(id) {
   try { m = (await api.get(`/api/matrices/${id}`)).matrix }
-  catch { setPage('Price matrix'); $('#view').innerHTML = empty('▦', 'Matrix not found', 'It may have been deleted.', '<a class="btn" href="#/matrices">Back to matrices</a>'); return }
+  catch { setPage('Price matrix'); $('#view').innerHTML = empty('▦', 'Matriz not found', 'It may have been deleted.', '<a class="btn" href="#/matrices">Back to matrices</a>'); return }
   dirty = false; importing = false
-  setPage(m.name, `<button class="btn ghost" id="mx-back">Back</button><button class="btn" id="mx-save">Save matrix</button>`,
+  setPage(m.name, `<button class="btn ghost" id="mx-back">Back</button><button class="btn" id="mx-save">Guardar matrix</button>`,
     `<a href="#/pricing">Pricing</a> / <a href="#/matrices">Price matrices</a> /`)
   drawEditor()
 }
@@ -239,10 +239,10 @@ function drawEditor() {
 
     <div class="card"><div class="card-h"><h3>Danger zone</h3></div>
       <div class="card-b wrap-row">
-        <button class="btn ghost sm" id="mx-dup">Duplicate this matrix</button>
+        <button class="btn ghost sm" id="mx-dup">Duplicar this matrix</button>
         ${m.isDefault ? '<span class="pill green">This is the default for new quotes</span>' : '<button class="btn ghost sm" id="mx-def">Make it the default for new quotes</button>'}
         <div class="sp"></div>
-        <button class="btn ghost sm" id="mx-del" style="color:var(--red)">Delete matrix</button>
+        <button class="btn ghost sm" id="mx-del" style="color:var(--red)">Eliminar matrix</button>
       </div></div>
   </div>`
   drawGrid()
@@ -259,13 +259,13 @@ function drawGrid() {
       <th class="mx-corner">${esc(m.rowLabel)} &darr; / ${esc(m.colLabel)} &rarr;</th>
       ${m.cols.map((c, ci) => `<th class="mx-head">
         <input class="mx-h" data-col="${ci}" value="${esc(c)}" maxlength="48" aria-label="Heading for column ${ci + 1} of ${m.cols.length}">
-        <button class="mx-x" data-delcol="${ci}" title="Delete this column" type="button" aria-label="Delete the ${esc(c)} column">&times;</button>
+        <button class="mx-x" data-delcol="${ci}" title="Eliminar this column" type="button" aria-label="Eliminar the ${esc(c)} column">&times;</button>
       </th>`).join('')}
     </tr></thead>
     <tbody>${m.rows.map((r, ri) => `<tr>
       <th class="mx-head mx-rowhead">
         <input class="mx-h" data-row="${ri}" value="${esc(r)}" maxlength="48" aria-label="Heading for row ${ri + 1} of ${m.rows.length}">
-        <button class="mx-x" data-delrow="${ri}" title="Delete this row" type="button" aria-label="Delete the ${esc(r)} row">&times;</button>
+        <button class="mx-x" data-delrow="${ri}" title="Eliminar this row" type="button" aria-label="Eliminar the ${esc(r)} row">&times;</button>
       </th>
       ${m.cols.map((_c, ci) => `<td class="mx-cell">
         <input class="mx-in" data-r="${ri}" data-c="${ci}" type="number" step="0.01" min="0" inputmode="decimal"
@@ -336,7 +336,7 @@ function wireEditor() {
   $('#mx-save').onclick = save
 
   // `dirty` was tracked, displayed (" · unsaved") and then never acted on. Back went straight to
-  // the list and every price typed since the last Save was gone — no prompt, no undo, and this
+  // the list and every price typed since the last Guardar was gone — no prompt, no undo, and this
   // grid is the one screen where a shop types for ten minutes before saving once.
   const leaveEditor = (to) => {
     if (importing) return toast('Wait for the price sheet to finish importing')
@@ -365,9 +365,9 @@ function wireEditor() {
   }
   const defBtn = $('#mx-def')
   if (defBtn) defBtn.onclick = async () => { await api.post(`/api/matrices/${m.id}/default`); toast('New quotes start on this matrix'); matrixEditor(m.id) }
-  $('#mx-del').onclick = () => confirmModal('Delete this matrix?',
+  $('#mx-del').onclick = () => confirmModal('Eliminar this matrix?',
     `“${m.name}” is removed. Estimates already priced from it keep their prices.`,
-    async () => { await api.del(`/api/matrices/${m.id}`); toast('Deleted'); go('/matrices') })
+    async () => { await api.del(`/api/matrices/${m.id}`); toast('Eliminard'); go('/matrices') })
 
   $('#mx-file').onchange = e => {
     const file = e.target.files?.[0]; e.target.value = ''
@@ -430,7 +430,7 @@ async function importSheet(request, onSuccess = () => {}) {
     $('#mx-note').textContent = `Imported ${r.filled} prices — saved. Quotes use these prices now.`
     return true
   } catch (e) {
-    if (active()) note.textContent = `${e.message} ${[400, 403, 404, 413].includes(e.status) ? 'Saved prices and your unsaved edits are unchanged.' : 'Your unsaved edits are still here. The save could not be confirmed; check the saved matrix before retrying.'}`
+    if (active()) note.textContent = `${e.message} ${[400, 403, 404, 413].includes(e.status) ? 'Guardard prices and your unsaved edits are unchanged.' : 'Your unsaved edits are still here. The save could not be confirmed; check the saved matrix before retrying.'}`
     return false
   } finally {
     controls.forEach((el, i) => { el.disabled = disabled[i] })
@@ -482,8 +482,8 @@ async function save() {
     m = r.matrix; dirty = false
     // The server may have de-duplicated headings or renamed a blank one, so redraw from its answer.
     drawEditor()
-    $('#mx-note').innerHTML = '<span style="color:var(--accent)">Saved — quotes use these prices now.</span>'
-    toast('Matrix saved')
+    $('#mx-note').innerHTML = '<span style="color:var(--accent)">Guardard — quotes use these prices now.</span>'
+    toast('Matriz saved')
   } catch (e) { note.innerHTML = `<span style="color:var(--red)">${esc(e.message)}</span>` }
 }
 
@@ -512,7 +512,7 @@ export async function matrixPickerModal({ qty = 0, onPick, lockQty = false } = {
   modal({
     title: 'Price from a matrix', wide: true,
     body: `<div class="grid2">
-        <div class="field"><label>Matrix</label><select class="input" id="mp-matrix">
+        <div class="field"><label>Matriz</label><select class="input" id="mp-matrix">
           ${payload.matrices.map((x) => `<option value="${x.id}" ${x.id === start.id ? 'selected' : ''}>${esc(x.name)}${x.isDefault ? ' — default' : ''}</option>`).join('')}
         </select></div>
         <div class="field"><label>Quantity</label><input class="input" id="mp-qty" ${lockQty ? 'readonly' : ''} type="number" min="0" value="${Math.max(0, Number(qty) || 0)}"></div>
@@ -600,7 +600,7 @@ export async function matrixPickerModal({ qty = 0, onPick, lockQty = false } = {
 
 /**
  * Which row a quantity falls in — the browser-side twin of rowIndexForQty in lib/matrices.mjs.
- * Duplicated deliberately: the picker re-suggests on every keystroke, and a round trip per digit
+ * Duplicard deliberately: the picker re-suggests on every keystroke, and a round trip per digit
  * would make typing a quantity feel broken. The server stays authoritative for stored prices.
  */
 function suggestRow(rows, qty) {
