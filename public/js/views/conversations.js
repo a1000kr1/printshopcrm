@@ -22,7 +22,7 @@ function captureDraft(s) {
 }
 
 export async function conversationsView(contactId) {
-  setPage('Conversations')
+  setPage('Conversaciones')
   if (screen) captureDraft(screen)
   activeId = contactId ? +contactId : activeId
   /**
@@ -109,16 +109,16 @@ async function drawThread(id, s) {
       </div>`).join('')}
     </div>
     <div class="ct-compose">
-      <p class="dim">Replies here go to the buyer: ${esc(c.email || 'no email saved')}. To contact accounts payable, open the invoice and use its saved billing recipient.</p>
+      <p class="dim">Replies here go to the buyer: ${esc(c.email || 'sin correo guardado')}. To contact accounts payable, open the invoice and use its saved billing recipient.</p>
       <div class="row" style="margin-bottom:7px">
-        <div class="tabs" id="ct-channel" role="group" aria-label="Send this reply as">
+        <div class="tabs" id="ct-channel" role="group" aria-label="Enviar esta respuesta como">
           <button type="button" data-ch="email" class="${channelWas === 'email' ? 'on' : ''}" aria-pressed="${channelWas === 'email'}">Email</button><button type="button" data-ch="sms" class="${channelWas === 'sms' ? 'on' : ''}" aria-pressed="${channelWas === 'sms'}">SMS</button>
         </div>
         <div class="sp"></div>
-        <button class="btn ghost sm" id="ct-ai" ${s.drafting.has(id) ? 'disabled' : ''}>${s.drafting.has(id) ? 'Drafting…' : 'Draft with AI'}</button>
+        <button class="btn ghost sm" id="ct-ai" ${s.drafting.has(id) ? 'disabled' : ''}>${s.drafting.has(id) ? 'Drafting…' : 'Redactar con IA'}</button>
         ${window.__me?.single_tenant ? '<button class="btn ghost sm" id="ct-sim" title="Dev preview only — fakes a customer reply">Simulate reply</button>' : ''}
       </div>
-      <textarea class="input" id="ct-text" aria-label="Reply to ${esc(c.name)}" placeholder="Write a reply…" style="min-height:70px"></textarea>
+      <textarea class="input" id="ct-text" aria-label="Responder a ${esc(c.name)}" placeholder="Escribe una respuesta…" style="min-height:70px"></textarea>
       ${s.errors.has(id) ? `<p role="alert" class="dim">${esc(s.errors.get(id))}</p>` : ''}
       <div class="row" style="margin-top:7px"><div class="sp"></div><button class="btn" id="ct-send" ${s.sending.has(id) ? 'disabled' : ''}>${s.sending.has(id) ? 'Sending…' : 'Send'}</button></div>
     </div>`
@@ -139,7 +139,7 @@ async function drawThread(id, s) {
   send.onclick = async () => {
     if (!isCurrent(s) || !input.isConnected || activeId !== id || s.sending.has(id)) return
     const saved = saveDraft(s, id, input.value, channel), text = saved.text.trim()
-    if (!text) return toast('Write a reply first', true)
+    if (!text) return toast('Primero escribe una respuesta', true)
     s.sending.set(id, saved)
     s.errors.delete(id)
     send.disabled = true; send.textContent = 'Sending…'
@@ -171,12 +171,12 @@ async function drawThread(id, s) {
       captureDraft(s)
       if (r.text && draftFor(s, id).revision === saved.revision) {
         saveDraft(s, id, r.text, saved.channel)
-        if (isCurrent(s) && s.renderedId === id) { $('#ct-text', s.thread).value = r.text; toast('Draft ready — edit before sending') }
-      } else if (isCurrent(s) && activeId === id) toast(r.text ? 'Your reply changed while drafting. Your edits were kept.' : r.ai_note || 'Model offline — type your reply', true)
+        if (isCurrent(s) && s.renderedId === id) { $('#ct-text', s.thread).value = r.text; toast('Borrador listo — edítalo antes de enviar') }
+      } else if (isCurrent(s) && activeId === id) toast(r.text ? 'Your reply changed while drafting. Your edits were kept.' : r.ai_note || 'Modelo sin conexión — escribe tu respuesta', true)
     } catch (e) { if (isCurrent(s) && activeId === id) toast(e.message, true) }
     finally {
       s.drafting.delete(id)
-      if (isCurrent(s) && s.renderedId === id) { const btn = $('#ct-ai', s.thread); btn.disabled = false; btn.textContent = 'Draft with AI' }
+      if (isCurrent(s) && s.renderedId === id) { const btn = $('#ct-ai', s.thread); btn.disabled = false; btn.textContent = 'Redactar con IA' }
     }
   }
 
