@@ -37,7 +37,7 @@ export async function conversationsView(contactId) {
    * "Hi Coach — yes, we can have those 48 hoodies ready by the 12th. I will" → "".
    *
    * Guarding the shell rather than threading the draft through also keeps the caret and the
-   * channel picker, which the rebuild reset to Email — so an SMS reply went out as an email.
+   * channel picker, which the rebuild reset to Correo — so an SMS reply went out as an email.
    *
    * Every other route in the app replaces #view wholesale on entry, so arriving here from
    * anywhere else still rebuilds; drawList() and drawThread() repaint both panes regardless.
@@ -80,7 +80,7 @@ async function drawList(s) {
         <div class="ci-preview">${t.last_dir === 'out' ? '<span class="dim">You: </span>' : ''}${esc((t.last_body || '').replace(/\n/g, ' ').slice(0, 60))}</div>
       </div>
       ${t.unread ? `<span class="ci-badge" aria-label="${t.unread} unread">${t.unread}</span>` : `<span class="ci-ch" aria-hidden="true">${t.last_channel === 'sms' ? '✉' : '@'}</span>`}
-    </div>`).join('') : empty('▭', 'No conversations', 'Send an estimate or a proof to start one.', '<a class="btn" href="#/autopilot">Create an estimate</a>')
+    </div>`).join('') : empty('▭', 'No conversations', 'Enviar an estimate or a proof to start one.', '<a class="btn" href="#/autopilot">Create an estimate</a>')
   onOnce(s.list, '[data-c]', (_e, t) => go(`/conversations/${+t.dataset.c}`))
 }
 
@@ -100,27 +100,27 @@ async function drawThread(id, s) {
         <div style="font-weight:650">${esc(c.name)}</div>
         <div class="dim" style="font-size:12px">${esc(c.company || '')}${c.email ? ` · ${esc(c.email)}` : ''}</div>
       </div>
-      <a class="btn ghost sm" href="#/contacts/${c.id}">Profile</a>
+      <a class="btn ghost sm" href="#/contacts/${c.id}">Perfil</a>
     </div>
     <div class="ct-body" id="ct-body">
       ${d.messages.map((m) => `<div class="bubble ${m.direction === 'out' ? 'out' : 'in'}">
         <div class="bub-txt">${esc(m.body).replace(/\n/g, '<br>')}</div>
-        <div class="bub-meta">${m.channel === 'sms' ? 'SMS' : 'Email'} · ${relTime(m.created_at)}${m.kind === 'automation' ? ' · auto' : ''}${m.direction==='out' && m.recipient_email?` · To: ${esc(m.recipient_name || '')} ${esc(m.recipient_email)}`:''}</div>
+        <div class="bub-meta">${m.channel === 'sms' ? 'SMS' : 'Correo'} · ${relTime(m.created_at)}${m.kind === 'automation' ? ' · auto' : ''}${m.direction==='out' && m.recipient_email?` · To: ${esc(m.recipient_name || '')} ${esc(m.recipient_email)}`:''}</div>
       </div>`).join('')}
     </div>
     <div class="ct-compose">
-      <p class="dim">Replies here go to the buyer: ${esc(c.email || 'sin correo guardado')}. To contact accounts payable, open the invoice and use its saved billing recipient.</p>
+      <p class="dim">Las respuestas se envían al comprador: ${esc(c.email || 'sin correo guardado')}. Para contactar a cuentas por pagar, abre la factura y usa el destinatario de facturación guardado.</p>
       <div class="row" style="margin-bottom:7px">
         <div class="tabs" id="ct-channel" role="group" aria-label="Enviar esta respuesta como">
-          <button type="button" data-ch="email" class="${channelWas === 'email' ? 'on' : ''}" aria-pressed="${channelWas === 'email'}">Email</button><button type="button" data-ch="sms" class="${channelWas === 'sms' ? 'on' : ''}" aria-pressed="${channelWas === 'sms'}">SMS</button>
+          <button type="button" data-ch="email" class="${channelWas === 'email' ? 'on' : ''}" aria-pressed="${channelWas === 'email'}">Correo</button><button type="button" data-ch="sms" class="${channelWas === 'sms' ? 'on' : ''}" aria-pressed="${channelWas === 'sms'}">SMS</button>
         </div>
         <div class="sp"></div>
         <button class="btn ghost sm" id="ct-ai" ${s.drafting.has(id) ? 'disabled' : ''}>${s.drafting.has(id) ? 'Drafting…' : 'Redactar con IA'}</button>
-        ${window.__me?.single_tenant ? '<button class="btn ghost sm" id="ct-sim" title="Dev preview only — fakes a customer reply">Simulate reply</button>' : ''}
+        ${window.__me?.single_tenant ? '<button class="btn ghost sm" id="ct-sim" title="Dev preview only — fakes a customer reply">Simular respuesta</button>' : ''}
       </div>
       <textarea class="input" id="ct-text" aria-label="Responder a ${esc(c.name)}" placeholder="Escribe una respuesta…" style="min-height:70px"></textarea>
       ${s.errors.has(id) ? `<p role="alert" class="dim">${esc(s.errors.get(id))}</p>` : ''}
-      <div class="row" style="margin-top:7px"><div class="sp"></div><button class="btn" id="ct-send" ${s.sending.has(id) ? 'disabled' : ''}>${s.sending.has(id) ? 'Sending…' : 'Send'}</button></div>
+      <div class="row" style="margin-top:7px"><div class="sp"></div><button class="btn" id="ct-send" ${s.sending.has(id) ? 'disabled' : ''}>${s.sending.has(id) ? 'Enviaring…' : 'Enviar'}</button></div>
     </div>`
 
   s.renderedId = id
@@ -142,7 +142,7 @@ async function drawThread(id, s) {
     if (!text) return toast('Primero escribe una respuesta', true)
     s.sending.set(id, saved)
     s.errors.delete(id)
-    send.disabled = true; send.textContent = 'Sending…'
+    send.disabled = true; send.textContent = 'Enviaring…'
     try {
       await api.post(`/api/conversations/${id}/reply`, { body: text, channel })
       captureDraft(s)
@@ -155,7 +155,7 @@ async function drawThread(id, s) {
     finally {
       s.sending.delete(id)
       if (isCurrent(s) && activeId === id) {
-        if (send.isConnected) { send.disabled = false; send.textContent = 'Send' }
+        if (send.isConnected) { send.disabled = false; send.textContent = 'Enviar' }
         try { await drawThread(id, s); await drawList(s) } catch (e) { if (isCurrent(s)) toast(e.message, true) }
       }
     }
