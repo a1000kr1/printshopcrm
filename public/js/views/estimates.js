@@ -12,7 +12,7 @@ let listFilter = 'all'
 const DECORATIONS = ['Screen Print', 'DTF Transfer', 'Embroidery', 'UV DTF', 'Vinyl', 'Patch', 'Laser', 'Promo']
 
 export async function estimatesView() {
-  setPage('Estimates', `<button class="btn" id="new">+ New Estimate</button>`)
+  setPage('Cotizaciones', `<button class="btn" id="new">+ Nueva cotización</button>`)
   const render = async () => {
     const rows = await api.get(`/api/estimates?status=${listFilter}`)
     $('#list').innerHTML = rows.length ? `<table class="tbl stack">
@@ -25,7 +25,7 @@ export async function estimatesView() {
         <td class="num" data-label="Total"><strong>${money(e.total)}</strong></td>
         <td class="num dim" data-label="Created" style="font-size:12px">${fmtDate(e.created_at)}</td>
       </tr>`).join('')}</tbody></table>`
-      : empty('▤', 'No estimates', 'Quote a job and it shows up here.', '<a class="btn" href="#/autopilot">Paste a request → estimate</a>')
+      : empty('▤', 'Sin cotizaciones', 'Cotiza un trabajo y aparecerá aquí.', '<a class="btn" href="#/autopilot">Pegar solicitud → cotización</a>')
   }
 
   $('#view').innerHTML = `<div class="searchbar"><div class="tabs" id="tabs" role="group" aria-label="Filter estimates by status">
@@ -88,7 +88,7 @@ export async function estimateEditor(id) {
   const initialShipping = isNew ? selectedCustomer?.shipping_address || initialBilling : est.shipping_address || ''
   const upcharges = () => { try { return JSON.parse(settings.size_upcharges) } catch { return {} } }
 
-  setPage(isNew ? 'New Estimate' : `Edit ${est.estimate_number}`, `<button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="save">${isNew ? 'Create Estimate' : 'Save'}</button>`,
+  setPage(isNew ? 'New Estimate' : `Editar ${est.estimate_number}`, `<button class="btn ghost" id="cancel">Cancelar</button><button class="btn" id="save">${isNew ? 'Create Estimate' : 'Save'}</button>`,
     `<a href="#/estimates">Estimates</a> /`)
 
   $('#view').innerHTML = `<div class="card" style="max-width:1000px">
@@ -103,7 +103,7 @@ export async function estimateEditor(id) {
           </select>
         </div>
         <div class="field"><label>Tax rate (%)</label><input class="input" id="tax" type="number" step="0.001" value="${esc(est.tax_rate ?? settings.tax_rate)}">
-          <div class="dim" id="tax-note" style="font-size:12px;margin-top:4px;display:none">Wholesale account. Sales tax off.</div>
+          <div class="dim" id="tax-note" style="font-size:12px;margin-top:4px;display:none">Wholesale account. Impuesto de venta desactivado.</div>
         </div>
       </div>
 
@@ -115,7 +115,7 @@ export async function estimateEditor(id) {
         <div class="wrap-row" style="margin-top:9px">
           <button class="btn ghost sm" id="add">+ Garment line</button>
           <button class="btn ghost sm" id="add-fee">+ Fee / setup line</button>
-          <button class="btn ghost sm" id="add-disc">− Discount</button>
+          <button class="btn ghost sm" id="add-disc">− Descuento</button>
           <button class="btn ghost sm" id="add-matrix">▦ From a price matrix</button>
           <div class="sp"></div>
           <button class="btn ghost sm" id="read-email">Read from email</button>
@@ -167,7 +167,7 @@ export async function estimateEditor(id) {
       ${result ? `<p class="dim">${result.qty} garments × ${money(result.perPiece)}${result.flat ? ` + ${money(result.flat)} one-time decoration charges` : ''}. ${p.customer_supplied?'No garment or size charges; tax follows the quote setting.':'Size upcharges and tax are added once.'} Saved matrix prices; use Edit / reprice to load current prices.</p>` : ''}`
   }
   const locationPanel = (it,i) => `<div class="location-pricing" data-location-panel="${i}">
-    ${it.decoration_pricing ? `<label>Garment-only selling price / piece <input class="input" style="max-width:130px" type="number" min="0" step="0.01" data-garment-price="${i}" value="${esc(it.decoration_pricing.garment_price)}" ${it.decoration_pricing.customer_supplied?'disabled':''}></label><label><input type="checkbox" data-customer-supplied="${i}" ${it.decoration_pricing.customer_supplied?'checked':''}> Customer supplied (no garment or size charges)</label>` : ''}
+    ${it.decoration_pricing ? `<label>Garment-only selling price / piece <input class="input" style="max-width:130px" type="number" min="0" step="0.01" data-garment-price="${i}" value="${esc(it.decoration_pricing.garment_price)}" ${it.decoration_pricing.customer_supplied?'disabled':''}></label><label><input type="checkbox" data-customer-supplied="${i}" ${it.decoration_pricing.customer_supplied?'checked':''}> Proporcionado por el cliente (sin cargos de prenda ni talla)</label>` : ''}
     <div data-location-breakdown="${i}">${locationBreakdown(it,i)}</div>
     <button class="btn ghost sm" type="button" data-location-add="${i}">+ Decoration location</button>
     ${!it.decoration_pricing ? '<span class="dim"> Mix screen printing, embroidery, DTF or your own methods on this garment.</span>' : ''}
@@ -190,7 +190,7 @@ export async function estimateEditor(id) {
         ? `<div class="qtycell" title="Set by the size grid">${lineQty(it)}<span class="dim" style="font-size:10px"> pcs</span></div>`
         : `<input class="input num" data-f="qty" type="number" min="0" aria-label="Quantity, line ${i + 1}" value="${esc(it.qty)}">`}
       <div class="rate-cell">
-        <input class="input num" data-f="unit_price" ${it.decoration_pricing ? 'readonly title="Combined garment and location rate. Edit the garment rate or each location below."' : ''} type="number"${gridded ? ' min="0"' : ''} step="0.01" aria-label="Rate, line ${i + 1}" value="${esc(it.unit_price)}">
+        <input class="input num" data-f="unit_price" ${it.decoration_pricing ? 'readonly title="Tarifa combinada de prenda y ubicación. Edita la tarifa de la prenda o cada ubicación abajo."' : ''} type="number"${gridded ? ' min="0"' : ''} step="0.01" aria-label="Rate, line ${i + 1}" value="${esc(it.unit_price)}">
         <button class="mx-btn" ${it.decoration_pricing ? 'disabled' : ''} data-mx="${i}" type="button" title="${it.matrix ? `Priced from ${esc(it.matrix.name)}: ${esc(it.matrix.row)} × ${esc(it.matrix.col)}. Click to change.` : 'Price this line from one of your price matrices'}" aria-label="Price from a matrix">▦</button>
       </div>
       <div class="amt">${displayLineAmount(it, up)}</div>
@@ -231,7 +231,7 @@ export async function estimateEditor(id) {
     const unsupported = unsupportedScreenPrintMethods(items)
     if (unsupported.length) {
       g.hidden = false; g.className = 'margin-guard'
-      g.innerHTML = `<div class="mg-sub">Use Job costing for ${esc(unsupported.join(', '))} labor and machine costs. This quick preview supports screen printing only.</div>`
+      g.innerHTML = `<div class="mg-sub">Usa Costeo de trabajo para ${esc(unsupported.join(', '))} labor and machine costs. This quick preview supports screen printing only.</div>`
       return
     }
     let cost = 0, priced = false
@@ -240,7 +240,7 @@ export async function estimateEditor(id) {
        *
        * The skip used to be `it.taxable === false`, which catches fee lines because blankFee()
        * sets it — but blankDiscount() sets taxable TRUE, deliberately, so that a discount reduces
-       * the tax base. So the shop's own "− Discount" button produced { qty: 1, taxable: true },
+       * the tax base. So the shop's own "− Descuento" button produced { qty: 1, taxable: true },
        * which fell straight into jobCost({ qty: 1, colors: 1, garmentCost: 0 }) and booked press
        * labour and a screen against it: about $58.63 of cost for a line that is a credit.
        *
@@ -293,7 +293,7 @@ export async function estimateEditor(id) {
   // Wholesale accounts are tax exempt. Picking one zeroes the rate and says why, so nobody has to
   // remember; it stays editable in case a particular order really is taxable.
   // `userPicked` only: opening a NEW estimate from a wholesale customer's own page preselects the
-  // contact without a pick, so the note said "Sales tax off" above a field still holding the
+  // contact without a pick, so the note said "Impuesto de venta desactivado" above a field still holding the
   // shop's 7.75% — and the save always sends that field. Zero it whenever the buyer is exempt and
   // the estimate carries no deliberately-stored rate of its own.
   const syncTaxExempt = (userPicked) => {
@@ -325,7 +325,7 @@ export async function estimateEditor(id) {
         <div class="grid2"><div class="field"><label>Company</label><input class="input" id="nc-company" placeholder="Lakeside High School"></div>
         <div class="field"><label>Email</label><input class="input" id="nc-email" type="email" placeholder="jamie@example.com"></div></div>
         <div class="dim" id="nc-err" role="alert" style="color:var(--red);font-size:12px;display:none;margin-top:6px"></div>`,
-      footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="nc-save">Create &amp; use</button>`,
+      footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="nc-save">Create &amp; use</button>`,
       onMount: (bg) => {
         // role="alert" on the div gets it read out; aria-invalid + aria-describedby tie it to the
         // field, so a screen reader that lands on the input hears WHY it was refused. There was no
@@ -404,9 +404,9 @@ export async function estimateEditor(id) {
     if(!qty) return toast('Enter the garment quantities first.',true)
     modal({title:current?'Edit decoration location':'Add decoration location',body:`
       <div class="field"><label for="location-name">Location</label><input class="input" id="location-name" maxlength="120" value="${esc(current?.location||'')}" placeholder="Left sleeve, front, back…"></div>
-      ${!target.decoration_pricing?`<div class="field"><label for="location-garment">Garment-only selling price / piece</label><input class="input" id="location-garment" type="number" min="0" step="0.01" placeholder="Required — 0 for customer-supplied garments"><p class="dim">Enter only the garment charge. This replaces the current ${money(target.unit_price)} all-in rate; each decoration is added separately. Use decoration-only matrices.</p><label><input type="checkbox" id="location-supplied"> Customer supplied (no garment or size charges)</label></div>`:''}
+      ${!target.decoration_pricing?`<div class="field"><label for="location-garment">Garment-only selling price / piece</label><input class="input" id="location-garment" type="number" min="0" step="0.01" placeholder="Required — 0 for customer-supplied garments"><p class="dim">Enter only the garment charge. This replaces the current ${money(target.unit_price)} all-in rate; each decoration is added separately. Use decoration-only matrices.</p><label><input type="checkbox" id="location-supplied"> Proporcionado por el cliente (sin cargos de prenda ni talla)</label></div>`:''}
       <p class="dim">Next, choose any method's matrix and its stitch count, colors, size or other column. This location applies to all ${qty} pieces on the line. Split garments into separate lines when their decorations differ.</p>`,
-      footer:'<button class="btn ghost" data-close>Cancel</button><button class="btn" id="location-next">Choose matrix</button>',
+      footer:'<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="location-next">Choose matrix</button>',
       onMount:bg=>{
         const supplied=$('#location-supplied',bg)
         if(supplied) supplied.onchange=()=>{const f=$('#location-garment',bg);f.disabled=supplied.checked;f.value=supplied.checked?'0':''}
@@ -546,7 +546,7 @@ export async function estimateEditor(id) {
     try {
       const saved = isNew ? await api.post('/api/estimates', payload) : await api.put(`/api/estimates/${id}`, payload)
       editorDirty = false // it is on the server now; leaving must not ask
-      toast(isNew ? `Estimate ${saved.estimate_number} created` : saved.quote_revised ? 'Saved as draft. Send the new link for approval.' : 'Estimate saved')
+      toast(isNew ? `Estimate ${saved.estimate_number} created` : saved.quote_revised ? 'Guardado como borrador. Envía el nuevo enlace para aprobación.' : 'Cotización guardada')
       go(`/estimates/${saved.id}`)
     } catch (e) { toast(e.message, true); btn.disabled = false; btn.textContent = isNew ? 'Create Estimate' : 'Save' }
   }
@@ -610,9 +610,9 @@ function mockupCard(mockups) {
         ${m.decided_by && m.decided_at ? `<div class="dim" style="font-size:11px;margin-top:3px">${esc(m.status)} by ${esc(m.decided_by)} · ${fmtDate(m.decided_at)}</div>` : ''}
       </div>
       <div class="mk-act">
-        <button class="btn ghost sm" data-mksend="${m.id}">${m.status === 'draft' ? 'Send for approval' : 'Resend'}</button>
+        <button class="btn ghost sm" data-mksend="${m.id}">${m.status === 'draft' ? 'Enviar para aprobación' : 'Reenviar'}</button>
         <button class="btn ghost sm" data-mkcopy="${m.id}" data-url="${esc(m.share_url)}">Copy link</button>
-        ${m.status === 'draft' || m.status === 'rejected' ? `<button class="btn ghost sm" data-mkdel="${m.id}" style="color:var(--red)">Delete</button>` : ''}
+        ${m.status === 'draft' || m.status === 'rejected' ? `<button class="btn ghost sm" data-mkdel="${m.id}" style="color:var(--red)">Eliminar</button>` : ''}
       </div>
     </div>`
   }
@@ -639,16 +639,16 @@ export async function estimateDetailView(id) {
   // reads e.status at all. Gating these two on `approved` meant that a CUSTOMER clicking the public
   // approval link — which the shop does not control, and which lands on the wrong one of two quotes
   // emailed the same afternoon — removed the only Edit and the only Delete in the product, on a
-  // quote with no invoice and no job. Nothing writes an estimate back to 'draft', and Resend
+  // quote with no invoice and no job. Nothing writes an estimate back to 'draft', and Reenviar
   // deliberately refuses to un-settle one, so the correction the server would have accepted had no
   // button anywhere. `e.invoice` is on the payload already, selected with the same status != 'void'
   // filter both routes use.
   setPage(e.estimate_number, `
-    ${!e.invoice ? `<button class="btn ghost" id="edit">Edit</button>` : ''}
-    ${e.status === 'draft' || e.status === 'sent' ? `<button class="btn ghost" id="send">${e.status === 'sent' ? 'Resend' : 'Send to Customer'}</button>` : ''}
-    ${e.status === 'sent' ? `<button class="btn ghost" id="approve">Mark Approved</button>` : ''}
+    ${!e.invoice ? `<button class="btn ghost" id="edit">Editar</button>` : ''}
+    ${e.status === 'draft' || e.status === 'sent' ? `<button class="btn ghost" id="send">${e.status === 'sent' ? 'Reenviar' : 'Send to Customer'}</button>` : ''}
+    ${e.status === 'sent' ? `<button class="btn ghost" id="approve">Marcar aprobada</button>` : ''}
     ${canConvert ? `<button class="btn" id="convert">${window.__EDITION === 'lite' ? 'Convert to Invoice' : 'Convert to Invoice + Job'}</button>` : ''}
-    ${e.invoice ? `<a class="btn ghost" href="#/invoices/${e.invoice.id}">View Invoice</a>` : ''}
+    ${e.invoice ? `<a class="btn ghost" href="#/invoices/${e.invoice.id}">Ver factura</a>` : ''}
     ${(e.voided_invoices || []).map((v) => `<a class="btn ghost" href="#/invoices/${v.id}" title="${esc(v.void_reason || 'cancelled')}">${esc(v.invoice_number)} · voided</a>`).join('')}
     <button class="btn ghost" id="dup">Duplicate</button>
     <a class="btn ghost" href="/api/estimates/${id}/pdf" target="_blank">PDF</a>`,
@@ -671,7 +671,7 @@ export async function estimateDetailView(id) {
           <td class="num">${lineQty(i)}</td><td class="num">${money(i.unit_price)}${extra ? `<div class="dim" style="font-size:10.5px">+${money(extra)} sizes</div>` : ''}${
             // Where the number came from — internal provenance, so a shop can trace a price back
             // to the sheet that produced it. Not part of what the customer receives.
-            i.matrix ? `<div class="dim" style="font-size:10.5px" title="Priced from your ${esc(i.matrix.name)} matrix">▦ ${esc(i.matrix.name)}</div>` : ''}</td>
+            i.matrix ? `<div class="dim" style="font-size:10.5px" title="Calculado con tu matriz de ${esc(i.matrix.name)} matrix">▦ ${esc(i.matrix.name)}</div>` : ''}</td>
           <td class="num"><strong>${money(lineAmount(i, up))}</strong></td>
         </tr>`}).join('')}</tbody>
       </table>
@@ -682,7 +682,7 @@ export async function estimateDetailView(id) {
           <div><span>Tax</span><span>${money(e.tax)}</span></div>
           <div class="g"><span>Total</span><span>${money(e.total)}</span></div>
         </div>
-        ${e.billing_address || e.shipping_address ? `<details style="margin-top:16px"><summary>Order addresses</summary><div class="grid2" style="margin-top:10px">${[['Billing address',e.billing_address],['Ship to',e.shipping_address]].map(([label,value]) => `<div><strong>${label}</strong><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(value || 'Not set')}</div></div>`).join('')}</div></details>` : ''}
+        ${e.billing_address || e.shipping_address ? `<details style="margin-top:16px"><summary>Order addresses</summary><div class="grid2" style="margin-top:10px">${[['Billing address',e.billing_address],['Ship to',e.shipping_address]].map(([label,value]) => `<div><strong>${label}</strong><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(value || 'Sin definir')}</div></div>`).join('')}</div></details>` : ''}
         ${e.notes ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
           <div class="dim" style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Notes</div>
           <div class="muted" style="font-size:13px;white-space:pre-wrap">${esc(e.notes)}</div></div>` : ''}
@@ -693,21 +693,21 @@ export async function estimateDetailView(id) {
       <div class="card"><div class="card-h"><h3>Status</h3></div><div class="card-b">
         <div class="tl">
           <div class="tl-i"><div class="tx">Created</div><div class="dt">${fmtDate(e.created_at)}</div></div>
-          <div class="tl-i ${e.sent_at ? '' : 'gray'}"><div class="tx">${e.sent_at ? 'Sent to customer' : 'Not sent yet'}</div><div class="dt">${e.sent_at ? fmtDate(e.sent_at) : '—'}</div></div>
-          <div class="tl-i ${e.approved_at ? '' : 'gray'}"><div class="tx">${e.approved_at ? 'Approved' : 'Awaiting approval'}</div><div class="dt">${e.approved_at ? fmtDate(e.approved_at) : '—'}</div></div>
-          <div class="tl-i ${e.invoice ? '' : 'gray'}"><div class="tx">${e.invoice ? `Invoiced — ${esc(e.invoice.invoice_number)}` : 'Not invoiced'}</div><div class="dt">${e.invoice ? fmtDate(e.invoice.created_at) : '—'}</div></div>
+          <div class="tl-i ${e.sent_at ? '' : 'gray'}"><div class="tx">${e.sent_at ? 'Enviada al cliente' : 'Aún no enviada'}</div><div class="dt">${e.sent_at ? fmtDate(e.sent_at) : '—'}</div></div>
+          <div class="tl-i ${e.approved_at ? '' : 'gray'}"><div class="tx">${e.approved_at ? 'Approved' : 'Esperando aprobación'}</div><div class="dt">${e.approved_at ? fmtDate(e.approved_at) : '—'}</div></div>
+          <div class="tl-i ${e.invoice ? '' : 'gray'}"><div class="tx">${e.invoice ? `Facturada — ${esc(e.invoice.invoice_number)}` : 'Sin facturar'}</div><div class="dt">${e.invoice ? fmtDate(e.invoice.created_at) : '—'}</div></div>
         </div>
       </div></div>
 
-      ${e.approval_history?.length ? `<details class="card"><summary class="card-h">Approval history</summary><div class="card-b">${e.approval_history.map(h => `<div style="margin-bottom:12px"><strong>Revision ${h.commercial_revision + 1} · ${money(h.snapshot.total)}</strong><p class="dim">${esc(({staff:'Marked approved by staff',staff_conversion:'Recorded during conversion',customer_link:'Approved using customer link',legacy_record:'Historical approval record'})[h.source] || 'Approval record')}${h.approved_at ? ` · ${fmtDate(h.approved_at)}` : ' · original date unknown'}${h.actor ? ` · ${esc(h.actor)}` : ''}${h.revoked_at ? ` · superseded ${fmtDate(h.revoked_at)}` : ' · current acceptance'}</p><details><summary>Accepted quote details</summary><p>${esc(h.snapshot.contact_name || '')}</p>${h.snapshot.items.map(i => `<p><strong>${esc(i?.description || '')}</strong><br>${esc(i?.detail || '')}<br>${lineQty(i || {})} × ${money(i?.unit_price || 0)}${i?.sizes ? `<br>${esc(sizeSummary(i.sizes))}` : ''}</p>`).join('')}<p>Tax: ${money(h.snapshot.tax)} · Total: ${money(h.snapshot.total)}</p>${h.snapshot.billing_address ? `<p style="white-space:pre-wrap">Bill to:<br>${esc(h.snapshot.billing_address)}</p>` : ''}${h.snapshot.shipping_address ? `<p style="white-space:pre-wrap">Ship to:<br>${esc(h.snapshot.shipping_address)}</p>` : ''}${h.snapshot.notes ? `<p style="white-space:pre-wrap">${esc(h.snapshot.notes)}</p>` : ''}<p style="white-space:pre-wrap">${esc(h.snapshot.terms_snapshot)}</p>${h.snapshot.terms_snapshot_source === 'legacy_migration' ? '<p class="dim">Original historical terms are unknown. These terms were frozen from shop settings when snapshot storage was introduced.</p>' : ''}</details></div>`).join('')}</div></details>` : ''}
+      ${e.approval_history?.length ? `<details class="card"><summary class="card-h">Approval history</summary><div class="card-b">${e.approval_history.map(h => `<div style="margin-bottom:12px"><strong>Revision ${h.commercial_revision + 1} · ${money(h.snapshot.total)}</strong><p class="dim">${esc(({staff:'Marcada como aprobada por el personal',staff_conversion:'Recorded during conversion',customer_link:'Aprobada mediante enlace del cliente',legacy_record:'Historical approval record'})[h.source] || 'Registro de aprobación')}${h.approved_at ? ` · ${fmtDate(h.approved_at)}` : ' · original date unknown'}${h.actor ? ` · ${esc(h.actor)}` : ''}${h.revoked_at ? ` · superseded ${fmtDate(h.revoked_at)}` : ' · current acceptance'}</p><details><summary>Accepted quote details</summary><p>${esc(h.snapshot.contact_name || '')}</p>${h.snapshot.items.map(i => `<p><strong>${esc(i?.description || '')}</strong><br>${esc(i?.detail || '')}<br>${lineQty(i || {})} × ${money(i?.unit_price || 0)}${i?.sizes ? `<br>${esc(sizeSummary(i.sizes))}` : ''}</p>`).join('')}<p>Tax: ${money(h.snapshot.tax)} · Total: ${money(h.snapshot.total)}</p>${h.snapshot.billing_address ? `<p style="white-space:pre-wrap">Bill to:<br>${esc(h.snapshot.billing_address)}</p>` : ''}${h.snapshot.shipping_address ? `<p style="white-space:pre-wrap">Ship to:<br>${esc(h.snapshot.shipping_address)}</p>` : ''}${h.snapshot.notes ? `<p style="white-space:pre-wrap">${esc(h.snapshot.notes)}</p>` : ''}<p style="white-space:pre-wrap">${esc(h.snapshot.terms_snapshot)}</p>${h.snapshot.terms_snapshot_source === 'legacy_migration' ? '<p class="dim">Original historical terms are unknown. These terms were frozen from shop settings when snapshot storage was introduced.</p>' : ''}</details></div>`).join('')}</div></details>` : ''}
       ${mockups ? mockupCard(mockups) : ''}
 
       <div class="card"><div class="card-h"><h3>Customer Link</h3></div><div class="card-b">
         <p class="dim" style="font-size:12.5px;margin-bottom:9px">Customers approve here. No login, no account.</p>
-        <div class="copy" id="share" aria-label="Copy the customer approval link">${esc(location.origin + e.share_url)}</div>
+        <div class="copy" id="share" aria-label="Copiar enlace de aprobación del cliente">${esc(location.origin + e.share_url)}</div>
         <div class="row" style="margin-top:10px">
           <a class="btn ghost sm" href="${esc(e.share_url)}" target="_blank">Open customer view</a>
-          ${!e.invoice ? `<button class="btn danger sm" id="del">Delete</button>` : ''}
+          ${!e.invoice ? `<button class="btn danger sm" id="del">Eliminar</button>` : ''}
         </div>
       </div></div>
     </div>
@@ -739,7 +739,7 @@ export async function estimateDetailView(id) {
           const r = await api.post(`/api/mockups/${t.dataset.mksend}/send`, {})
           toast(r.email_live && r.emailed_to ? `Sent to ${r.emailed_to}` : 'Marked sent. Copy the link and send it yourself')
           estimateDetailView(id)
-        } catch (ex) { toast(ex.message, true); t.disabled = false; t.textContent = 'Send for approval' }
+        } catch (ex) { toast(ex.message, true); t.disabled = false; t.textContent = 'Enviar para aprobación' }
       })
       on(list, '[data-mkcopy]', (_ev, t) => copyText(location.origin + t.dataset.url, 'Approval link copied'))
       on(list, '[data-mkdel]', (_ev, t) => confirmModal('Delete this mockup?', 'The customer will no longer be able to open its approval link.', async () => {
@@ -799,11 +799,11 @@ function convertModal(e) {
     body: `<p class="muted" style="margin-bottom:15px;line-height:1.6">${lite
         ? `This creates an invoice for <strong>${money(e.total)}</strong> linked to this estimate, ready to send and take payment on.`
         : `This creates invoice for <strong>${money(e.total)}</strong>, opens a production job on the board, and links all three together.`}</p>
-      <div class="field"><label>${lite ? 'Order name' : 'Job title'}</label><input class="input" name="title" value="${esc(e.items[0]?.description || 'Custom order')}"></div>
+      <div class="field"><label>${lite ? 'Nombre del pedido' : 'Título del trabajo'}</label><input class="input" name="title" value="${esc(e.items[0]?.description || 'Custom order')}"></div>
       <div class="field"><label for="convert-payment-due">Payment due</label><input class="input" id="convert-payment-due" name="payment_due_date" type="date" value="${due}"></div>
       ${lite ? '' : `<div class="field"><label for="convert-production-due">Production due</label><input class="input" id="convert-production-due" name="production_due_date" type="date">
         <div class="dim" style="font-size:12px;margin-top:4px">Leave blank to use this quote’s turnaround${e.rush_days ? ` (${esc(e.rush_days)} business days)` : ' (10 business days)'}. Payment terms do not change when the job must be ready.</div></div>`}`,
-    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn" id="go">${lite ? 'Create Invoice' : 'Create Invoice + Job'}</button>`,
+    footer: `<button class="btn ghost" data-close>Cancelar</button><button class="btn" id="go">${lite ? 'Crear factura' : 'Crear factura + trabajo'}</button>`,
     onMount: (bg) => {
       $('#go', bg).onclick = async () => {
         const btn = $('#go', bg); btn.disabled = true; btn.textContent = 'Creating…'
@@ -816,7 +816,7 @@ function convertModal(e) {
             : r.job_reused ? `Created ${r.invoice_number} — linked to ${r.job_number}, already on the board`
               : `Created ${r.invoice_number} and ${r.job_number}`)
           go(lite ? `/invoices/${r.invoice_id}` : `/jobs/${r.job_id}`)
-        } catch (err) { toast(err.message, true); btn.disabled = false; btn.textContent = lite ? 'Create Invoice' : 'Create Invoice + Job' }
+        } catch (err) { toast(err.message, true); btn.disabled = false; btn.textContent = lite ? 'Crear factura' : 'Crear factura + trabajo' }
       }
     },
   })
