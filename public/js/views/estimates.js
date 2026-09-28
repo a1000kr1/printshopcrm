@@ -16,14 +16,14 @@ export async function estimatesView() {
   const render = async () => {
     const rows = await api.get(`/api/estimates?status=${listFilter}`)
     $('#list').innerHTML = rows.length ? `<table class="tbl stack">
-      <thead><tr><th>Estimate</th><th>Customer</th><th>Items</th><th>Status</th><th class="num">Total</th><th class="num">Created</th></tr></thead>
+      <thead><tr><th>Estimate</th><th>Customer</th><th>Items</th><th>Estado</th><th class="num">Total</th><th class="num">Creada</th></tr></thead>
       <tbody>${rows.map((e) => `<tr class="click" data-id="${e.id}">
         <td class="mono" data-label="Estimate" style="color:var(--txt)">${esc(e.estimate_number)}</td>
         <td data-label="Customer"><div style="font-weight:600">${esc(e.contact_name || '—')}</div><div class="dim" style="font-size:12px">${esc(e.company || '')}</div></td>
         <td class="muted" data-label="Items" style="font-size:12.5px">${esc(e.items[0]?.description || '—')}${e.items.length > 1 ? ` <span class="dim">+${e.items.length - 1}</span>` : ''}</td>
-        <td data-label="Status">${pill(e.status)}</td>
+        <td data-label="Estado">${pill(e.status)}</td>
         <td class="num" data-label="Total"><strong>${money(e.total)}</strong></td>
-        <td class="num dim" data-label="Created" style="font-size:12px">${fmtDate(e.created_at)}</td>
+        <td class="num dim" data-label="Creada" style="font-size:12px">${fmtDate(e.created_at)}</td>
       </tr>`).join('')}</tbody></table>`
       : empty('▤', 'Sin cotizaciones', 'Cotiza un trabajo y aparecerá aquí.', '<a class="btn" href="#/autopilot">Pegar solicitud → cotización</a>')
   }
@@ -102,7 +102,7 @@ export async function estimateEditor(id) {
             <option value="__new">＋ Add a new customer…</option>
           </select>
         </div>
-        <div class="field"><label>Tax rate (%)</label><input class="input" id="tax" type="number" step="0.001" value="${esc(est.tax_rate ?? settings.tax_rate)}">
+        <div class="field"><label>Impuestos rate (%)</label><input class="input" id="tax" type="number" step="0.001" value="${esc(est.tax_rate ?? settings.tax_rate)}">
           <div class="dim" id="tax-note" style="font-size:12px;margin-top:4px;display:none">Wholesale account. Impuesto de venta desactivado.</div>
         </div>
       </div>
@@ -122,9 +122,9 @@ export async function estimateEditor(id) {
           <button class="btn ghost sm" id="quote-calc">Price calculator</button>
         </div>
         <div class="totbox">
-          <div><span>Pieces</span><span id="pcs" class="dim">0</span></div>
+          <div><span>Piezas</span><span id="pcs" class="dim">0</span></div>
           <div><span>Subtotal</span><span id="sub">$0.00</span></div>
-          <div><span>Tax</span><span id="taxv">$0.00</span></div>
+          <div><span>Impuestos</span><span id="taxv">$0.00</span></div>
           <div class="g"><span>Total</span><span id="tot">$0.00</span></div>
         </div>
         <div class="margin-guard" id="margin-guard" hidden></div>
@@ -296,7 +296,7 @@ export async function estimateEditor(id) {
   // contact without a pick, so the note said "Impuesto de venta desactivado" above a field still holding the
   // shop's 7.75% — and the save always sends that field. Zero it whenever the buyer is exempt and
   // the estimate carries no deliberately-stored rate of its own.
-  const syncTaxExempt = (userPicked) => {
+  const syncImpuestosExempt = (userPicked) => {
     const c = contacts.find((x) => x.id === +$('#contact').value)
     const exempt = !!(c && c.tax_exempt)
     $('#tax-note').style.display = exempt ? '' : 'none'
@@ -318,7 +318,7 @@ export async function estimateEditor(id) {
   const addCustomerInline = () => {
     const prev = est.contact_id ? String(est.contact_id) : ''
     $('#contact').value = prev // don't leave the "+ Add…" row selected while the dialog is open
-    syncTaxExempt(false)
+    syncImpuestosExempt(false)
     modal({
       title: 'New customer',
       body: `<div class="field"><label>Name *</label><input class="input" id="nc-name" placeholder="Jamie Rivera"></div>
@@ -347,14 +347,14 @@ export async function estimateEditor(id) {
             const sel = $('#contact'); sel.insertBefore(opt, sel.querySelector('option[value="__new"]'))
             sel.value = String(c.id); est.contact_id = c.id
             markEditorDirty() // the new customer is saved; choosing them on this quote is not
-            closeModal(); syncTaxExempt(true); loadCustomerAddresses(); toast(`Added ${c.name}`)
+            closeModal(); syncImpuestosExempt(true); loadCustomerAddresses(); toast(`Added ${c.name}`)
           } catch (e) { err(e.message || 'Could not create the customer. Try again.') }
         })
       },
     })
   }
-  $('#contact').addEventListener('change', () => { if ($('#contact').value === '__new') addCustomerInline(); else { syncTaxExempt(true); loadCustomerAddresses() } })
-  syncTaxExempt(false)
+  $('#contact').addEventListener('change', () => { if ($('#contact').value === '__new') addCustomerInline(); else { syncImpuestosExempt(true); loadCustomerAddresses() } })
+  syncImpuestosExempt(false)
 
   // Text/price edits patch in place, since redrawing would blur the field mid-type.
   on($('#rows'), '[data-f]', (e, t) => {
@@ -473,7 +473,7 @@ export async function estimateEditor(id) {
         } else {
           /* The picker asks for a quantity, prices on it, and prints "48 pcs = $624.00" — and
            * this branch then dropped it, because blankItem()'s grid is all zeroes. The new line
-           * landed at 0 pcs, its Amount cell read $0.00, Pieces / Subtotal / Total did not move,
+           * landed at 0 pcs, its Amount cell read $0.00, Piezas / Subtotal / Total did not move,
            * and the 48 the shop had just typed was gone with no message. Two screens disagreeing
            * about the same order by the whole value of the line — and a shop that saves without
            * noticing sends the customer a quote with a $0.00 line on it.
@@ -558,7 +558,7 @@ export async function estimateEditor(id) {
   onOnce($('#view'), 'input, select, textarea', markEditorDirty, 'change')
 
   // The paths the app DOES control: Cancel, a sidebar click, `g e`, the browser's Back button.
-  // All of them are a hash change, and app.js routes every hash change through this.
+  // Todas of them are a hash change, and app.js routes every hash change through this.
   guardLeave((to) => {
     if (!editorDirty) return true
     confirmModal('Leave without saving?',
@@ -584,7 +584,7 @@ if (typeof window !== 'undefined' && !window.__pscEstimateGuard) {
 
 /* ---------- detail ---------- */
 
-/** Status → how the mockup row reads to the shop. */
+/** Estado → how the mockup row reads to the shop. */
 const MOCKUP_PILL = {
   draft: ['gray', 'not sent'], sent: ['amber', 'waiting on customer'],
   approved: ['green', 'approved'], rejected: ['red', 'changes requested'],
@@ -618,7 +618,7 @@ function mockupCard(mockups) {
   }
   return `<div class="card"><div class="card-h"><h3>Artwork &amp; Mockups</h3>
       ${mockups.length ? `<span class="pill ${(MOCKUP_PILL[mockups[0].status] || ['gray'])[0]}">${esc((MOCKUP_PILL[mockups[0].status] || ['', mockups[0].status])[1])}</span>` : ''}
-      <div class="spacer"></div><button class="btn ghost sm" id="mk-add">+ Add mockup</button></div>
+      <div class="spacer"></div><button class="btn ghost sm" id="mk-add">+ Agregar montaje</button></div>
     <div class="card-b">
       <input type="file" id="mk-file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,application/pdf" hidden>
       ${mockups.length
@@ -636,7 +636,7 @@ export async function estimateDetailView(id) {
   const pieces = e.items.reduce((s, i) => s + (i.sizes ? sizeTotal(i.sizes) : 0), 0)
 
   // The server's rule for both PUT and DELETE is "has this become an invoice?", and neither route
-  // reads e.status at all. Gating these two on `approved` meant that a CUSTOMER clicking the public
+  // reads e.status at all. Gating these two on `approved` meant that a CLIENTE clicking the public
   // approval link — which the shop does not control, and which lands on the wrong one of two quotes
   // emailed the same afternoon — removed the only Edit and the only Delete in the product, on a
   // quote with no invoice and no job. Nothing writes an estimate back to 'draft', and Reenviar
@@ -650,7 +650,7 @@ export async function estimateDetailView(id) {
     ${canConvert ? `<button class="btn" id="convert">${window.__EDITION === 'lite' ? 'Convert to Invoice' : 'Convert to Invoice + Job'}</button>` : ''}
     ${e.invoice ? `<a class="btn ghost" href="#/invoices/${e.invoice.id}">Ver factura</a>` : ''}
     ${(e.voided_invoices || []).map((v) => `<a class="btn ghost" href="#/invoices/${v.id}" title="${esc(v.void_reason || 'cancelled')}">${esc(v.invoice_number)} · voided</a>`).join('')}
-    <button class="btn ghost" id="dup">Duplicate</button>
+    <button class="btn ghost" id="dup">Duplicar</button>
     <a class="btn ghost" href="/api/estimates/${id}/pdf" target="_blank">PDF</a>`,
     `<a href="#/estimates">Estimates</a> /`)
 
@@ -677,12 +677,12 @@ export async function estimateDetailView(id) {
       </table>
       <div class="card-b">
         <div class="totbox" style="margin-top:0">
-          ${pieces ? `<div><span>Pieces</span><span>${pieces}</span></div>` : ''}
+          ${pieces ? `<div><span>Piezas</span><span>${pieces}</span></div>` : ''}
           <div><span>Subtotal</span><span>${money(e.subtotal)}</span></div>
-          <div><span>Tax</span><span>${money(e.tax)}</span></div>
+          <div><span>Impuestos</span><span>${money(e.tax)}</span></div>
           <div class="g"><span>Total</span><span>${money(e.total)}</span></div>
         </div>
-        ${e.billing_address || e.shipping_address ? `<details style="margin-top:16px"><summary>Order addresses</summary><div class="grid2" style="margin-top:10px">${[['Billing address',e.billing_address],['Ship to',e.shipping_address]].map(([label,value]) => `<div><strong>${label}</strong><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(value || 'Sin definir')}</div></div>`).join('')}</div></details>` : ''}
+        ${e.billing_address || e.shipping_address ? `<details style="margin-top:16px"><summary>Direcciones del pedido</summary><div class="grid2" style="margin-top:10px">${[['Billing address',e.billing_address],['Ship to',e.shipping_address]].map(([label,value]) => `<div><strong>${label}</strong><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(value || 'Sin definir')}</div></div>`).join('')}</div></details>` : ''}
         ${e.notes ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
           <div class="dim" style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Notes</div>
           <div class="muted" style="font-size:13px;white-space:pre-wrap">${esc(e.notes)}</div></div>` : ''}
@@ -690,23 +690,23 @@ export async function estimateDetailView(id) {
     </div>
 
     <div class="stack">
-      <div class="card"><div class="card-h"><h3>Status</h3></div><div class="card-b">
+      <div class="card"><div class="card-h"><h3>Estado</h3></div><div class="card-b">
         <div class="tl">
-          <div class="tl-i"><div class="tx">Created</div><div class="dt">${fmtDate(e.created_at)}</div></div>
+          <div class="tl-i"><div class="tx">Creada</div><div class="dt">${fmtDate(e.created_at)}</div></div>
           <div class="tl-i ${e.sent_at ? '' : 'gray'}"><div class="tx">${e.sent_at ? 'Enviada al cliente' : 'Aún no enviada'}</div><div class="dt">${e.sent_at ? fmtDate(e.sent_at) : '—'}</div></div>
-          <div class="tl-i ${e.approved_at ? '' : 'gray'}"><div class="tx">${e.approved_at ? 'Approved' : 'Esperando aprobación'}</div><div class="dt">${e.approved_at ? fmtDate(e.approved_at) : '—'}</div></div>
+          <div class="tl-i ${e.approved_at ? '' : 'gray'}"><div class="tx">${e.approved_at ? 'Aprobada' : 'Esperando aprobación'}</div><div class="dt">${e.approved_at ? fmtDate(e.approved_at) : '—'}</div></div>
           <div class="tl-i ${e.invoice ? '' : 'gray'}"><div class="tx">${e.invoice ? `Facturada — ${esc(e.invoice.invoice_number)}` : 'Sin facturar'}</div><div class="dt">${e.invoice ? fmtDate(e.invoice.created_at) : '—'}</div></div>
         </div>
       </div></div>
 
-      ${e.approval_history?.length ? `<details class="card"><summary class="card-h">Approval history</summary><div class="card-b">${e.approval_history.map(h => `<div style="margin-bottom:12px"><strong>Revision ${h.commercial_revision + 1} · ${money(h.snapshot.total)}</strong><p class="dim">${esc(({staff:'Marcada como aprobada por el personal',staff_conversion:'Recorded during conversion',customer_link:'Aprobada mediante enlace del cliente',legacy_record:'Historical approval record'})[h.source] || 'Registro de aprobación')}${h.approved_at ? ` · ${fmtDate(h.approved_at)}` : ' · original date unknown'}${h.actor ? ` · ${esc(h.actor)}` : ''}${h.revoked_at ? ` · superseded ${fmtDate(h.revoked_at)}` : ' · current acceptance'}</p><details><summary>Accepted quote details</summary><p>${esc(h.snapshot.contact_name || '')}</p>${h.snapshot.items.map(i => `<p><strong>${esc(i?.description || '')}</strong><br>${esc(i?.detail || '')}<br>${lineQty(i || {})} × ${money(i?.unit_price || 0)}${i?.sizes ? `<br>${esc(sizeSummary(i.sizes))}` : ''}</p>`).join('')}<p>Tax: ${money(h.snapshot.tax)} · Total: ${money(h.snapshot.total)}</p>${h.snapshot.billing_address ? `<p style="white-space:pre-wrap">Bill to:<br>${esc(h.snapshot.billing_address)}</p>` : ''}${h.snapshot.shipping_address ? `<p style="white-space:pre-wrap">Ship to:<br>${esc(h.snapshot.shipping_address)}</p>` : ''}${h.snapshot.notes ? `<p style="white-space:pre-wrap">${esc(h.snapshot.notes)}</p>` : ''}<p style="white-space:pre-wrap">${esc(h.snapshot.terms_snapshot)}</p>${h.snapshot.terms_snapshot_source === 'legacy_migration' ? '<p class="dim">Original historical terms are unknown. These terms were frozen from shop settings when snapshot storage was introduced.</p>' : ''}</details></div>`).join('')}</div></details>` : ''}
+      ${e.approval_history?.length ? `<details class="card"><summary class="card-h">Approval history</summary><div class="card-b">${e.approval_history.map(h => `<div style="margin-bottom:12px"><strong>Revision ${h.commercial_revision + 1} · ${money(h.snapshot.total)}</strong><p class="dim">${esc(({staff:'Marcada como aprobada por el personal',staff_conversion:'Recorded during conversion',customer_link:'Aprobada mediante enlace del cliente',legacy_record:'Historical approval record'})[h.source] || 'Registro de aprobación')}${h.approved_at ? ` · ${fmtDate(h.approved_at)}` : ' · original date unknown'}${h.actor ? ` · ${esc(h.actor)}` : ''}${h.revoked_at ? ` · superseded ${fmtDate(h.revoked_at)}` : ' · current acceptance'}</p><details><summary>Accepted quote details</summary><p>${esc(h.snapshot.contact_name || '')}</p>${h.snapshot.items.map(i => `<p><strong>${esc(i?.description || '')}</strong><br>${esc(i?.detail || '')}<br>${lineQty(i || {})} × ${money(i?.unit_price || 0)}${i?.sizes ? `<br>${esc(sizeSummary(i.sizes))}` : ''}</p>`).join('')}<p>Impuestos: ${money(h.snapshot.tax)} · Total: ${money(h.snapshot.total)}</p>${h.snapshot.billing_address ? `<p style="white-space:pre-wrap">Bill to:<br>${esc(h.snapshot.billing_address)}</p>` : ''}${h.snapshot.shipping_address ? `<p style="white-space:pre-wrap">Ship to:<br>${esc(h.snapshot.shipping_address)}</p>` : ''}${h.snapshot.notes ? `<p style="white-space:pre-wrap">${esc(h.snapshot.notes)}</p>` : ''}<p style="white-space:pre-wrap">${esc(h.snapshot.terms_snapshot)}</p>${h.snapshot.terms_snapshot_source === 'legacy_migration' ? '<p class="dim">Original historical terms are unknown. These terms were frozen from shop settings when snapshot storage was introduced.</p>' : ''}</details></div>`).join('')}</div></details>` : ''}
       ${mockups ? mockupCard(mockups) : ''}
 
       <div class="card"><div class="card-h"><h3>Customer Link</h3></div><div class="card-b">
         <p class="dim" style="font-size:12.5px;margin-bottom:9px">Customers approve here. No login, no account.</p>
         <div class="copy" id="share" aria-label="Copiar enlace de aprobación del cliente">${esc(location.origin + e.share_url)}</div>
         <div class="row" style="margin-top:10px">
-          <a class="btn ghost sm" href="${esc(e.share_url)}" target="_blank">Open customer view</a>
+          <a class="btn ghost sm" href="${esc(e.share_url)}" target="_blank">Abrir vista del cliente</a>
           ${!e.invoice ? `<button class="btn danger sm" id="del">Eliminar</button>` : ''}
         </div>
       </div></div>
@@ -729,7 +729,7 @@ export async function estimateDetailView(id) {
         if (!r.ok) throw new Error(d.error || 'Upload failed')
         toast(`Mockup v${d.version} added`)
         estimateDetailView(id)
-      } catch (ex) { toast(ex.message, true); btn.disabled = false; btn.textContent = '+ Add mockup' }
+      } catch (ex) { toast(ex.message, true); btn.disabled = false; btn.textContent = '+ Agregar montaje' }
     }
     const list = $('.mk-list', $('#view'))
     if (list) {
@@ -737,7 +737,7 @@ export async function estimateDetailView(id) {
         t.disabled = true; t.textContent = 'Sending…'
         try {
           const r = await api.post(`/api/mockups/${t.dataset.mksend}/send`, {})
-          toast(r.email_live && r.emailed_to ? `Sent to ${r.emailed_to}` : 'Marked sent. Copy the link and send it yourself')
+          toast(r.email_live && r.emailed_to ? `Enviada to ${r.emailed_to}` : 'Marked sent. Copy the link and send it yourself')
           estimateDetailView(id)
         } catch (ex) { toast(ex.message, true); t.disabled = false; t.textContent = 'Enviar para aprobación' }
       })
@@ -770,11 +770,11 @@ export async function estimateDetailView(id) {
     const btn = $('#dup'); btn.disabled = true; btn.textContent = 'Copying…'
     try {
       const r = await api.post(`/api/estimates/${id}/duplicate`, {})
-      toast(`Created ${r.estimate_number}`)
+      toast(`Creada ${r.estimate_number}`)
       go(`/estimates/${r.id}/edit`)
-    } catch (ex) { toast(ex.message, true); btn.disabled = false; btn.textContent = 'Duplicate' }
+    } catch (ex) { toast(ex.message, true); btn.disabled = false; btn.textContent = 'Duplicar' }
   })
-  // Duplicate eight lines above has always had this; Delete never did. Now that Delete is offered
+  // Duplicar eight lines above has always had this; Delete never did. Now that Delete is offered
   // on a quote that may carry a job, the active-job 409 is a message the shop has to READ — without
   // a catch it throws uncaught inside confirmModal and the dialog just sits there.
   $('#del')?.addEventListener('click', () => confirmModal('Delete estimate?', `${e.estimate_number} will be permanently removed.`, async () => {
@@ -812,9 +812,9 @@ function convertModal(e) {
           closeModal()
           // Autopilot and the Slack quick-quote open the job when they write the quote, so convert
           // adopts it rather than opening a second card for one order. Say which happened.
-          toast(lite ? `Created ${r.invoice_number}`
-            : r.job_reused ? `Created ${r.invoice_number} — linked to ${r.job_number}, already on the board`
-              : `Created ${r.invoice_number} and ${r.job_number}`)
+          toast(lite ? `Creada ${r.invoice_number}`
+            : r.job_reused ? `Creada ${r.invoice_number} — linked to ${r.job_number}, already on the board`
+              : `Creada ${r.invoice_number} and ${r.job_number}`)
           go(lite ? `/invoices/${r.invoice_id}` : `/jobs/${r.job_id}`)
         } catch (err) { toast(err.message, true); btn.disabled = false; btn.textContent = lite ? 'Crear factura' : 'Crear factura + trabajo' }
       }
