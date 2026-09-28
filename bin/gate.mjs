@@ -2997,7 +2997,7 @@ section('the app does not discard what the shop has typed')
       [/#ob-back'\)\.onclick = \(\) => leaveStep\(/, 'Back, offered on every step from basics onward'],
     ]) assert.match(ob, exit, `${why} still repaints over the form`)
     // …and it offers to SAVE, because that is what this screen's own promise is.
-    const g = ob.slice(ob.indexOf('async function leaveStep'), ob.indexOf('async function leaveStep') + 900)
+    const g = ob.slice(ob.indexOf('async function leaveStep'), ob.indexOf('async function leaveStep') + 1200)
     assert.match(g, /saveSettings\(/, 'the wizard saves as you go — the offer must be to save, not to discard')
     assert.match(g, /confirmModal\(/, 'and the shop gets asked')
   })
@@ -4087,7 +4087,7 @@ await t('an unparseable date comes back escaped, not verbatim', async () => {
 await t('…while real dates are unchanged', async () => {
   const core = await import('../public/js/core.js')
   assert.equal(core.fmtDate('2026-08-28'), 'Aug 28')
-  assert.match(core.relTime(new Date(Date.now() - 60000).toISOString().slice(0, 19).replace('T', ' ')), /m ago$/)
+  assert.match(core.relTime(new Date(Date.now() - 60000).toISOString().slice(0, 19).replace('T', ' ')), /hace [12] min$/)
 })
 
 section('the shop floor is told the time the shop is actually in')
@@ -4104,7 +4104,7 @@ for (const tz of ['America/Los_Angeles', 'Asia/Tokyo', 'UTC']) {
       process.stdout.write(JSON.stringify([m.relTime(stored), stored.slice(5, 16)]))
     `], { env: { ...process.env, TZ: tz }, encoding: 'utf8' })
     const [rel, raw] = JSON.parse(out)
-    assert.match(rel, /^[12]m ago$/, `relTime said ${JSON.stringify(rel)}`)
+    assert.match(rel, /^hace [12] min$/, `relTime said ${JSON.stringify(rel)}`)
     assert.notEqual(rel, raw, 'the raw slice is what the floor was being shown')
   })
 }
@@ -4761,7 +4761,7 @@ await t('the camera can be switched off from the page itself', async () => {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..')
   const src = readFileSync(join(root, 'public/js/views/scan.js'), 'utf8')
   assert.match(src, /id="scan-stop"/, 'there must be a stop control in the markup')
-  assert.match(src, /Stop camera/, 'and it has to say what it does')
+  assert.match(src, /Detener camera/, 'and it has to say what it does')
 })
 
 section('the app never shows a shop owner a JSON parser error')
@@ -4784,7 +4784,7 @@ await t('a non-JSON response becomes something a human can act on', async () => 
     answer(502, '<html><head><title>502 Bad Gateway</title></head><body>nginx</body></html>')
     const restarting = await failure()
     assert.doesNotMatch(restarting, /JSON|Unexpected token/, `got ${JSON.stringify(restarting)}`)
-    assert.match(restarting, /restarting/i, 'a deploy window has a true and actionable answer')
+    assert.match(restarting, /reiniciando/i, 'a deploy window has a true and actionable answer')
 
     answer(404, '<!DOCTYPE html><html><body>Cannot GET /api/nope</body></html>')
     const missing = await failure()
@@ -12306,7 +12306,7 @@ section('an expired reset link does not take the buttons off the login page')
     const src = AUTH.slice(AUTH.lastIndexOf('<script>') + 8, AUTH.lastIndexOf('</script>'))
     assert.match(src, /function readJson\(/, 'the page must read the body as text and parse it itself')
     assert.match(src, /httpMsg\(/, '…and turn a status into a sentence a person can act on')
-    assert.match(src, /restarting/, '…which for a 502 says the server is restarting')
+    assert.match(src, /reiniciando/, '…which for a 502 says the server is restarting')
     assert.ok(!/await r\.json\(\)/.test(src), 'nothing may call r.json() straight any more')
   })
 
@@ -14856,7 +14856,7 @@ section('every credential a lite shop can enter, it can also remove')
   })
 
   await t('the lite Take Payments card offers a way to unlink the Stripe payout account', () => {
-    const card = slice('<h3>Take Payments</h3>', '<h3>Online ordering & payments</h3>')
+    const card = slice('<h3>Cobrar pagos</h3>', '<h3>Online ordering & payments</h3>')
     assert.match(card, /disconnectBtn\('stripe'/,
       'lite has no Disconnect for Stripe: a shop onboarded onto the wrong account keeps paying out to it')
   })
@@ -14882,7 +14882,7 @@ section('every credential a lite shop can enter, it can also remove')
       'the note never reaches the DOM')
     assert.match(misc, /const \{ disconnect: group, label, note \} = btn\.dataset/, 'the handler never reads it')
     assert.match(misc, /confirmModal\(`Disconnect \$\{label\}\?`,\s*\n?\s*note \|\|/, 'the handler never prefers it')
-    const card = slice('<h3>Take Payments</h3>', '<h3>Online ordering & payments</h3>')
+    const card = slice('<h3>Cobrar pagos</h3>', '<h3>Online ordering & payments</h3>')
     assert.ok(!/pasting the keys back in/.test(card), 'lite Stripe must not claim it is reconnected by pasting a key')
     assert.match(card, /Connect Stripe/, 'the confirm should name the button that undoes this')
   })
