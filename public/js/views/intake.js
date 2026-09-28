@@ -38,12 +38,12 @@ Thanks,
 Alexis`
 
   modal({
-    title: 'Read an order from an email',
+    title: 'Leer un pedido desde un correo',
     wide: true,
     body: `<div class="quote">
       <div class="quote-in">
         <div class="field"><label>Paste the customer's message</label>
-          <textarea class="input" id="in-text" style="min-height:230px;font-size:13px" placeholder="Paste an email, a text, a DM…"></textarea>
+          <textarea class="input" id="in-text" style="min-height:230px;font-size:13px" placeholder="Pega un correo, mensaje de texto o DM…"></textarea>
         </div>
         <div class="wrap-row">
           <button class="btn" id="in-read">Read it</button>
@@ -73,7 +73,7 @@ Alexis`
 
       $('#in-read', bg).onclick = async () => {
         const text = $('#in-text', bg).value.trim()
-        if (text.length < 8) return toast('Paste the message first', true)
+        if (text.length < 8) return toast('Primero pega el mensaje', true)
         $('#in-read', bg).disabled = true
         $('#in-out', bg).innerHTML = '<div class="dim" style="text-align:center;padding:44px">Reading…</div>'
         try {
@@ -87,7 +87,7 @@ Alexis`
       }
 
       const render = (p) => {
-        const pieces = sizeTotal(p.sizes) || p.total_pieces || 0
+        const piezas = sizeTotal(p.sizes) || p.total_piezas || 0
         const lines = p.priced?.items || []
         const subtotal = pricedSubtotal(lines)
         const perPiece = Number(lines[0]?.unit_price) || 0
@@ -105,32 +105,32 @@ Alexis`
             <div><span>Locations</span><span>${(p.locations || []).map((l) => `${l.colors}c ${esc(l.name)}`).join(', ')}</span></div>
             ${p.dark_garment ? '<div><span>Dark garment</span><span style="color:var(--amber)">underbase added</span></div>' : ''}
             ${p.rush ? '<div><span>Rush</span><span style="color:var(--red)">flagged</span></div>' : ''}
-            ${p.due_hint ? `<div><span>Wants it by</span><span>${esc(p.due_hint)}</span></div>` : ''}
+            ${p.due_hint ? `<div><span>Lo necesita para</span><span>${esc(p.due_hint)}</span></div>` : ''}
           </div>
           <div style="margin-top:11px">
-            <div class="dim" style="font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px">Size run — ${pieces} pcs</div>
+            <div class="dim" style="font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px">Size run — ${piezas} pcs</div>
             ${grid.length ? `<div class="sizebar">${grid.map((s) => `<div class="sizebox"><span>${s}</span><strong>${p.sizes[s]}</strong></div>`).join('')}</div>`
-              : `<div class="dim" style="font-size:11.5px">No size breakdown in the message${pieces ? ` — just "${pieces} pieces". You'll split it.` : ''}</div>`}
+              : `<div class="dim" style="font-size:11.5px">No size breakdown in the message${piezas ? ` — just "${piezas} piezas". You'll split it.` : ''}</div>`}
           </div>
           <div class="qbig" style="margin-top:14px;border-top:1px solid var(--line);border-bottom:0;padding-top:12px">
             <span>${money(perPiece)}</span><em>per piece · ${money(subtotal)} order</em>
           </div>
           ${p.priced?.quote?.rushApplied ? `<div class="dim" style="font-size:10.5px;margin-top:6px">Rush surcharge applied — +${Math.round((p.priced.quote.rushMult - 1) * 100)}% on the per-piece, at the shop's published tier.</div>` : ''}
-          ${p.assumed_pieces ? `<div class="dim" style="font-size:10.5px;margin-top:6px">The message never says how many, so this is priced at <strong>${p.assumed_pieces}</strong> — set the real count on the estimate and it re-prices.</div>` : ''}`
+          ${p.assumed_piezas ? `<div class="dim" style="font-size:10.5px;margin-top:6px">The message never says how many, so this is priced at <strong>${p.assumed_piezas}</strong> — set the real count on the estimate and it re-prices.</div>` : ''}`
       }
 
       $('#in-use', bg).onclick = () => {
         if (!parsed) return
-        const pieces = sizeTotal(parsed.sizes) || parsed.total_pieces || parsed.assumed_pieces || 24
+        const piezas = sizeTotal(parsed.sizes) || parsed.total_piezas || parsed.assumed_piezas || 24
         const lines = parsed.priced?.items || []
-        if (!lines.length) return toast('That message could not be priced — open a blank estimate instead', true)
+        if (!lines.length) return toast('No se pudo calcular el precio de ese mensaje — abre una cotización en blanco', true)
         // The server's lines, verbatim: the garment line (with its size grid, colour count, blank
         // source and the rush surcharge already in the per-piece) plus whatever setup line this
         // decoration actually bills — screens for screen print, digitizing for embroidery, none
         // for DTF. `parsed` rides along on the first one so the caller can pull the notes across.
         lines.forEach((line, i) => onUse({ ...line }, i === 0 ? parsed : null))
         closeModal()
-        toast(`Read ${pieces} pieces from the message — check it before you send`)
+        toast(`Read ${piezas} piezas from the message — check it before you send`)
       }
     },
   })
