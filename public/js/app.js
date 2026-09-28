@@ -82,7 +82,7 @@ const NAV = [
   { advanced: true, href: '/activity', ico: 'activity', name: 'Actividad' },
   { advanced: true, href: '/developers', ico: 'settings', name: 'Desarrolladores', manage: true },
   { advanced: true, href: '/outbox', ico: 'outbox', name: 'Bandeja de salida' },
-  { href: '/billing', ico: 'billing', name: 'Hosting', owner: true },
+  { href: '/billing', ico: 'billing', name: 'Alojamiento', owner: true },
   { advanced: true, href: '/support', ico: 'customers', name: 'Support the project' },
   { href: '/settings', ico: 'settings', name: 'Configuración' },
   { label: 'Admin', section: true, admin: true },
@@ -240,7 +240,7 @@ function drawNav() {
   $('#nav').innerHTML = pruned.map((n) => (n.section ? `<div class="nav-label">${n.label}</div>` : link(n))).join('')
     + (hiddenCount
       ? `<button type="button" class="nav-more" id="nav-more" aria-expanded="${expanded}">${
-          expanded ? 'Show fewer tools' : `More tools <span class="count">${hiddenCount}</span>`}</button>`
+          expanded ? 'Mostrar menos herramientas' : `Más herramientas <span class="count">${hiddenCount}</span>`}</button>`
       : '')
 
   const btn = $('#nav-more')
@@ -478,7 +478,7 @@ if (viewEl && !document.querySelector('.skip-link')) {
   const skip = document.createElement('a')
   skip.href = '#view'
   skip.className = 'skip-link'
-  skip.textContent = 'Skip to content'
+  skip.textContent = 'Saltar al contenido'
   skip.addEventListener('click', (e) => { e.preventDefault(); viewEl.focus(); viewEl.scrollIntoView() })
   document.body.insertBefore(skip, document.body.firstChild)
 }
